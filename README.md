@@ -16,7 +16,7 @@ user,키오스크 (고객),"메뉴 목록 조회, 주문 접수 및 결제 처�
 ## 1. 📁 프로젝트 폴더 구조도
 
 ```text
-com.asak.backend/
+com.asak/
 │
 ├── common/                          # [공통 패키지] Admin과 User 모두에서 공유하여 사용하는 파일들
 │   │

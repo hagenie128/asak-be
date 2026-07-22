@@ -1,4 +1,4 @@
-package com.asak.backend.common.entity;
+package com.asak.common.entity;
 
 public class BaseEntity {
 }
