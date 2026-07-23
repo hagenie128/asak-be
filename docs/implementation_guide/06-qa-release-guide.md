@@ -1,58 +1,45 @@
-# QA·릴리스 구현 가이드
+# 백엔드 QA·릴리스 가이드
 
-> 기능이 보인다고 완료가 아니다. Figma, API, DB, 상태값과 복구 흐름까지 확인해야 완료다.
+## API 하나의 테스트 순서
 
-## 테스트 순서
+1. Service 단위 테스트: 가격, 품절, 필수 옵션, 상태 전이 같은 비즈니스 규칙을 검증한다.
+2. Mapper 통합 테스트: 실제 스키마/뷰, join, null, 빈 목록, 집계값을 확인한다.
+3. Controller 계약 테스트: 경로·method·request validation·response envelope·HTTP status를 확인한다.
+4. Bruno smoke: 프론트가 사용할 정상 요청과 대표 오류 요청을 실행한다.
+5. 회귀: 주문/결제 변경 뒤 Admin 주문·매출 집계가 깨지지 않는지 확인한다.
 
-`Build → Smoke → Feature → Integration → Data Integrity → Regression → Accessibility → Demo → Release`
+## 공통 응답 체크
 
-| 우선순위 | 대표 실패 |
-| --- | --- |
-| P0 | 주문 불가, 중복 결제, 금액 불일치, Cart 초기화, 상태 전이 오류, 품절 주문, 서버 가격 검증 누락 |
-| P1 | Loading/Empty/Error 누락, 검색/필터 오류, TTS 중복, Dashboard 데이터 오류, 접근성 일부 미반영 |
-| P2 | 카피, 간격, hover, 차트 미세 표현, 확장 기능 |
+| 상황 | 기대 HTTP status | 기대 code 예시 |
+| --- | --- | --- |
+| 정상 조회 | 200 | `SUCCESS` |
+| 정상 생성 | 201 | `SUCCESS` 또는 생성 코드 |
+| request 형식/필수값 오류 | 400 | validation code |
+| 대상 없음 | 404 | `MENU_NOT_FOUND`, `ORDER_NOT_FOUND` |
+| 품절·가격·상태 충돌 | 409 | `MENU_SOLD_OUT`, `ORDER_PRICE_CHANGED`, `INVALID_ORDER_STATUS_TRANSITION` |
+| 예상 밖 오류 | 500 | internal error code |
 
-## 기능 완료 체크
+모든 경우 `{ success, status, code, message, data }` 형식을 유지하는지 확인한다. field 오류는 `data.field`, 재시도 가능 여부는 `data.canRetry`처럼 프론트가 사용할 정보를 합의된 형식으로 반환한다.
 
-- [ ] Build와 lint가 성공한다.
-- [ ] Screen ID, route, 최신 Figma의 주요 상태가 일치한다.
-- [ ] Default / Loading / Empty / Error / Disabled와 복구 행동을 확인했다.
-- [ ] 프론트 요청·응답·오류 처리가 API 계약과 일치한다.
-- [ ] 서버가 가격·품절·상태 전이를 최종 검증한다.
-- [ ] Kiosk 주문 → 결제 → DB → Admin 상태/매출 흐름을 통합 점검했다.
-- [ ] P0 전체를 통과했다.
-- [ ] 접근성 모드와 timeout, 결제 처리 중 조작을 점검했다.
-- [ ] 기존 기능 regression과 데모 동선을 통과했다.
-- [ ] 승인된 05-C 또는 06-C의 해당 Frame 상태를 빠뜨리지 않았다.
+## P0 시나리오
 
-## 07-C 상태 대조 방법
+- 품절 메뉴/옵션을 장바구니에 담은 뒤 주문 직전에 409로 막힌다.
+- 클라이언트 가격을 변조해도 서버 `totalAmount`가 DB 가격으로 계산된다.
+- 같은 결제 요청이 반복되어도 이중 승인되지 않는다.
+- 허용되지 않은 주문 상태 전이와 완료/기취소 주문 취소가 409다.
+- 승인 결제 취소는 주문·결제 상태와 매출 순매출에 함께 반영된다.
+- 결제수단을 비활성화하면 Kiosk 결제수단 조회/승인이 일관되게 막힌다.
 
-1. [07-C QA / Screen State Matrix](https://www.figma.com/design/JSrjOy668zhfkiLplCkreh/ASAK-%E2%80%94-Design-System---Product-UI-0715?node-id=190-2)에서 해당 Screen ID의 모든 상태를 찾는다.
-2. `Loading`, `Empty`, `Error`, `Saving`, `Success`, `Changed`, `Disabled`, `Sold-out`, `Retry`가 어떤 프론트 state/API 결과인지 표로 연결한다.
-3. Prototype 연결률과 화면 존재 여부를 혼동하지 않는다. 연결되지 않은 Loading/Error/Annotation Frame은 의도적으로 Flow에 미연결일 수 있다.
-4. `Mock settings`·`__manual-check` 항목은 API/DB 완료 전 실데이터 통과 조건으로 쓰지 않는다.
-5. toast, confirm, warning countdown, 결제 차단, TTS 실패도 별도 QA 시나리오로 테스트한다.
+## 릴리스 전 체크
 
-## 주문·결제 P0 시나리오
-
-1. 품절 메뉴 또는 옵션을 장바구니에 담은 뒤 주문 시도한다.
-2. 가격 변경 뒤 주문을 시도해 변경 안내와 복구가 되는지 확인한다.
-3. 주문 생성/결제 버튼을 연속 클릭해도 한 건만 처리되는지 확인한다.
-4. 결제 실패 뒤 장바구니·주문 정보를 유지하고 재시도 가능한지 확인한다.
-5. 관리자 완료 처리를 중복 요청해도 주문 상태·매출·TTS가 한 번만 반영되는지 확인한다.
-6. 승인 후 뒤로가기로 재결제할 수 없는지 확인한다.
-
-## 릴리스 전 확인
-
-- 코드: build, lint, 치명적 console 오류 없음, secret 없음, env 예시, README.
-- 데이터: seed/mock 일관성, 상태 코드, 금액.
-- Figma: 최신 frame, 보이는 명세 잔여 없음, prototype/screenshot.
-- 시연: 데모 계정, 안정적인 mock, 실패 대비 영상/스크린샷, 알려진 한계.
+- [ ] `.env`와 DB 비밀값은 저장소/응답 로그에 포함하지 않았다.
+- [ ] DB migration/seed 또는 실제 테스트 데이터로 재현했다.
+- [ ] Bruno 요청이 Controller 구현 상태와 일치한다. 미구현 요청은 `SPEC_ONLY`로 남겼다.
+- [ ] 테스트 결과와 남은 제한 사항을 현황 보고에 기록했다.
+- [ ] API 문서의 경로/필드/상태 코드가 구현과 다르면 차이를 먼저 보고했다.
 
 ## 정본 링크
 
-- [QA Strategy](../product_bible/09_QA_Bible/docs/10-qa/00-strategy/QA_STRATEGY.md)
-- [Regression Suite](../product_bible/09_QA_Bible/docs/10-qa/06-regression/REGRESSION_SUITE.md)
-- [Release Checklist](../product_bible/09_QA_Bible/docs/10-qa/07-demo-release/RELEASE_CHECKLIST.md)
-- [Order Edge Case and QA](../product_bible/02_Order_Cart_Payment/docs/09-features/order/ORDER_EDGE_CASE_AND_QA.md)
-- [Error Recovery Architecture](../product_bible/05_Accessibility_Timeout_Error/docs/09-features/error-recovery/ERROR_RECOVERY_ARCHITECTURE.md)
+- [API smoke checklist](../../../ASAK/docs/product_bible/11_Backend_Implementation/docs/12-backend-implementation/08-testing/API_SMOKE_CHECKLIST.md)
+- [백엔드 테스트 계획](../../../ASAK/docs/product_bible/11_Backend_Implementation/docs/12-backend-implementation/08-testing/BACKEND_TEST_PLAN.md)
+- [API 계약 테스트](../../../ASAK/docs/product_bible/09_QA_Bible/docs/10-qa/03-api-backend/API_CONTRACT_TESTS.md)

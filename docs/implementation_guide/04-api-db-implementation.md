@@ -1,59 +1,73 @@
-# API·DB 공통 규칙
+# API·DB 구현 규칙
 
-> 화면별 URL·request·response는 이미 [Kiosk 기능 가이드](02-kiosk-implementation.md), [Admin 기능 가이드](03-admin-implementation.md)에 붙어 있다.  
-> 이 문서는 **여러 화면에서 공통으로 쓰는 처리 규칙만** 찾는 곳이다.
+> 상태: Current · 기준일: 2026-07-23
 
-## 현재 연결 상태
+## 실제 연결 상태
 
-| 사실 | 구현할 때의 처리 |
-| --- | --- |
-| Backend는 `GET /api/health`만 구현됨 | 아래 계약을 실제로 호출 가능한 API로 착각하지 않는다. mock/미구현 표시를 유지한다. |
-| API 계약은 `SPEC_ONLY`/Draft가 포함됨 | Backend 구현 시 원본 계약을 확정하고 Front adapter를 연결한다. |
-| 기존 frontend mock 필드가 다름 | 기존 store를 한꺼번에 바꾸지 않고 API 경계에서 변환한다. |
-
-## 모든 API에서 공통으로 처리할 것
-
-### 응답을 화면에 넘기는 방식
-
-```json
-{"success": true, "status": 200, "code": "OK", "message": "OK", "data": {}}
-```
-
-- API client가 envelope를 한 번만 벗기고, 화면은 필요한 `data`만 받는다.
-- 실패 때도 `status`, `code`, `message`, `data`를 버리지 않는다.
-- Entity를 그대로 JSON으로 반환하지 않는다. Controller는 DTO validation, Service는 가격·품절·상태 전이·멱등성을 맡는다.
-
-### 오류별 공통 행동
-
-| 상황 | 화면 행동 |
-| --- | --- |
-| `401` | 로그인/세션 만료를 안내한다. |
-| `403` | 권한 없음을 알리고 무의미한 재시도는 숨긴다. |
-| `409` | 최신 데이터를 다시 받고 충돌·가격 변경을 안내한다. |
-| network / `5xx` | 입력값·필터·장바구니를 남기고 재시도한다. |
-| `MENU_SOLD_OUT`, `OPTION_ITEM_SOLD_OUT` | 해당 항목만 표시하고 수정·삭제로 복구한다. |
-| `PAYMENT_IN_PROGRESS`, `PAYMENT_ALREADY_APPROVED` | 결제를 다시 만들지 말고 현재 결과를 조회한다. |
-
-### 기존 mock과 목표 API를 연결하는 이름
-
-| 목표 API | 기존 mock/store에서 보일 수 있는 값 | 경계에서 맞출 이름 |
+| 항목 | 현재 상태 | 작업 시 주의 |
 | --- | --- | --- |
-| `menuName` | `name` | `menuName` |
-| `basePrice` | `price` | `basePrice` |
-| `calories` | `baseKcal` | `calories` |
-| `additionalAmount` | `extraPrice` | `additionalAmount` |
-| `totalAmount` | `totalPrice` | 기존 store에는 `totalPrice` 유지 가능 |
-| `approvedAmount` | `amount` | 기존 결제 상태에는 `amount` 유지 가능 |
-| `approvedAt` | `paidAt` | 기존 결제 상태에는 `paidAt` 유지 가능 |
+| `ApiResponse<T>` | 필드 구조 존재 | 성공/실패 factory와 Controller 적용은 아직 필요 |
+| Controller/Service/Mapper | 패키지와 빈 클래스 존재 | 매핑 annotation, Service 로직, SQL은 아직 없음 |
+| Bruno `api/` | 목표 계약 요청 24개 존재 | `SPEC_ONLY`; 구현 전 성공 응답을 기대하지 않음 |
+| MyBatis | 의존성·mapper-locations 설정 존재 | Mapper scan, SQL, 결과 DTO 매핑은 API별 확인 필요 |
+| DB 설정 | 외부 MySQL 접속 정보와 `ddl-auto=none` 존재 | 스키마를 코드가 자동 변경하지 않으며, 실제 컬럼 확인이 선행 |
 
-<details>
-<summary>원본 API 계약이 필요할 때만 열기</summary>
+## 목표 API 범위
 
-- [Canonical Contract Decisions](../governance/canonical-contract-decisions-2026-07-16.md)
-- [Kiosk Frontend Data Contract](../../../ASAK-Kiosk/src/contracts/api-data-contract.md)
-- [Menu API Contract](../product_bible/03_Menu_Inventory_SoldOut/docs/09-features/menu/MENU_API_CONTRACT.md)
-- [Order API Contract](../product_bible/02_Order_Cart_Payment/docs/09-features/order/ORDER_API_CONTRACT.md)
-- [Payment API Contract](../product_bible/02_Order_Cart_Payment/docs/09-features/payment/PAYMENT_API_CONTRACT.md)
-- [Menu Management API Contract](../product_bible/03_Menu_Inventory_SoldOut/docs/09-features/menu-management/MENU_MANAGEMENT_API_CONTRACT.md)
-- [Sales API Contract](../product_bible/04_Dashboard_Sales_Kitchen_TTS/docs/09-features/sales/SALES_API_CONTRACT.md)
-</details>
+| 영역 | API |
+| --- | --- |
+| Kiosk | categories, menuList, menuDetail, cart validate, orders, payments, payment methods |
+| Admin 주문 | active orders, list, detail, status update, cancel/refund |
+| Admin 메뉴 | menu list/detail/create/update, sold-out |
+| Admin 운영 | payment methods, dashboard, sales daily/summary/monthly |
+
+정확한 URL과 API 번호는 [기능 구현 매트릭스](08-feature-implementation-matrix.md) 및 `api/` Bruno 요청을 기준으로 한다.
+
+## 공통 응답·오류의 기존 정의
+
+이 항목은 새 정책이 아니라 다음 정본을 구현 단계에 맞춰 연결한 것이다.
+
+- [DevCopilot API 정리 기준](../../../ASAK/docs/governance/devcopilot-api-alignment-2026-07-23.md): 이 저장소에 적용할 `{ success, status, code, message, data }` 계약과 현재 API 목록
+- [예외 구현 기준](../../../ASAK/docs/product_bible/11_Backend_Implementation/docs/12-backend-implementation/01-common/EXCEPTION_IMPLEMENTATION.md): `ErrorCode`, `BusinessException`, `GlobalExceptionHandler`의 구현 골격
+- [검증·예외 규칙](../../../ASAK/docs/product_bible/06_Engineering_Bible/docs/03-backend/VALIDATION_AND_EXCEPTION_RULES.md): Bean Validation/Service 검증/DB 제약의 역할과 400·404·409 기준
+
+현재 `ApiResponse`, `GlobalExceptionHandler`, `ErrorCode`는 소스에 클래스 또는 필드 골격만 있으므로, 관리자 API를 만들기 전에 위 세 문서를 기준으로 공통 기반을 먼저 완성한다. `API_DESIGN_RULES.md`의 3필드 예시는 2026-07-23 정렬 문서의 5필드 계약과 다르므로, 구현 시에는 후자를 적용하고 차이를 남긴다.
+
+## 필드·DB 매핑
+
+| DB | API DTO | 비고 |
+| --- | --- | --- |
+| `orders.total_price` | `totalAmount` | 요청 금액이 아닌 서버 계산 결과 |
+| `payment.amount` | `approvedAmount` | 승인/환불 규칙과 함께 처리 |
+| `payment.paid_at` | `approvedAt` | 승인 시각 |
+| `orders.canceled_at` | `canceledAt` | 주문 취소 시각 |
+| `payment.refunded_at` | `refundedAt` | 승인 결제 환불 시각 |
+| `menu.cat_id` | `categoryId` | `categoryCode` 사용 금지 |
+| `menu.sold_out` | `isSoldOut` | 메뉴 판매 가능 여부 |
+| `category.sort_no` | `sortOrder` | 탭/목록 정렬 |
+| `category.active` | `isActive` | 카테고리 노출 여부 |
+
+## 실제 DB 정책
+
+- 옵션 조회 경로는 `menu_opt_policy → opt_policy → opt_policy_item → opt_item`이다. `menu_option`은 레거시 명칭이다.
+- 재료 제외와 선택 옵션은 `item_exclusion`, `order_item`, `order_item_option`에 저장한다.
+- 결제수단과 상태 코드는 `pay_method_cfg`, `common_code`를 사용한다.
+- 매출 API는 `vw_sales_daily`, `vw_sales_hourly`, `vw_top_menu_daily`, `vw_top_menu_hourly`를 읽기 원본으로 사용한다.
+- 전액 환불의 순매출은 0이어야 하며, 취소/환불 주문은 인기 메뉴 집계에서 제외한다.
+- `menu.active`는 실제 DB에 없으므로 새 필드로 가정하지 않는다.
+
+## 구현 전·후 체크
+
+1. DB에 실제 컬럼/뷰와 테스트 데이터가 있는지 확인한다.
+2. request DTO에 Bean Validation과 오류 코드 규칙을 정한다.
+3. Service에서 금액, 품절, 상태 전이, 트랜잭션 경계를 구현한다.
+4. Mapper XML은 파라미터와 result mapping을 DTO 기준으로 명시한다.
+5. 성공, 400 검증 오류, 404 없음, 409 충돌, 5xx 예외 응답을 Bruno로 확인한다.
+
+## 정본 링크
+
+- [API 계약 Bruno 안내](../../api/README.md)
+- [메뉴 API 계약](../../../ASAK/docs/product_bible/03_Menu_Inventory_SoldOut/docs/09-features/menu/MENU_API_CONTRACT.md)
+- [주문 API 계약](../../../ASAK/docs/product_bible/02_Order_Cart_Payment/docs/09-features/order/ORDER_API_CONTRACT.md)
+- [결제 API 계약](../../../ASAK/docs/product_bible/02_Order_Cart_Payment/docs/09-features/payment/PAYMENT_API_CONTRACT.md)
+- [정본 계약 결정](../../../ASAK/docs/governance/canonical-contract-decisions-2026-07-16.md)

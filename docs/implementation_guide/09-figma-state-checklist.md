@@ -1,50 +1,24 @@
-# Figma 상태 구현 체크리스트
+# 화면 상태 ↔ 백엔드 응답 체크리스트
 
-> 화면 카드의 `완료 체크`를 실제 Figma 상태 프레임과 대조하는 표다.  
-> 체크가 안 된 행은 구현 완료가 아니다. Figma Prototype 연결 여부와 화면 상태 존재 여부는 별개다.
+> Figma는 화면 상태의 기준이고, 이 문서는 해당 상태를 만들기 위해 API가 무엇을 반환해야 하는지 정리한다.
 
-## Kiosk · 05-C
+| 화면 상태 | API 관점 | 확인 예 |
+| --- | --- | --- |
+| Default | 200/201과 화면용 data | 메뉴 카드, 주문 상세, 매출 KPI |
+| Loading | 요청 중; 별도 응답 없음 | 프론트 timeout/cancel과 API 처리 시간 합의 |
+| Empty | 200 + 빈 content/list | 카테고리 메뉴 없음, 활성 주문 없음 |
+| Validation error | 400 + field 정보 | 수량, 필수 옵션, 날짜 형식 |
+| Not found | 404 + target code | 존재하지 않는 menuId/orderId |
+| Conflict | 409 + 재시도/복구 정보 | 품절, 가격 변경, 상태 전이, 중복 결제 |
+| Server error | 500 + 안전한 code/message | DB/예상 밖 오류, 민감 정보 미노출 |
+| Disabled | 결제수단/메뉴 상태 data | `isEnabled: false`, `isSoldOut: true` |
 
-**Figma:** [05-C Screens / Kiosk](https://www.figma.com/design/JSrjOy668zhfkiLplCkreh/ASAK-%E2%80%94-Design-System---Product-UI-0715?node-id=134-7720)
+## 화면별 우선 확인
 
-| Screen | 확인할 상태 |
-| --- | --- |
-| SCR-001 Home | Default, 주문 유형 선택, High Contrast |
-| SCR-003 Menu List | Default, Loading, Empty, Error, 품절 메뉴, 카테고리 비활성, 장바구니 추가 toast, 빈 장바구니 toast |
-| SCR-004 Menu Detail | Default, 옵션 선택, Loading, Error, 알레르기 펼침, 메뉴 품절, 재료 품절, 베이스 품절, 옵션 품절, 수량 제한 toast, 장바구니 항목 수정, 저장 중, 저장 오류, 취소 확인 |
-| SCR-005 Cart | Default, Empty, 삭제 확인, 마지막 항목 삭제, 전체 비우기, 옵션 수정 완료, 품절 수정 요구, 결제 차단 |
-| SCR-007 Payment | 결제 수단 선택, 모든 수단 비활성, 결제 수단 불러오기 오류, Summary 접힘/펼침, Processing, 네트워크 오류, 재시도 중 |
-| SCR-008 Complete | 결제 승인 완료, 주문 번호/대기 수 표시, 새 주문 진입 |
-| SCR-012 Payment Error | 결제 거절, 재시도/장바구니 복귀 |
-| SCR-013 Timeout | 만료, 경고 카운트다운, 계속 주문 |
-| SCR-014 Accessibility | Default, High Contrast, Reverted |
+- SCR-003/004: 메뉴 목록·상세의 빈 목록, 품절, 메뉴 없음
+- SCR-005/007/008/012: 옵션 검증, 가격/품절 충돌, 결제 중복/실패, 완료 data
+- SCR-009/010: 활성 주문 없음, 상세 없음, 상태 전이 충돌
+- SCR-011/016: 품절 변경 실패, 메뉴 폼 validation
+- SCR-019~022: 기간 오류, 빈 매출, 취소/환불 반영 집계
 
-## Admin · 06-C
-
-**Figma:** [06-C Screens / Admin](https://www.figma.com/design/JSrjOy668zhfkiLplCkreh/ASAK-%E2%80%94-Design-System---Product-UI-0715?node-id=134-10606)
-
-| Screen | 확인할 상태 |
-| --- | --- |
-| SCR-015 Login | Default, 입력 검증, 인증 오류, 제출 중, Unauthorized |
-| SCR-022 Dashboard | Default, Loading, Error, Empty, Partial Data |
-| SCR-009 Live Order | Default, Loading, Empty, Error, 상세 열기, 상태 변경 확인, 저장 중, 성공, 저장 오류, TTS 실패, 새 주문 알림 |
-| SCR-010 Order Management | Default, 상세 열기, 필터 적용, Loading, Empty, Error |
-| SCR-011 Sold-out Management | Default, 항목 변경, 전체 비활성 확인, 저장 중, 성공, 저장 오류, Loading, Empty, Error |
-| SCR-016 Menu Management | Default, 상세 추가, 상세 수정, 검증 오류, 삭제 확인, 저장 중, 성공, 저장 오류, Empty, Loading |
-| SCR-018 Payment Method Settings | Default, 토글/순서 변경, 저장 확인, 저장 중, 성공, 오류, 전체 비활성, Loading, 불러오기 오류 |
-| SCR-019 Sales Summary | Default, 필터, Partial Data, Loading, Empty, Error |
-| SCR-020 Monthly Sales | Default, 월/연도 변경, Loading, Empty, Error |
-| SCR-021 Daily Sales | Default, 날짜 변경, Loading, Empty, Error |
-
-## 공통 판정
-
-| 상태 | 구현 확인 |
-| --- | --- |
-| Loading | 요청 중 조작 가능 여부가 명확하고 이전 데이터를 현재 결과처럼 보이지 않는다. |
-| Empty | 데이터 없음의 이유와 다음 행동이 있다. |
-| Error | 실패 단계와 재시도/복귀가 있다. |
-| Disabled | 비활성 이유를 색상 외에도 전달한다. |
-| Saving/Processing | 같은 요청을 중복으로 보내지 않는다. |
-| Success | 서버 성공 응답 뒤에만 UI를 확정한다. |
-
-**QA 기준:** [07-C QA / Screen State Matrix](https://www.figma.com/design/JSrjOy668zhfkiLplCkreh/ASAK-%E2%80%94-Design-System---Product-UI-0715?node-id=190-2)
+Figma 화면에 표현된 문구는 Product Bible/프론트에서 매핑할 수 있다. 백엔드는 화면 문구가 아닌 안정적인 `code`, `status`, 필요한 `data`를 제공한다.
