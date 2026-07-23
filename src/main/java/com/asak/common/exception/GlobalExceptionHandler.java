@@ -31,7 +31,7 @@ public class GlobalExceptionHandler {
     return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
         .body(ApiResponse.failure(
             HttpStatus.INTERNAL_SERVER_ERROR.value(),
-            "INTERNAL_SERVER_ERROR",
+            "9000",
             "서버 오류가 발생했습니다."));
   }
 }

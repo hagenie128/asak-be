@@ -9,7 +9,7 @@ import lombok.Getter;
 // {
 //   "success": true,
 //   "status": 200,
-//   "code": "SUCCESS",
+//   "code": "0000",
 //   "message": "OK",
 //   "data": {...
 //   }
@@ -32,7 +32,7 @@ public class ApiResponse<T> {
     return ApiResponse.<T>builder()
         .success(true)
         .status(200)
-        .code("SUCCESS")
+        .code("0000")
         .message("요청이 성공했습니다.")
         .data(data)
         .build();
@@ -52,7 +52,7 @@ public class ApiResponse<T> {
     return ApiResponse.<T>builder()
         .success(false)
         .status(errorCode.status().value())
-        .code(errorCode.name())
+        .code(errorCode.code())
         .message(errorCode.message())
         .data(null)
         .build();
@@ -62,7 +62,7 @@ public class ApiResponse<T> {
     return ApiResponse.<T>builder()
         .success(false)
         .status(errorCode.status().value())
-        .code(errorCode.name())
+        .code(errorCode.code())
         .message(errorCode.message())
         .data(data)
         .build();

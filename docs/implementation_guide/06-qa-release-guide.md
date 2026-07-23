@@ -12,12 +12,12 @@
 
 | 상황 | 기대 HTTP status | 기대 code 예시 |
 | --- | --- | --- |
-| 정상 조회 | 200 | `SUCCESS` |
-| 정상 생성 | 201 | `SUCCESS` 또는 생성 코드 |
-| request 형식/필수값 오류 | 400 | validation code |
-| 대상 없음 | 404 | `MENU_NOT_FOUND`, `ORDER_NOT_FOUND` |
-| 품절·가격·상태 충돌 | 409 | `MENU_SOLD_OUT`, `ORDER_PRICE_CHANGED`, `INVALID_ORDER_STATUS_TRANSITION` |
-| 예상 밖 오류 | 500 | internal error code |
+| 정상 조회 | 200 | `0000` |
+| 정상 생성 | 201 | `0000` 또는 생성용 업무 코드 |
+| request 형식/필수값 오류 | 400 | `1001` 등 validation code |
+| 대상 없음 | 404 | `2001`(메뉴), `3002`(주문) |
+| 품절·가격·상태 충돌 | 409 | `2002`, `3001`, `3003` |
+| 예상 밖 오류 | 500 | `9000`으로 확장 예정 |
 
 모든 경우 `{ success, status, code, message, data }` 형식을 유지하는지 확인한다. field 오류는 `data.field`, 재시도 가능 여부는 `data.canRetry`처럼 프론트가 사용할 정보를 합의된 형식으로 반환한다.
 

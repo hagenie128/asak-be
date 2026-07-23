@@ -41,13 +41,14 @@
 {
   "success": true,
   "status": 200,
-  "code": "SUCCESS_CODE",
+  "code": "0000",
   "message": "요청이 성공했습니다.",
   "data": {}
 }
 ```
 
 - Java/JSON은 camelCase, DB는 현재 snake_case를 사용한다.
+- API `code`는 숫자 문자열이다. 성공은 `"0000"`, 옵션 오류는 `"1001"`, 메뉴 오류는 `"2001"~`, 주문 오류는 `"3001"~`, 결제 오류는 `"4001"~`로 구분한다. HTTP `status` 숫자와 업무 코드는 다른 값이다.
 - Entity 또는 Mapper 조회 결과를 그대로 반환하지 않는다. Controller는 validation/HTTP,
   Service는 비즈니스 규칙·트랜잭션, Mapper/XML은 SQL·조인·집계를 맡는다.
 - `400`은 입력 검증, `404`는 대상 없음, `409`는 품절·가격·상태 충돌, `500`은 예상 밖 오류다.
