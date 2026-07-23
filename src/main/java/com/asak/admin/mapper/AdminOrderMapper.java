@@ -1,3 +1,9 @@
 package com.asak.admin.mapper;
 
-public interface AdminOrderMapper {}
+import java.util.Map;
+
+public interface AdminOrderMapper {
+
+  Map<String, Object> getLiveOrders();
+
+}
