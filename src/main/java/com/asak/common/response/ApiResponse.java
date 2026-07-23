@@ -1,5 +1,7 @@
 package com.asak.common.response;
 
+import com.asak.common.exception.ErrorCode;
+
 import lombok.Builder;
 import lombok.Getter;
 
@@ -43,6 +45,26 @@ public class ApiResponse<T> {
         .code(code)
         .message(message)
         .data(null)
+        .build();
+  }
+
+  public static <T> ApiResponse<T> error(ErrorCode errorCode) { // 에러 코드만 있는 경우
+    return ApiResponse.<T>builder()
+        .success(false)
+        .status(errorCode.status().value())
+        .code(errorCode.name())
+        .message(errorCode.message())
+        .data(null)
+        .build();
+  }
+
+  public static <T> ApiResponse<T> error(ErrorCode errorCode, T data) { // 에러 코드와 데이터가 있는 경우
+    return ApiResponse.<T>builder()
+        .success(false)
+        .status(errorCode.status().value())
+        .code(errorCode.name())
+        .message(errorCode.message())
+        .data(data)
         .build();
   }
 }
