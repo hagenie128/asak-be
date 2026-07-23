@@ -1,3 +1,7 @@
 package com.asak.user.service;
 
-public class UserMenuService {}
+import org.springframework.stereotype.Service;
+
+@Service
+public class UserMenuService {
+}

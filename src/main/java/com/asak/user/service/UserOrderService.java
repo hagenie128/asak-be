@@ -1,3 +1,7 @@
 package com.asak.user.service;
 
-public class UserOrderService {}
+import org.springframework.stereotype.Service;
+
+@Service
+public class UserOrderService {
+}

@@ -1,5 +1,8 @@
 package com.asak.user.service;
 
+import org.springframework.stereotype.Service;
+
+@Service
 public class UserPayService {
 
 }

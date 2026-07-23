@@ -1,3 +1,7 @@
 package com.asak.admin.service;
 
-public class AdminOrderService {}
+import org.springframework.stereotype.Service;
+
+@Service
+public class AdminOrderService {
+}

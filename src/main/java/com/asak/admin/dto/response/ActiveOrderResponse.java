@@ -1,13 +1,23 @@
 package com.asak.admin.dto.response;
 
 import java.time.LocalDateTime;
+import java.util.List;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 
+@Getter
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class ActiveOrderResponse {
-  private Long id;
+
+  private Long orderId;
   private String orderNo;
-  private Long orderTypeId;
-  private Long statusId;
-  private Integer totalPrice;
+  private String orderType;
+  private String orderStatus;
+  private int totalAmount;
   private LocalDateTime createdAt;
-  private LocalDateTime canceledAt;
+  private List<ActiveOrderItemResponse> items;
 }

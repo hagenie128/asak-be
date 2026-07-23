@@ -1,13 +1,21 @@
 package com.asak.admin.dto.response;
 
+import java.util.List;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+
+@Getter
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class ActiveOrderItemResponse {
+
   private Long orderItemId;
-  private String orderId;
   private Long menuId;
-  private Integer quantity;
-  private Integer price;
-  private private Long optid;
-  private Long optItemId;
-  private Integer optQuantity;
-  private Integer optPrice;
+  private String menuName;
+  private int quantity;
+  private List<ActiveOrderOptionResponse> selectedOptions;
+  private List<ActiveOrderExcludedIngredientResponse> excludedIngredients;
 }
