@@ -1,4 +1,5 @@
 package com.asak.user.mapper;
 
-public class UserMenuMapper {
+public interface UserMenuMapper {
+
 }
