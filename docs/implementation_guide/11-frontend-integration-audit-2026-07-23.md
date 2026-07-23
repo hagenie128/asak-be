@@ -34,7 +34,7 @@
 | --- | --- | --- |
 | 버튼/기본 안내 문구 | Frontend/Figma | `결제하기`, `데이터가 없습니다`, `다시 시도` |
 | 표시 포맷 | Frontend | 원화 표기, `오늘/이번 주/이번 달`, 날짜 문자열 |
-| 실패 분기 기준 | Backend | HTTP 400/404/409/500, `MENU_SOLD_OUT`, `ORDER_PRICE_CHANGED` |
+| 실패 분기 기준 | Backend | HTTP 400/404/409/500, 업무 코드 `2002`(품절), `3001`(가격 변경) |
 | 화면별 사용자 문구 매핑 | Frontend | code를 toast/empty/error 문구로 변환 |
 | 최종 가격·품절·상태 | Backend | 서버 계산 `totalAmount`, 실제 `isSoldOut`, 주문/결제 상태 |
 

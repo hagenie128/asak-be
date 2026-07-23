@@ -29,10 +29,12 @@ Controller → Service → Mapper interface → Mapper XML → Database
 `ASAK-back`의 신규 API는 2026-07-23 API 정렬 문서와 `IMPLEMENTATION_PLAN.md`에 따라 아래 5개 공통 필드를 사용한다.
 
 ```json
-{"success": true, "status": 200, "code": "SUCCESS_CODE", "message": "요청이 성공했습니다.", "data": {}}
+{"success": true, "status": 200, "code": "0000", "message": "요청이 성공했습니다.", "data": {}}
 ```
 
 - Java/JSON은 camelCase, DB 컬럼은 기존 snake_case를 Mapper에서 연결한다.
+- `code`는 숫자처럼 보이는 **문자열 업무 코드**다. 성공은 `"0000"`, 옵션은 `"1001"`, 메뉴는 `"2001"~`, 주문은 `"3001"~`, 결제는 `"4001"~`를 사용한다. HTTP `status`와 같은 숫자를 재사용하지 않는다.
+- Java의 enum 이름(`ORDER_NOT_FOUND`)은 개발용 식별자이고, API 응답 `code`는 대응하는 업무 코드(`"3002"`)다.
 - Product Bible의 [API Design Rules](../../../ASAK/docs/product_bible/06_Engineering_Bible/docs/05-api/API_DESIGN_RULES.md)는 아직 `success/message/data` 3개 필드 예시를 갖고 있다. 이 저장소에서는 더 최신인 [DevCopilot API 정리 기준](../../../ASAK/docs/governance/devcopilot-api-alignment-2026-07-23.md)의 5개 필드를 적용하며, Product Bible 원문 정리는 별도 문서 작업으로 남긴다.
 - `total_price → totalAmount`, `paid_at → approvedAt`, `sold_out → isSoldOut`을 사용한다.
 - `category` 테이블에는 코드 컬럼이 없으므로 `categoryCode`를 만들지 않고 `categoryId`를 사용한다.

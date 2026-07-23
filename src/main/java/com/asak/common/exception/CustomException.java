@@ -1,5 +1,15 @@
 package com.asak.common.exception;
 
-// Service 로직에서 터지는 에러를 공통 처리
+public class CustomException extends RuntimeException {
 
-public class CustomException {}
+  private final ErrorCode errorCode;
+
+  public CustomException(ErrorCode errorCode) {
+    super(errorCode.message());
+    this.errorCode = errorCode;
+  }
+
+  public ErrorCode getErrorCode() {
+    return errorCode;
+  }
+}
