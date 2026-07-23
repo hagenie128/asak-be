@@ -1,4 +1,3 @@
 package com.asak.admin.dto;
 
-public class request {
-}
+public class request {}

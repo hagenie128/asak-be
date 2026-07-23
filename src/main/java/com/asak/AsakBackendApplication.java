@@ -6,8 +6,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 @SpringBootApplication
 public class AsakBackendApplication {
 
-	public static void main(String[] args) {
-		SpringApplication.run(AsakBackendApplication.class, args);
-	}
-
+  public static void main(String[] args) {
+    SpringApplication.run(AsakBackendApplication.class, args);
+  }
 }

@@ -1,4 +1,3 @@
 package com.asak.admin.controller;
 
-public class AdminStatsController {
-}
+public class AdminStatsController {}

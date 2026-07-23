@@ -13,18 +13,16 @@ import lombok.Getter;
 //   }
 // }
 
-//모든 API의 반환 규격
+// 모든 API의 반환 규격
 // ** T는 제네릭(Generic)
 
 @Getter
 @Builder
 public class ApiResponse<T> {
 
-    private boolean success;
-    private int status;
-    private String code;
-    private String message;
-    private T data;
-
-
+  private boolean success;
+  private int status;
+  private String code;
+  private String message;
+  private T data;
 }

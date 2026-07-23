@@ -1,4 +1,3 @@
 package com.asak.admin.service;
 
-public class AdminMenuService {
-}
+public class AdminMenuService {}

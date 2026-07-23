@@ -1,4 +1,3 @@
 package com.asak.admin.service;
 
-public class AdminOrderService {
-}
+public class AdminOrderService {}

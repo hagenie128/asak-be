@@ -1,4 +1,3 @@
 package com.asak.user.service;
 
-public class UserMenuService {
-}
+public class UserMenuService {}

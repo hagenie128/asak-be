@@ -1,4 +1,3 @@
 package com.asak.user.controller;
 
-public class UserMenuController {
-}
+public class UserMenuController {}

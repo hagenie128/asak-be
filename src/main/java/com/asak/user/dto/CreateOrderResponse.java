@@ -1,7 +1,6 @@
 package com.asak.user.dto;
 
 import com.asak.common.enums.OrderStatus;
-
 import lombok.Builder;
 import lombok.Getter;
 
@@ -16,9 +15,8 @@ import lombok.Getter;
 @Builder
 public class CreateOrderResponse {
 
-    private Long orderId;
-    private String orderNo;
-    private Integer totalAmount;
-    private OrderStatus status;
-
+  private Long orderId;
+  private String orderNo;
+  private Integer totalAmount;
+  private OrderStatus status;
 }

@@ -1,4 +1,3 @@
 package com.asak.user.controller;
 
-public class UserPayController {
-}
+public class UserPayController {}

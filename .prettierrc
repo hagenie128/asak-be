@@ -1,0 +1,42 @@
+# 문장 끝에 세미콜론을 붙입니다.
+# true: const a = 1;
+# false: const a = 1
+semi: true
+
+# 문자열에 사용할 따옴표 스타일입니다.
+# false: "double quote" 사용
+# true: 'single quote' 사용
+singleQuote: false
+
+# 들여쓰기 칸 수입니다.
+# 2: 프론트엔드에서 가장 흔한 기본값
+# 4: Java/Python 스타일처럼 넓은 들여쓰기
+tabWidth: 2
+
+# 여러 줄 객체/배열/함수 인자 마지막에도 쉼표를 붙입니다.
+# all: 가능한 곳에 모두 붙임, diff가 깔끔해짐
+# es5: ES5에서 허용되는 객체/배열에만 붙임
+# none: 마지막 쉼표를 붙이지 않음
+trailingComma: all
+
+# 한 줄 최대 길이 기준입니다.
+# 80: Prettier 기본값, 줄바꿈이 더 자주 생김
+# 100: 조금 더 넓게 사용, React/JS 프로젝트에서 무난함
+# 120: 긴 줄을 더 허용
+printWidth: 100
+
+# 객체 중괄호 안쪽 공백 여부입니다.
+# true: { name: "asak" }
+# false: {name: "asak"}
+bracketSpacing: true
+
+# 화살표 함수 인자가 하나일 때도 괄호를 붙입니다.
+# always: (item) => item.id
+# avoid: item => item.id
+arrowParens: always
+
+# 줄바꿈 문자를 LF로 통일합니다.
+# lf: macOS/Linux 스타일, 협업과 Git diff에 안정적
+# crlf: Windows 스타일
+# auto: 기존 파일의 줄바꿈을 유지
+endOfLine: auto
