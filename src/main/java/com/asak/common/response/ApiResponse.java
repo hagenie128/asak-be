@@ -36,7 +36,7 @@ public class ApiResponse<T> {
         .build();
   }
 
-public static <T> ApiResponse<T> failure(int status, String code, String message) {
+  public static <T> ApiResponse<T> failure(int status, String code, String message) {
     return ApiResponse.<T>builder()
         .success(false)
         .status(status)
@@ -44,5 +44,5 @@ public static <T> ApiResponse<T> failure(int status, String code, String message
         .message(message)
         .data(null)
         .build();
+  }
 }
-
