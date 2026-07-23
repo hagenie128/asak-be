@@ -1,0 +1,11 @@
+meta {
+  name: [SPEC] Admin Cancel Order
+  type: http
+  seq: 16
+}
+
+patch {
+  url: {{baseUrl}}/api/admin/orders/{{orderId}}/cancel
+  body: none
+  auth: none
+}

@@ -1,0 +1,11 @@
+meta {
+  name: [SPEC] Kiosk Menu List
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{baseUrl}}/api/kiosk/menuList?categoryId={{categoryId}}
+  body: none
+  auth: none
+}

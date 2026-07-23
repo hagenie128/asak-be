@@ -1,0 +1,23 @@
+meta {
+  name: [SPEC] Kiosk Start Payment
+  type: http
+  seq: 6
+}
+
+post {
+  url: {{baseUrl}}/api/kiosk/payments
+  body: json
+  auth: none
+}
+
+headers {
+  Content-Type: application/json
+}
+
+body:json {
+  {
+    "orderId": {{orderId}},
+    "paymentMethodCode": "CARD",
+    "idempotencyKey": "replace-with-unique-key"
+  }
+}

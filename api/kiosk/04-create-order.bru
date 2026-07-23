@@ -1,0 +1,29 @@
+meta {
+  name: [SPEC] Kiosk Create Order
+  type: http
+  seq: 4
+}
+
+post {
+  url: {{baseUrl}}/api/kiosk/orders
+  body: json
+  auth: none
+}
+
+headers {
+  Content-Type: application/json
+}
+
+body:json {
+  {
+    "orderType": "TAKE_OUT",
+    "items": [
+      {
+        "menuId": {{menuId}},
+        "quantity": 1,
+        "selectedOptionItemIds": [],
+        "excludedIngredientIds": []
+      }
+    ]
+  }
+}

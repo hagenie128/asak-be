@@ -1,0 +1,27 @@
+meta {
+  name: [SPEC] Admin Update Sold Out
+  type: http
+  seq: 9
+}
+
+patch {
+  url: {{baseUrl}}/api/admin/soldOut
+  body: json
+  auth: none
+}
+
+headers {
+  Content-Type: application/json
+}
+
+body:json {
+  {
+    "changes": [
+      {
+        "targetType": "INGREDIENT",
+        "targetId": 33,
+        "isSoldOut": true
+      }
+    ]
+  }
+}

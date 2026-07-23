@@ -1,0 +1,11 @@
+meta {
+  name: [SPEC] Admin Menu List
+  type: http
+  seq: 5
+}
+
+get {
+  url: {{baseUrl}}/api/admin/menus?categoryId={{categoryId}}&keyword=&isSoldOut=false&tagId=&page=0&size=20&sort=name,asc
+  body: none
+  auth: none
+}

@@ -1,0 +1,11 @@
+meta {
+  name: [SPEC] Admin Daily Sales
+  type: http
+  seq: 15
+}
+
+get {
+  url: {{baseUrl}}/api/admin/sales/daily?date={{salesDate}}
+  body: none
+  auth: none
+}

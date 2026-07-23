@@ -91,7 +91,7 @@
 
 | 호출 | 보낼 값 | 화면에서 쓸 `data` |
 | --- | --- | --- |
-| `GET /api/kiosk/paymentMethods` | 없음 | `paymentMethodCode`, `displayName`, `status`, `sortOrder` |
+| `GET /api/kiosk/payment-methods` | 없음 | `methods[].methodCode`, `methodName`, `isEnabled`, `sortOrder` |
 | `POST /api/kiosk/payments` | `orderId`, `paymentMethodCode`, `idempotencyKey` | `orderNo`, `approvedAmount`, `approvedAt`, `waitingOrderCount` |
 
 | 상태/행동 | 처리 |
@@ -100,6 +100,9 @@
 | 모든 수단 비활성 / Load Error | 결제 진행을 막고 원인과 복귀 행동을 보인다. |
 | Processing | 뒤로가기·연타를 막고 새 결제 요청을 만들지 않는다. |
 | 승인 | SCR-008로 이동한다. |
+
+`CARD`의 화면 이름은 `카드·삼성페이`이며, 삼성페이는 별도의 `paymentMethodCode`가 아니다.
+`KAKAO_PAY`, `NAVER_PAY`는 현재 비활성으로 표시만 하고 선택은 막는다.
 
 ```json
 {"orderId":128,"paymentMethodCode":"CARD","idempotencyKey":"uuid"}

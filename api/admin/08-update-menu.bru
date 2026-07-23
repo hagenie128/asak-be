@@ -1,0 +1,25 @@
+meta {
+  name: [SPEC] Admin Update Menu
+  type: http
+  seq: 8
+}
+
+patch {
+  url: {{baseUrl}}/api/admin/menus/{{menuId}}
+  body: json
+  auth: none
+}
+
+headers {
+  Content-Type: application/json
+}
+
+body:json {
+  {
+    "categoryId": {{categoryId}},
+    "name": "Bruno Sample Menu",
+    "price": 8900,
+    "imageUrl": "/assets/menu/sample.png",
+    "description": "Bruno 명세 확인용 메뉴"
+  }
+}

@@ -1,0 +1,21 @@
+meta {
+  name: [SPEC] Admin Update Payment Method
+  type: http
+  seq: 11
+}
+
+patch {
+  url: {{baseUrl}}/api/admin/payment-methods/{{methodId}}
+  body: json
+  auth: none
+}
+
+headers {
+  Content-Type: application/json
+}
+
+body:json {
+  {
+    "isEnabled": true
+  }
+}

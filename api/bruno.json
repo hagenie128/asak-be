@@ -1,0 +1,9 @@
+{
+  "version": "1",
+  "name": "ASAK API Contract",
+  "type": "collection",
+  "ignore": [
+    "node_modules",
+    ".git"
+  ]
+}

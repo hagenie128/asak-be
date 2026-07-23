@@ -1,0 +1,11 @@
+meta {
+  name: [SPEC] Admin Sales Summary
+  type: http
+  seq: 13
+}
+
+get {
+  url: {{baseUrl}}/api/admin/sales/summary?startDate={{startDate}}&endDate={{endDate}}
+  body: none
+  auth: none
+}

@@ -1,0 +1,28 @@
+meta {
+  name: [SPEC] Kiosk Cart Validate
+  type: http
+  seq: 3
+}
+
+post {
+  url: {{baseUrl}}/api/kiosk/cart/validate
+  body: json
+  auth: none
+}
+
+headers {
+  Content-Type: application/json
+}
+
+body:json {
+  {
+    "items": [
+      {
+        "menuId": {{menuId}},
+        "quantity": 1,
+        "selectedOptionItemIds": [],
+        "excludedIngredientIds": []
+      }
+    ]
+  }
+}

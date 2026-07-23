@@ -1,0 +1,25 @@
+meta {
+  name: [SPEC] Admin Create Menu
+  type: http
+  seq: 7
+}
+
+post {
+  url: {{baseUrl}}/api/admin/menus
+  body: json
+  auth: none
+}
+
+headers {
+  Content-Type: application/json
+}
+
+body:json {
+  {
+    "categoryId": {{categoryId}},
+    "name": "Bruno Sample Menu",
+    "price": 8900,
+    "imageUrl": "/assets/menu/sample.png",
+    "description": "Bruno 명세 확인용 메뉴"
+  }
+}
