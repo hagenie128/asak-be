@@ -66,33 +66,42 @@ com.asak/
 │   └── mapper/                      # [MyBatis 매퍼] 관리자 전용 DB 쿼리 연결
 │       ├── AdminOrderMapper.java    # - Java 인터페이스
 │       ├── AdminMenuMapper.java     # - Java 인터페이스
-│       └── xml/                     # - 실제 SQL문이 들어있는 XML 파일 폴더
-│           ├── AdminOrderMapper.xml
-│           └── AdminMenuMapper.xml
+│       
+│           
 │
 │
 └── user/                            # [고객 전용 패키지] 키오스크 프론트엔드와 통신하는 백엔드 로직
-    │
-    ├── controller/                  # [컨트롤러] 키오스크 고객용 API 요청을 받는 곳
-    │   ├── UserMenuController.java  # - 고객용 메뉴 목록 조회, 카테고리별 조회
-    │   ├── UserOrderController.java # - 키오스크 주문 접수 및 장바구니 결제
-    │   └── UserPayController.java   # - PG사 연동/결제 요청 처리
-    │
-    ├── service/                     # [비즈니스 로직] 키오스크 관련 실제 처리 로직
-    │   ├── UserMenuService.java     # - 판매 중인 메뉴만 필터링하여 조회하는 로직
-    │   └── UserOrderService.java    # - 재고 확인, 주문 생성, 결제 검증 로직
-    │
-    ├── dto/                         # [데이터 전달 객체] 키오스크 화면과 데이터 주고받을 때 쓰는 객체
-    │   ├── request/                 # - 키오스크가 보내는 데이터 (예: CreateOrderRequest, PayVerifyRequest)
-    │   └── response/                # - 키오스크에 보여줄 데이터 (예: UserMenuListResponse, OrderReceiptResponse)
-    │
-    └── mapper/                      # [MyBatis 매퍼] 키오스크 전용 DB 쿼리 연결
-        ├── UserMenuMapper.java      # - Java 인터페이스 (예: 노출 가능한 메뉴만 SELECT)
-        ├── UserOrderMapper.java     # - Java 인터페이스 (예: 주문 INSERT)
-        └── xml/                     # - 실제 SQL문이 들어있는 XML 파일 폴더
-            ├── UserMenuMapper.xml
-            └── UserOrderMapper.xml
-
+│
+│   
+│    ├── controller/                  # [컨트롤러] 키오스크 고객용 API 요청을 받는 곳
+│    │   ├── UserMenuController.java  # - 고객용 메뉴 목록 조회, 카테고리별 조회
+│    │   ├── UserOrderController.java # - 키오스크 주문 접수 및 장바구니 결제
+│    │   └── UserPayController.java   # - PG사 연동/결제 요청 처리
+│    │
+│    ├── service/                     # [비즈니스 로직] 키오스크 관련 실제 처리 로직
+│    │   ├── UserMenuService.java     # - 판매 중인 메뉴만 필터링하여 조회하는 로직
+│    │   └── UserOrderService.java    # - 재고 확인, 주문 생성, 결제 검증 로직
+│    │
+│    ├── dto/                         # [데이터 전달 객체] 키오스크 화면과 데이터 주고받을 때 쓰는 객체
+│    │   ├── request/                 # - 키오스크가 보내는 데이터 (예: CreateOrderRequest, PayVerifyRequest)
+│    │   └── response/                # - 키오스크에 보여줄 데이터 (예: UserMenuListResponse, OrderReceiptResponse)
+│    │
+│    └── mappers/                      # [MyBatis 매퍼] 키오스크 전용 DB 쿼리 연결
+│        ├── UserMenuMapper.java      # - Java 인터페이스 (예: 노출 가능한 메뉴만 SELECT)
+│        ├── UserOrderMapper.java     # - Java 인터페이스 (예: 주문 INSERT)
+│                             
+│            
+│           
+│
+│
+└── resources
+│    │
+│    └── mapper/                       # - 실제 SQL문이 들어있는 XML 파일 폴더
+             ├── AdminMenuMapper.xml
+│            ├── AdminOrderMapper.xml
+│            ├── UserMenuMapper.xml
+│            └── UserOrderMapper.xml
+│
 
 3. 🛠️ 라이브러리 구성 및 상세 역할 설명
 프로젝트 생성 시 추가된 라이브러리(build.gradle) 목록과 각각의 동작 방식 및 역할 설명입니다.
