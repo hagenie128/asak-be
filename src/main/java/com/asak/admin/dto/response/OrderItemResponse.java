@@ -14,13 +14,13 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class OrderItemResponse {
-  private Long itemId;
   private Long menuId;
   private String menuName;
   private int quantity;
+  private int unitPrice;
 
   @JsonRawValue
-  private String options; // vw_order_item_full.options 그대로 (JSON 배열 문자열)
+  private String optionItems; // vw_order_item_full.option_items 그대로 (JSON 배열 문자열)
   @JsonRawValue
-  private String exclusions; // vw_order_item_full.exclusions 그대로
+  private String excludedIngredients; // vw_order_item_full.excluded_ingredients 그대로
 }

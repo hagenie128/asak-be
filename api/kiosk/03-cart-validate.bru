@@ -1,5 +1,5 @@
 meta {
-  name: SPEC - Kiosk Cart Validate
+  name: Kiosk Cart Validate
   type: http
   seq: 3
 }
@@ -20,9 +20,16 @@ body:json {
       {
         "menuId": {{menuId}},
         "quantity": 1,
-        "selectedOptionItemIds": [],
+        "selectedOptionItemIds": [269],
         "excludedIngredientIds": []
       }
     ]
   }
+}
+
+docs {
+  # API-004
+  POST /api/kiosk/cart/validate
+  CART_API_AND_DATA_CONTRACT.md
+  요청 필드: selectedOptionItemIds, excludedIngredientIds (optionItems 아님)
 }

@@ -1,5 +1,5 @@
 meta {
-  name: SPEC - Kiosk Create Order
+  name: Kiosk Create Order
   type: http
   seq: 4
 }
@@ -21,9 +21,17 @@ body:json {
       {
         "menuId": {{menuId}},
         "quantity": 1,
-        "selectedOptionItemIds": [],
+        "selectedOptionItemIds": [269],
         "excludedIngredientIds": []
       }
     ]
   }
+}
+
+docs {
+  # API-005
+  POST /api/kiosk/orders
+  ORDER_API_CONTRACT.md · IMPLEMENTATION_PLAN
+  응답: totalAmount (orders.total_price 매핑). 클라이언트가 금액 보내지 않음.
+  orderType: EAT_IN | TAKE_OUT
 }

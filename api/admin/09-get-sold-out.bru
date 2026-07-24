@@ -1,5 +1,5 @@
 meta {
-  name: SPEC - Admin Sold Out List
+  name: Admin Sold Out List
   type: http
   seq: 10
 }
@@ -8,4 +8,12 @@ get {
   url: {{baseUrl}}/api/admin/soldOut
   body: none
   auth: none
+}
+
+docs {
+  # API-010
+  GET /api/admin/soldOut
+  DB view: vw_soldout_catalog
+  target_type: MENU | INGREDIENT | OPTION_ITEM
+  영향 메뉴 수 미리보기는 view.sql [18] 인라인
 }

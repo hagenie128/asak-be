@@ -1,5 +1,5 @@
 meta {
-  name: SPEC - Admin Change Order Status
+  name: Admin Change Order Status
   type: http
   seq: 4
 }
@@ -18,4 +18,11 @@ body:json {
   {
     "status": "COMPLETED"
   }
+}
+
+docs {
+  # API-008
+  PATCH /api/admin/orders/{orderId}/status
+  ORDER_API_CONTRACT: body.status
+  enum: RECEIVED | PREPARING | COMPLETED | CANCELED
 }

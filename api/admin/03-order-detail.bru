@@ -1,5 +1,5 @@
 meta {
-  name: SPEC - Admin Order Detail
+  name: Admin Order Detail
   type: http
   seq: 3
 }
@@ -8,4 +8,11 @@ get {
   url: {{baseUrl}}/api/admin/orders/{{orderId}}
   body: none
   auth: none
+}
+
+docs {
+  # API-022
+  GET /api/admin/orders/{orderId}
+  DB view: vw_order_summary, vw_order_item_full
+  items[].optionItems / excludedIngredients (JSON)
 }

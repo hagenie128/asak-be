@@ -1,11 +1,19 @@
 meta {
-  name: SPEC - Admin Cancel Order
+  name: Admin Cancel Order
   type: http
-  seq: 16
+  seq: 17
 }
 
 patch {
   url: {{baseUrl}}/api/admin/orders/{{orderId}}/cancel
   body: none
   auth: none
+}
+
+docs {
+  # API-024
+  PATCH /api/admin/orders/{orderId}/cancel
+  RECEIVED/PREPARING만 가능 → CANCELED
+  승인 결제는 REFUNDED + refundedAt
+  불가 시 409 ORDER_CANCEL_NOT_ALLOWED
 }

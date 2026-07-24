@@ -15,6 +15,8 @@ public class HealthController {
   @GetMapping("/health")
   public ApiResponse<Map<String, String>> health() {
     return ApiResponse.success(
+        "HEALTH_OK",
+        "서버가 정상입니다.",
         Map.of("service", "ASAK-backend"));
   }
 }

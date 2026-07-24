@@ -215,19 +215,22 @@ ORDER BY o.created_at DESC;
 --     - 주의: 매칭 행이 0개면 JSON_ARRAYAGG 결과는 NULL
 --         (필요하면 COALESCE(..., JSON_ARRAY()) 로 빈 배열 [] 처리)
 -- -----------------------------------------------------------------------------
+-- 2026-07-24 수정: Admin OrderDetailPanel.jsx / rest-api-spec.md API-007 실제 필드명에 맞춤
+--   options→optionItems, exclusions→excludedIngredients, optItemId→optionItemId,
+--   ingId→ingredientId, price 컬럼을 unit_price로 별칭(품목 단가 명시)
+--   order_item_id 컬럼 제거 — 계약 예시에 품목 id가 없음. 서브쿼리는 oi.id를 직접 참조하므로 영향 없음.
 CREATE OR REPLACE VIEW vw_order_item_full AS
 SELECT
     oi.order_id,
-    oi.id AS order_item_id,
     oi.menu_id,
     m.name AS menu_name,
     oi.quantity,
-    oi.price,
+    oi.price AS unit_price,
     -- 이 주문라인의 옵션들을 [{...}, {...}] 한 컬럼으로
     (
         SELECT JSON_ARRAYAGG(
                 JSON_OBJECT(
-                    'optItemId', oio.opt_item_id, 'name', oit.name, 'quantity', oio.quantity, 'price', oio.price
+                    'optionItemId', oio.opt_item_id, 'name', oit.name, 'quantity', oio.quantity, 'price', oio.price
                 )
             )
         FROM
@@ -235,19 +238,19 @@ SELECT
             JOIN opt_item oit ON oit.id = oio.opt_item_id
         WHERE
             oio.order_item_id = oi.id
-    ) AS options,
+    ) AS option_items,
     -- 이 주문라인의 제외재료들을 [{...}, {...}] 한 컬럼으로
     (
         SELECT JSON_ARRAYAGG(
                 JSON_OBJECT(
-                    'ingId', ie.ing_id, 'name', i.name
+                    'ingredientId', ie.ing_id, 'name', i.name
                 )
             )
         FROM item_exclusion ie
             JOIN ing i ON i.id = ie.ing_id
         WHERE
             ie.order_item_id = oi.id
-    ) AS exclusions
+    ) AS excluded_ingredients
 FROM order_item oi
     JOIN menu m ON m.id = oi.menu_id
 ORDER BY oi.order_id, oi.id;
@@ -538,18 +541,20 @@ FROM
 --       JSON_ARRAYAGG로 자식들을 배열 컬럼 1개에 넣고, 부모는 1행 유지.
 -- -----------------------------------------------------------------------------
 
+-- 2026-07-24 수정: 프론트 실제 필드명에 맞춤
+--   ing_id→ingredient_id, role_id(숫자)→role(문자 코드, 소문자), unit_id(숫자)→unit(표시 코드)
 -- 재료별 알레르기를 JSON 배열로 미리 묶음 (fan-out 없이 재료당 1행)
 --   allergens 예: [{"id":1,"name":"난류"},{"id":3,"name":"대두"}]
 --   알레르기 0개면 서브쿼리 NULL → COALESCE로 [] 빈 배열
 CREATE OR REPLACE VIEW vw_menu_ing_json AS
 SELECT
     mi.menu_id,
-    mi.ing_id,
+    i.id AS ingredient_id,
     i.name AS ing_name,
     i.sold_out AS ing_sold_out,
-    mi.role_id,
+    LOWER(rc.code) AS role,
     mi.quantity,
-    mi.unit_id,
+    ut.code AS unit,
     mi.is_default,
     mi.can_remove,
     mi.sort_no,
@@ -567,45 +572,51 @@ SELECT
     ) AS allergens
 FROM menu_ing mi
     JOIN ing i ON i.id = mi.ing_id
+    JOIN common_code rc ON rc.id = mi.role_id
+    LEFT JOIN common_code ut ON ut.id = mi.unit_id
 ORDER BY mi.menu_id, mi.sort_no;
 
+-- 2026-07-24 수정: Kiosk optionGroups[] 실제 필드명에 맞춤
+--   policy_id→option_group_id, policy_name→name, optId→optionItemId, ingId→ingredientId,
+--   addPrice→extraPrice, listPrice→originalPrice, amount→servingAmount, unitId(숫자)→servingUnit(코드)
+--   sortNo는 프론트 계약에 없어서 제거 (그룹 레벨 sort_no만 유지)
 -- 정책별 옵션 항목을 JSON 배열로 미리 묶음 (정책당 1행, override 병합 포함)
 --   GROUP BY 정책 → 그 정책에 속한 옵션 행들을 JSON_ARRAYAGG로 items 컬럼에 합침
---   items 예: [{"optId":10,"name":"아보카도","addPrice":1000,...}, ...]
+--   items 예: [{"optionItemId":10,"name":"아보카도","extraPrice":1000,...}, ...]
 --   COALESCE(mo.xxx, opi.xxx): 메뉴별 override 있으면 그걸, 없으면 정책 기본값
 CREATE OR REPLACE VIEW vw_menu_opt_policy_json AS
 SELECT
     mop.menu_id,
-    op.id AS policy_id,
-    op.name AS policy_name,
-    gt.code AS group_type_code,
+    op.id AS option_group_id,
+    op.name,
+    gt.code AS group_type,
     CASE
         WHEN op.max_select <= 1 THEN 'SINGLE'
         ELSE 'MULTI'
     END AS select_type,
     op.min_select,
     op.max_select,
-    mop.sort_no,
+    mop.sort_no AS sort_order,
     (
         mop.required = 1
         OR op.required = 1
     ) AS is_required,
     JSON_ARRAYAGG(
         JSON_OBJECT(
-            'optId',
+            'optionItemId',
             oi.id,
-            'ingId',
+            'ingredientId',
             oi.ing_id,
             'name',
             oi.name,
-            'addPrice',
+            'extraPrice',
             oi.add_price,
-            'listPrice',
+            'originalPrice',
             oi.list_price,
-            'amount',
+            'servingAmount',
             oi.amount,
-            'unitId',
-            oi.unit_id,
+            'servingUnit',
+            ut.code,
             'iconUrl',
             oi.icon_url,
             'colorHex',
@@ -623,8 +634,6 @@ SELECT
             ),
             'isDefault',
             COALESCE(mo.is_default, opi.is_default),
-            'sortNo',
-            COALESCE(mo.sort_no, opi.sort_no),
             'isActive',
             COALESCE(mo.active, opi.active)
         )
@@ -637,6 +646,7 @@ FROM
     JOIN opt_policy_item opi ON opi.policy_id = op.id
     JOIN opt_item oi ON oi.id = opi.opt_item_id
     LEFT JOIN ing ON ing.id = oi.ing_id
+    LEFT JOIN common_code ut ON ut.id = oi.unit_id
     LEFT JOIN menu_opt_override mo ON mo.menu_id = mop.menu_id
     AND mo.opt_item_id = opi.opt_item_id
 GROUP BY
@@ -654,11 +664,12 @@ ORDER BY mop.menu_id, mop.sort_no;
 -- -----------------------------------------------------------------------------
 -- [14] 메뉴 목록 (주문 가능 여부 포함)
 --     vw_menu_availability 플래그를 합쳐 is_orderable / has_sold_out_ingredient 산출
+--     2026-07-24 수정: cat_id → category_id (MENU_API_CONTRACT.md 명시: "Use categoryId")
 -- -----------------------------------------------------------------------------
 CREATE OR REPLACE VIEW vw_menu_list AS
 SELECT
     m.id AS menu_id,
-    m.cat_id,
+    m.cat_id AS category_id,
     m.name,
     m.price,
     m.image_url,
@@ -684,7 +695,139 @@ FROM
     JOIN vw_menu_availability va ON va.menu_id = m.id;
 
 -- -----------------------------------------------------------------------------
--- [15] 메타 확인용 (전체 테이블/뷰 목록)
+-- [15] 메뉴 상세 헤더 조회 (뷰 아님 — menu+category 인라인 조인에 allergens/allergyText 추가)
+--     재료(menu_ing) + 옵션(menu_opt_policy) 양쪽에서 알레르기를 모아 중복제거.
+--     "기본 재료와 옵션 기준 자동 집계" — 프론트 주석 근거. API-003 계약: allergens[] + allergyText.
+--     목록(vw_menu_list)에는 안 넣음 — 상세에서만 필요한 값을 목록 조회마다 계산하면 손해라서.
+-- -----------------------------------------------------------------------------
+-- SELECT m.id AS menu_id, m.cat_id AS category_id, c.name AS category_name,
+--        m.name, m.price, m.image_url, m.description, m.sold_out,
+--        COALESCE((
+--            SELECT JSON_ARRAYAGG(name) FROM (
+--                SELECT DISTINCT a.name
+--                FROM menu_ing mi
+--                JOIN ing_allergen ia ON ia.ing_id = mi.ing_id
+--                JOIN allergen a ON a.id = ia.allergen_id
+--                WHERE mi.menu_id = m.id
+--                UNION
+--                SELECT DISTINCT a.name
+--                FROM menu_opt_policy mop
+--                JOIN opt_policy_item opi ON opi.policy_id = mop.policy_id
+--                JOIN opt_item oi ON oi.id = opi.opt_item_id
+--                JOIN ing_allergen ia ON ia.ing_id = oi.ing_id
+--                JOIN allergen a ON a.id = ia.allergen_id
+--                WHERE mop.menu_id = m.id
+--            ) allerg
+--        ), JSON_ARRAY()) AS allergens,
+--        COALESCE((
+--            SELECT GROUP_CONCAT(name ORDER BY name SEPARATOR ', ') FROM (
+--                SELECT DISTINCT a.name
+--                FROM menu_ing mi
+--                JOIN ing_allergen ia ON ia.ing_id = mi.ing_id
+--                JOIN allergen a ON a.id = ia.allergen_id
+--                WHERE mi.menu_id = m.id
+--                UNION
+--                SELECT DISTINCT a.name
+--                FROM menu_opt_policy mop
+--                JOIN opt_policy_item opi ON opi.policy_id = mop.policy_id
+--                JOIN opt_item oi ON oi.id = opi.opt_item_id
+--                JOIN ing_allergen ia ON ia.ing_id = oi.ing_id
+--                JOIN allergen a ON a.id = ia.allergen_id
+--                WHERE mop.menu_id = m.id
+--            ) allerg2
+--        ), '') AS allergy_text
+-- FROM menu m
+-- JOIN category c ON c.id = m.cat_id
+-- WHERE m.id = #{menuId}
+
+-- -----------------------------------------------------------------------------
+-- [16] 결제 승인 응답
+--     PAYMENT_API_CONTRACT.md 계약: paymentId, orderId, orderNo, paymentStatus,
+--     approvedAmount, waitingOrderCount, approvedAt.
+--     waiting_order_count는 결제 시점이 아니라 조회 시점 기준 실시간 대기 건수
+--     (RECEIVED/PREPARING) — 상관 서브쿼리라 조회할 때마다 다시 계산됨.
+-- -----------------------------------------------------------------------------
+CREATE OR REPLACE VIEW vw_payment_result AS
+SELECT
+    p.id AS payment_id,
+    p.order_id,
+    o.order_no,
+    ps.code AS payment_status,
+    p.amount AS approved_amount,
+    p.paid_at AS approved_at,
+    (
+        SELECT COUNT(*)
+        FROM orders o2
+            JOIN common_code st2 ON st2.id = o2.status_id
+        WHERE
+            st2.code IN ('RECEIVED', 'PREPARING')
+    ) AS waiting_order_count
+FROM payment p
+    JOIN orders o ON o.id = p.order_id
+    JOIN common_code ps ON ps.id = p.status_id;
+
+-- -----------------------------------------------------------------------------
+-- [17] 결제수단 목록 (뷰 아님 — 단순 2테이블 조인이라 매퍼에 인라인)
+--     PAYMENT_API_CONTRACT.md 계약: methodCode, methodName, isEnabled, sortOrder.
+--     KAKAO_PAY/NAVER_PAY는 비활성이어도 화면에 표시하고 선택만 막음 → active로 필터링하지 않음.
+-- -----------------------------------------------------------------------------
+-- SELECT c.code AS method_code, pm.name AS method_name, pm.active AS is_enabled, pm.sort_no AS sort_order
+-- FROM pay_method_cfg pm
+-- JOIN common_code c ON c.id = pm.method_id
+-- ORDER BY pm.sort_no;
+
+-- -----------------------------------------------------------------------------
+-- [18] 품절관리 "영향 메뉴 개수" 미리보기 (뷰 아님 — 파라미터 1개 받는 매퍼 전용 쿼리)
+--     저장 전 토글 미리보기용. 실제로 sold_out을 UPDATE하지 않고 가정해서 계산.
+-- -----------------------------------------------------------------------------
+
+-- 재료 탭: 이 재료(#{ingredientId})를 품절로 바꿨을 때 막히는 메뉴 수
+--   CORE는 무조건 / BASE는 이게 마지막 남은 대안이면 / DEFAULT는 제거불가면
+-- SELECT COUNT(DISTINCT m.id) AS affected_menu_count
+-- FROM menu m
+-- JOIN menu_ing mi ON mi.menu_id = m.id
+-- JOIN common_code rc ON rc.id = mi.role_id
+-- WHERE mi.ing_id = #{ingredientId}
+--   AND (
+--       rc.code = 'CORE'
+--       OR (rc.code = 'DEFAULT' AND mi.can_remove = 0)
+--       OR (
+--           rc.code = 'BASE'
+--           AND NOT EXISTS (
+--               SELECT 1
+--               FROM menu_ing mi2
+--               JOIN ing i2 ON i2.id = mi2.ing_id
+--               WHERE mi2.menu_id = mi.menu_id
+--                 AND mi2.role_id = mi.role_id
+--                 AND mi2.ing_id <> #{ingredientId}
+--                 AND i2.sold_out = 0
+--           )
+--       )
+--   );
+
+-- 옵션 탭: 이 옵션항목(#{optionItemId})을 품절로 바꿨을 때, 속한 필수그룹이 전멸하는 메뉴 수
+-- SELECT COUNT(DISTINCT mop.menu_id) AS affected_menu_count
+-- FROM opt_policy_item opi
+-- JOIN menu_opt_policy mop ON mop.policy_id = opi.policy_id
+-- JOIN opt_policy op ON op.id = opi.policy_id
+-- WHERE opi.opt_item_id = #{optionItemId}
+--   AND (mop.required = 1 OR op.required = 1)
+--   AND (
+--       SELECT COUNT(*)
+--       FROM opt_policy_item opi2
+--       JOIN opt_item oi2 ON oi2.id = opi2.opt_item_id
+--       LEFT JOIN menu_opt_override mo2
+--              ON mo2.menu_id = mop.menu_id AND mo2.opt_item_id = opi2.opt_item_id
+--       WHERE opi2.policy_id = opi.policy_id
+--         AND COALESCE(mo2.active, opi2.active) = 1
+--         AND opi2.opt_item_id <> #{optionItemId}
+--         AND oi2.sold_out = 0
+--   ) < op.min_select;
+
+-- MENU 탭은 자기 자신만 영향받으므로 이 개념 자체가 필요 없음.
+
+-- -----------------------------------------------------------------------------
+-- [19] 메타 확인용 (전체 테이블/뷰 목록)
 -- -----------------------------------------------------------------------------
 SHOW FULL TABLES;
 

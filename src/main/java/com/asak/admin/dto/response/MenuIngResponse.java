@@ -14,12 +14,12 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class MenuIngResponse {
-  private Long ingId;
+  private Long ingredientId;
   private String name;
   private boolean isSoldOut;
-  private Long roleId;
+  private String role;
   private double quantity;
-  private Long unitId;
+  private String unit;
   private boolean isDefault;
   private boolean canRemove;
   private int sortNo;

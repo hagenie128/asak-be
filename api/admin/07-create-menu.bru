@@ -1,5 +1,5 @@
 meta {
-  name: SPEC - Admin Create Menu
+  name: Admin Create Menu
   type: http
   seq: 7
 }
@@ -20,6 +20,12 @@ body:json {
     "name": "Bruno Sample Menu",
     "price": 8900,
     "imageUrl": "/assets/menu/sample.png",
-    "description": "Bruno 명세 확인용 메뉴"
+    "description": "Bruno contract sample menu"
   }
+}
+
+docs {
+  # API-012
+  POST /api/admin/menus
+  MENU_API_CONTRACT 기본 등록 필드만
 }

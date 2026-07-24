@@ -1,11 +1,17 @@
 meta {
-  name: SPEC - Admin Daily Sales
+  name: Admin Daily Sales
   type: http
-  seq: 15
+  seq: 16
 }
 
 get {
   url: {{baseUrl}}/api/admin/sales/daily?date={{salesDate}}
   body: none
   auth: none
+}
+
+docs {
+  # API-017
+  GET /api/admin/sales/daily
+  DB: vw_sales_daily, vw_sales_hourly, vw_top_menu_daily/hourly
 }

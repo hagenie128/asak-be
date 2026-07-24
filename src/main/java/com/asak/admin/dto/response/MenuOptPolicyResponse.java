@@ -14,10 +14,13 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class MenuOptPolicyResponse {
-  private Long policyId;
-  private String policyName;
+  private Long optionGroupId;
+  private String name;
+  private String groupType;
+  private String selectType;
   private int minSelect;
   private int maxSelect;
+  private int sortOrder;
   private boolean isRequired;
 
   @JsonRawValue

@@ -1,5 +1,5 @@
 meta {
-  name: SPEC - Admin Menu Detail
+  name: Admin Menu Detail
   type: http
   seq: 6
 }
@@ -8,4 +8,10 @@ get {
   url: {{baseUrl}}/api/admin/menus/{{menuId}}
   body: none
   auth: none
+}
+
+docs {
+  # API-023
+  GET /api/admin/menus/{menuId}
+  DB view: vw_menu_ing_json, vw_menu_opt_policy_json
 }

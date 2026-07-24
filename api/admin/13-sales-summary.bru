@@ -1,11 +1,18 @@
 meta {
-  name: SPEC - Admin Sales Summary
+  name: Admin Sales Summary
   type: http
-  seq: 13
+  seq: 14
 }
 
 get {
   url: {{baseUrl}}/api/admin/sales/summary?startDate={{startDate}}&endDate={{endDate}}
   body: none
   auth: none
+}
+
+docs {
+  # API-018
+  GET /api/admin/sales/summary
+  DB: vw_sales_daily 집계
+  net_sales_amount = gross - canceled
 }

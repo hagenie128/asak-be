@@ -1,5 +1,5 @@
 meta {
-  name: SPEC - Kiosk Start Payment
+  name: Kiosk Start Payment
   type: http
   seq: 6
 }
@@ -18,6 +18,17 @@ body:json {
   {
     "orderId": {{orderId}},
     "paymentMethodCode": "CARD",
-    "idempotencyKey": "replace-with-unique-key"
+    "idempotencyKey": "bruno-local-replace-me"
   }
+}
+
+docs {
+  # API-006
+  POST /api/kiosk/payments
+  PAYMENT_API_CONTRACT.md
+  DB view: vw_payment_result
+  응답: paymentId, orderId, orderNo, paymentStatus,
+        approvedAmount, approvedAt, waitingOrderCount
+  waitingOrderCount는 조회 시점 RECEIVED/PREPARING 건수 (상관 서브쿼리)
+  레거시 amount/paidAt 사용 금지
 }

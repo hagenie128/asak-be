@@ -26,11 +26,14 @@
 {
   "success": true,
   "status": 200,
-  "code": "SUCCESS_CODE",
+  "code": "MENU_LIST_SUCCESS",
   "message": "요청이 성공했습니다.",
   "data": {}
 }
 ```
+
+`code`는 API별 의미 있는 문자열이다. (예: `MENU_LIST_SUCCESS`, `ORDER_CREATE_SUCCESS`)  
+공통 헬퍼 기본값은 `OK`이며, 레거시 숫자 코드(`0000`, `2001`)는 쓰지 않는다.
 
 ### API 필드와 DB 매핑
 
@@ -64,7 +67,7 @@
 | API-006 | POST | `/api/kiosk/payments` | 가상 결제 승인 |
 | API-014 | GET | `/api/kiosk/payment-methods` | 키오스크 결제수단 목록 |
 
-주문 요청은 `orderType`, `items[].menuId`, `quantity`, `optionItems`, `excludedIngredientIds`를 사용한다. 클라이언트가 결제 금액을 정본으로 보내지 않는다.
+주문 요청은 `orderType`, `items[].menuId`, `quantity`, `selectedOptionItemIds`, `excludedIngredientIds`를 사용한다. (ORDER/CART API Contract와 동일) 클라이언트가 결제 금액을 정본으로 보내지 않는다.
 
 ### 관리자
 
@@ -96,6 +99,8 @@
 - 실제 옵션 경로는 `menu_opt_policy → opt_policy → opt_policy_item → opt_item`이다. `menu_option`은 레거시 이름이다.
 - `item_exclusion`, `order_item`, `order_item_option`은 재료 제외와 선택 옵션을 저장한다.
 - `pay_method_cfg`, `common_code`는 결제수단과 상태 코드를 관리한다.
+- `vw_payment_result`를 결제 승인 응답 읽기 원본으로 사용한다. (`paymentId`, `orderId`, `orderNo`, `paymentStatus`, `approvedAmount`, `approvedAt`, `waitingOrderCount`)
+- 결제수단 목록·품절 영향 메뉴 수는 뷰가 아니라 매퍼 인라인 쿼리다. (`view.sql` [17]·[18])
 - `vw_sales_daily`, `vw_sales_hourly`, `vw_top_menu_daily`, `vw_top_menu_hourly`를 매출 API의 읽기 원본으로 사용한다.
 - `payment.paid_at`이 있는 원결제 금액은 gross sales에 유지한다.
 - 주문 또는 결제가 취소·환불되면 해당 금액은 canceled amount로 별도 집계한다.

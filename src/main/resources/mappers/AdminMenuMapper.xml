@@ -4,8 +4,8 @@
 
  <resultMap id="menuDetailMap" type="com.asak.admin.dto.response.MenuDetailResponse">
   <id column="menu_id" property="menuId"/>
-  <result column="cat_id" property="catId"/>
-  <result column="cat_name" property="catName"/>
+  <result column="category_id" property="categoryId"/>
+  <result column="category_name" property="categoryName"/>
   <result column="name" property="name"/>
   <result column="price" property="price"/>
   <result column="image_url" property="imageUrl"/>
@@ -18,7 +18,7 @@
 </resultMap>
 
 <select id="getMenuDetail" resultMap="menuDetailMap">
-  SELECT m.id AS menu_id, m.cat_id, c.name AS cat_name,
+  SELECT m.id AS menu_id, m.cat_id AS category_id, c.name AS category_name,
          m.name, m.price, m.image_url, m.description, m.sold_out
   FROM menu m
   JOIN category c ON c.id = m.cat_id
@@ -26,8 +26,8 @@
 </select>
 
 <select id="findMenuIngredients" resultType="com.asak.admin.dto.response.MenuIngResponse">
-  SELECT ing_id AS ingId, ing_name AS name, ing_sold_out AS isSoldOut,
-         role_id AS roleId, quantity, unit_id AS unitId,
+  SELECT ingredient_id AS ingredientId, ing_name AS name, ing_sold_out AS isSoldOut,
+         role, quantity, unit,
          is_default AS isDefault, can_remove AS canRemove, sort_no AS sortNo,
          allergens
   FROM vw_menu_ing_json
@@ -35,9 +35,10 @@
 </select>
 
 <select id="findMenuOptions" resultType="com.asak.admin.dto.response.MenuOptPolicyResponse">
-  SELECT policy_id AS policyId, policy_name AS policyName,
-         min_select AS minSelect, max_select AS maxSelect,
-         policy_required AS isRequired, items
+  SELECT option_group_id AS optionGroupId, name,
+         group_type AS groupType, select_type AS selectType,
+         min_select AS minSelect, max_select AS maxSelect, sort_order AS sortOrder,
+         is_required AS isRequired, items
   FROM vw_menu_opt_policy_json
   WHERE menu_id = #{menuId}
 </select>

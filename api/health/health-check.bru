@@ -1,0 +1,32 @@
+meta {
+  name: Health Check
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{baseUrl}}/api/health
+  body: none
+  auth: none
+}
+
+docs {
+  # Health
+  IMPLEMENTATION_PLAN §6 공통 smoke. 현재 유일하게 Controller 매핑됨.
+  응답 code: HEALTH_OK
+}
+
+tests {
+  test("HTTP 200", function() {
+    expect(res.getStatus()).to.equal(200);
+  });
+
+  test("ApiResponse envelope", function() {
+    const body = res.getBody();
+    expect(body.success).to.equal(true);
+    expect(body.status).to.equal(200);
+    expect(body.code).to.equal("HEALTH_OK");
+    expect(body).to.have.property("message");
+    expect(body.data).to.have.property("service", "ASAK-backend");
+  });
+}

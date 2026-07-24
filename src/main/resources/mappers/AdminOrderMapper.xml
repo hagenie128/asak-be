@@ -20,8 +20,8 @@
 </select>
 
 <select id="findOrderItems" resultType="com.asak.admin.dto.response.OrderItemResponse">
-  SELECT order_item_id AS itemId, menu_id AS menuId, menu_name AS menuName, quantity,
-         options, exclusions
+  SELECT menu_id AS menuId, menu_name AS menuName, quantity, unit_price AS unitPrice,
+         option_items AS optionItems, excluded_ingredients AS excludedIngredients
   FROM vw_order_item_full
   WHERE order_id = #{orderId}
 </select>

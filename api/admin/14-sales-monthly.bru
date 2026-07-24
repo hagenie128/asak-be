@@ -1,11 +1,17 @@
 meta {
-  name: SPEC - Admin Monthly Sales
+  name: Admin Monthly Sales
   type: http
-  seq: 14
+  seq: 15
 }
 
 get {
   url: {{baseUrl}}/api/admin/sales/monthly?year={{salesYear}}
   body: none
   auth: none
+}
+
+docs {
+  # API-019
+  GET /api/admin/sales/monthly
+  DB: vw_sales_daily 월 단위
 }

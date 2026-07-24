@@ -308,9 +308,9 @@
   <header class="hero">
     <span class="eyebrow">ASAK · asak_db 뷰 정리</span>
     <h1>DB 뷰 레퍼런스</h1>
-    <p class="subtitle">nam3324.synology.me / asak_db에 배포된 뷰 21개와, 화면별로 어떤 뷰를 어떤 순서로 조회하는지 흐름을 정리했습니다. Admin·Kiosk 둘 다 포함. 매퍼 XML에서 그대로 SELECT 대상으로 쓰면 됩니다.</p>
+    <p class="subtitle">nam3324.synology.me / asak_db에 배포된 뷰 22개와, 화면별로 어떤 뷰를 어떤 순서로 조회하는지 흐름을 정리했습니다. Admin·Kiosk 둘 다 포함. 매퍼 XML에서 그대로 SELECT 대상으로 쓰면 됩니다.</p>
     <div class="stat-row">
-      <div class="stat"><b>21</b><span>배포된 뷰</span></div>
+      <div class="stat"><b>22</b><span>배포된 뷰</span></div>
       <div class="stat"><b>8</b><span>화면 흐름</span></div>
       <div class="stat"><b>0</b><span>계획 중</span></div>
     </div>
@@ -338,6 +338,7 @@
       <tr><td><a href="#vw_order_item_base_dressing">vw_order_item_base_dressing</a></td><td class="idx-purpose">품목별 베이스/드레싱 pivot</td><td class="idx-screen">Live 주문 보드</td></tr>
       <tr><td><a href="#vw_order_item_tag">vw_order_item_tag</a></td><td class="idx-purpose">옵션+제외재료를 tone 태그로 통합</td><td class="idx-screen">Live 주문 보드</td></tr>
       <tr><td><a href="#vw_soldout_catalog">vw_soldout_catalog</a></td><td class="idx-purpose">메뉴/재료/옵션 통합 품절 카탈로그</td><td class="idx-screen">품절 관리</td></tr>
+      <tr><td><a href="#vw_payment_result">vw_payment_result</a></td><td class="idx-purpose">결제 승인 응답 (대기건수 포함)</td><td class="idx-screen">키오스크 결제</td></tr>
       <tr><td><a href="#vw_order_status_summary">vw_order_status_summary</a></td><td class="idx-purpose">일자·유형·상태별 주문 건수</td><td class="idx-screen">대시보드</td></tr>
       <tr><td><a href="#vw_sales_daily">vw_sales_daily</a></td><td class="idx-purpose">일별 매출 집계</td><td class="idx-screen">대시보드, 일별 매출</td></tr>
       <tr><td><a href="#vw_sales_hourly">vw_sales_hourly</a></td><td class="idx-purpose">시간대별 매출 집계</td><td class="idx-screen">일별 매출 상세</td></tr>
@@ -368,18 +369,19 @@
       <p class="flow-note">카테고리별</p>
       <ol class="flow-steps">
         <li><span class="step-text"><span class="mono">category</span> 단순 조회 (탭 목록, 뷰 불필요)</span></li>
-        <li><a class="step-view" href="#vw_menu_list">vw_menu_list</a><span class="step-text"><span class="mono">WHERE cat_id = ?</span> — isSoldOut/hasSoldOutIngredient/isOrderable 포함</span></li>
+        <li><a class="step-view" href="#vw_menu_list">vw_menu_list</a><span class="step-text"><span class="mono">WHERE category_id = ?</span> — isSoldOut/hasSoldOutIngredient/isOrderable 포함</span></li>
       </ol>
       <p class="flow-result"><span class="mono">vw_menu_availability</span>의 원인별 플래그를 SQL에서 조합해 최종 불리언 3개로 미리 만들어둠 — 프론트/자바 계산 없음.</p>
     </div>
 
     <div class="flow-card">
-      <h3>키오스크 주문완료</h3>
-      <p class="flow-note">대기 순번 표시</p>
+      <h3>키오스크 결제·주문완료</h3>
+      <p class="flow-note">결제 승인 후 대기 순번 표시</p>
       <ol class="flow-steps">
-        <li><a class="step-view" href="#vw_order_live">vw_order_live</a><span class="step-text"><span class="mono">COUNT(*) WHERE status_code IN ('RECEIVED','PREPARING')</span></span></li>
+        <li><span class="step-text"><span class="mono">pay_method_cfg</span>+<span class="mono">common_code</span> 인라인 — 결제수단 목록 (뷰 아님 · [17])</span></li>
+        <li><a class="step-view" href="#vw_payment_result">vw_payment_result</a><span class="step-text">승인 응답 — approvedAmount/approvedAt/waitingOrderCount</span></li>
       </ol>
-      <p class="flow-result">결제수단/카테고리 조회는 <span class="mono">pay_method_cfg</span>+<span class="mono">common_code</span>, <span class="mono">category</span> 단순 조인이라 별도 뷰 없이 그대로 사용.</p>
+      <p class="flow-result"><span class="mono">waitingOrderCount</span>는 결제 시점이 아니라 조회 시점 <span class="mono">RECEIVED/PREPARING</span> 건수. 레거시 <span class="mono">amount</span>/<span class="mono">paidAt</span> 대신 정본 필드명 사용.</p>
     </div>
 
     <div class="flow-card">
@@ -464,11 +466,12 @@
       <span class="view-name">vw_menu_ing_json</span>
       <span class="tag tag-live">LIVE · json</span>
     </div>
-    <p class="view-purpose">재료당 1행 보장 (fan-out 없음). 알레르기는 이미 JSON 배열로 묶여있음.</p>
+    <p class="view-purpose">재료당 1행 보장 (fan-out 없음). <span class="mono">ingredientId</span>/<span class="mono">role</span>(문자코드)/<span class="mono">unit</span>(표시코드)로 프론트 필드명에 맞춤. 알레르기는 이미 JSON 배열.</p>
     <p class="view-used-by">사용: <b>메뉴 상세</b> — <span class="mono">MenuIngResponse.allergens</span>에 <span class="mono">@JsonRawValue</span>로 통과</p>
     <pre class="sql"><span class="kw">SELECT</span>
-    mi.menu_id, mi.ing_id, i.name <span class="kw">AS</span> ing_name, i.sold_out <span class="kw">AS</span> ing_sold_out,
-    mi.role_id, mi.quantity, mi.unit_id, mi.is_default, mi.can_remove, mi.sort_no,
+    mi.menu_id, i.id <span class="kw">AS</span> ingredient_id, i.name <span class="kw">AS</span> ing_name, i.sold_out <span class="kw">AS</span> ing_sold_out,
+    <span class="kw">LOWER</span>(rc.code) <span class="kw">AS</span> role,
+    mi.quantity, ut.code <span class="kw">AS</span> unit, mi.is_default, mi.can_remove, mi.sort_no,
     <span class="kw">COALESCE</span>((
         <span class="kw">SELECT JSON_ARRAYAGG</span>(<span class="kw">JSON_OBJECT</span>(<span class="str">'id'</span>, a.id, <span class="str">'name'</span>, a.name))
         <span class="kw">FROM</span> ing_allergen ia
@@ -477,6 +480,8 @@
     ), <span class="kw">JSON_ARRAY</span>()) <span class="kw">AS</span> allergens
 <span class="kw">FROM</span> menu_ing mi
 <span class="kw">JOIN</span> ing i <span class="kw">ON</span> i.id = mi.ing_id
+<span class="kw">JOIN</span> common_code rc <span class="kw">ON</span> rc.id = mi.role_id
+<span class="kw">LEFT JOIN</span> common_code ut <span class="kw">ON</span> ut.id = mi.unit_id
 <span class="kw">ORDER BY</span> mi.menu_id, mi.sort_no;</pre>
   </div>
 
@@ -510,25 +515,24 @@
       <span class="view-name">vw_menu_opt_policy_json</span>
       <span class="tag tag-live">LIVE · json</span>
     </div>
-    <p class="view-purpose">정책당 1행 보장. 그룹타입(<span class="mono">groupType</span>)·선택타입(<span class="mono">selectType</span>, max_select 기준 SINGLE/MULTI 판정)까지 포함. 옵션항목(override 병합 + 재료 칼로리)은 JSON 배열.</p>
+    <p class="view-purpose">정책당 1행 보장(<span class="mono">optionGroupId</span>/<span class="mono">name</span>). 그룹타입(<span class="mono">groupType</span>)·선택타입(<span class="mono">selectType</span>, max_select 기준 SINGLE/MULTI 판정) 포함. 옵션항목(override 병합 + 재료 칼로리)은 JSON 배열, Kiosk <span class="mono">optionGroups[].items[]</span> 필드명에 맞춤.</p>
     <p class="view-used-by">사용: <b>메뉴 상세</b> (Admin·Kiosk) — <span class="mono">items</span>에 <span class="mono">@JsonRawValue</span>로 통과</p>
     <pre class="sql"><span class="kw">SELECT</span>
-    mop.menu_id, op.id <span class="kw">AS</span> policy_id, op.name <span class="kw">AS</span> policy_name,
-    gt.code <span class="kw">AS</span> group_type_code,
+    mop.menu_id, op.id <span class="kw">AS</span> option_group_id, op.name,
+    gt.code <span class="kw">AS</span> group_type,
     <span class="kw">CASE WHEN</span> op.max_select <= 1 <span class="kw">THEN</span> <span class="str">'SINGLE'</span> <span class="kw">ELSE</span> <span class="str">'MULTI'</span> <span class="kw">END AS</span> select_type,
-    op.min_select, op.max_select, mop.sort_no,
+    op.min_select, op.max_select, mop.sort_no <span class="kw">AS</span> sort_order,
     (mop.required = 1 <span class="kw">OR</span> op.required = 1) <span class="kw">AS</span> is_required,
     <span class="kw">JSON_ARRAYAGG</span>(
         <span class="kw">JSON_OBJECT</span>(
-            <span class="str">'optId'</span>, oi.id, <span class="str">'ingId'</span>, oi.ing_id, <span class="str">'name'</span>, oi.name,
-            <span class="str">'addPrice'</span>, oi.add_price, <span class="str">'listPrice'</span>, oi.list_price,
-            <span class="str">'amount'</span>, oi.amount, <span class="str">'unitId'</span>, oi.unit_id,
+            <span class="str">'optionItemId'</span>, oi.id, <span class="str">'ingredientId'</span>, oi.ing_id, <span class="str">'name'</span>, oi.name,
+            <span class="str">'extraPrice'</span>, oi.add_price, <span class="str">'originalPrice'</span>, oi.list_price,
+            <span class="str">'servingAmount'</span>, oi.amount, <span class="str">'servingUnit'</span>, ut.code,
             <span class="str">'iconUrl'</span>, oi.icon_url, <span class="str">'colorHex'</span>, oi.color_hex,
             <span class="str">'isSoldOut'</span>, oi.sold_out,
             <span class="str">'extraKcal'</span>, ing.kcal, <span class="str">'proteinG'</span>, ing.protein_g,
             <span class="str">'isRecommended'</span>, <span class="kw">COALESCE</span>(mo.recommended, opi.recommended),
             <span class="str">'isDefault'</span>, <span class="kw">COALESCE</span>(mo.is_default, opi.is_default),
-            <span class="str">'sortNo'</span>, <span class="kw">COALESCE</span>(mo.sort_no, opi.sort_no),
             <span class="str">'isActive'</span>, <span class="kw">COALESCE</span>(mo.active, opi.active)
         )
     ) <span class="kw">AS</span> items
@@ -539,11 +543,13 @@
 <span class="kw">JOIN</span> opt_policy_item opi <span class="kw">ON</span> opi.policy_id = op.id
 <span class="kw">JOIN</span> opt_item oi <span class="kw">ON</span> oi.id = opi.opt_item_id
 <span class="kw">LEFT JOIN</span> ing <span class="kw">ON</span> ing.id = oi.ing_id
+<span class="kw">LEFT JOIN</span> common_code ut <span class="kw">ON</span> ut.id = oi.unit_id
 <span class="kw">LEFT JOIN</span> menu_opt_override mo
     <span class="kw">ON</span> mo.menu_id = mop.menu_id <span class="kw">AND</span> mo.opt_item_id = opi.opt_item_id
 <span class="kw">GROUP BY</span> mop.menu_id, op.id, op.name, gt.code, op.max_select, op.min_select,
          mop.sort_no, mop.required, op.required
 <span class="kw">ORDER BY</span> mop.menu_id, mop.sort_no;</pre>
+    <p class="view-used-by" style="margin-top:10px">참고: 메뉴 레벨 <span class="mono">allergens</span>/<span class="mono">allergyText</span>(재료+옵션 통합, 중복제거)는 이 뷰가 아니라 메뉴 상세 헤더 조회(menu+category 인라인 SQL)에 서브쿼리로 붙습니다.</p>
   </div>
 
   <div class="view-card" id="vw_menu_list">
@@ -551,10 +557,10 @@
       <span class="view-name">vw_menu_list</span>
       <span class="tag tag-live">LIVE</span>
     </div>
-    <p class="view-purpose"><span class="mono">vw_menu_availability</span>의 원인별 플래그를 조합해 <span class="mono">isSoldOut</span>/<span class="mono">hasSoldOutIngredient</span>/<span class="mono">isOrderable</span> 3개 최종값으로 미리 계산.</p>
-    <p class="view-used-by">사용: <b>키오스크 메뉴 목록</b> — <span class="mono">WHERE cat_id = ?</span></p>
+    <p class="view-purpose"><span class="mono">vw_menu_availability</span>의 원인별 플래그를 조합해 <span class="mono">isSoldOut</span>/<span class="mono">hasSoldOutIngredient</span>/<span class="mono">isOrderable</span> 3개 최종값으로 미리 계산. <span class="mono">categoryId</span>로 필드명 맞춤(MENU_API_CONTRACT.md).</p>
+    <p class="view-used-by">사용: <b>키오스크 메뉴 목록</b> — <span class="mono">WHERE category_id = ?</span></p>
     <pre class="sql"><span class="kw">SELECT</span>
-    m.id <span class="kw">AS</span> menu_id, m.cat_id, m.name, m.price, m.image_url,
+    m.id <span class="kw">AS</span> menu_id, m.cat_id <span class="kw">AS</span> category_id, m.name, m.price, m.image_url,
     mn.kcal <span class="kw">AS</span> base_kcal,
     m.sold_out <span class="kw">AS</span> is_sold_out,
     (va.has_core_sold_out <span class="kw">OR</span> va.base_ing_exhausted <span class="kw">OR</span> va.base_opt_exhausted
@@ -705,18 +711,18 @@
       <span class="view-name">vw_order_item_full</span>
       <span class="tag tag-live">LIVE · json</span>
     </div>
-    <p class="view-purpose">품목 + 옵션/제외재료를 <span class="mono">JSON_ARRAYAGG</span>로 묶어 1행에 담음.</p>
-    <p class="view-used-by">사용: <b>주문 관리 상세</b> — <span class="mono">OrderItemResponse.options/exclusions</span>에 <span class="mono">@JsonRawValue</span>로 통과</p>
+    <p class="view-purpose">품목(<span class="mono">unitPrice</span>) + 옵션/제외재료를 <span class="mono">JSON_ARRAYAGG</span>로 묶어 1행에 담음. Admin <span class="mono">OrderDetailPanel.jsx</span> / rest-api-spec.md API-007 실제 필드명에 맞춤. 품목 id 컬럼 없음(계약에 없어서 제거).</p>
+    <p class="view-used-by">사용: <b>주문 관리 상세</b> — <span class="mono">OrderItemResponse.optionItems/excludedIngredients</span>에 <span class="mono">@JsonRawValue</span>로 통과</p>
     <pre class="sql"><span class="kw">SELECT</span>
-    oi.order_id, oi.id <span class="kw">AS</span> order_item_id, oi.menu_id, m.name <span class="kw">AS</span> menu_name,
-    oi.quantity, oi.price,
-    (<span class="kw">SELECT JSON_ARRAYAGG</span>(<span class="kw">JSON_OBJECT</span>(<span class="str">'optItemId'</span>, oio.opt_item_id, <span class="str">'name'</span>, oit.name,
+    oi.order_id, oi.menu_id, m.name <span class="kw">AS</span> menu_name,
+    oi.quantity, oi.price <span class="kw">AS</span> unit_price,
+    (<span class="kw">SELECT JSON_ARRAYAGG</span>(<span class="kw">JSON_OBJECT</span>(<span class="str">'optionItemId'</span>, oio.opt_item_id, <span class="str">'name'</span>, oit.name,
                                        <span class="str">'quantity'</span>, oio.quantity, <span class="str">'price'</span>, oio.price))
      <span class="kw">FROM</span> order_item_option oio <span class="kw">JOIN</span> opt_item oit <span class="kw">ON</span> oit.id = oio.opt_item_id
-     <span class="kw">WHERE</span> oio.order_item_id = oi.id) <span class="kw">AS</span> options,
-    (<span class="kw">SELECT JSON_ARRAYAGG</span>(<span class="kw">JSON_OBJECT</span>(<span class="str">'ingId'</span>, ie.ing_id, <span class="str">'name'</span>, i.name))
+     <span class="kw">WHERE</span> oio.order_item_id = oi.id) <span class="kw">AS</span> option_items,
+    (<span class="kw">SELECT JSON_ARRAYAGG</span>(<span class="kw">JSON_OBJECT</span>(<span class="str">'ingredientId'</span>, ie.ing_id, <span class="str">'name'</span>, i.name))
      <span class="kw">FROM</span> item_exclusion ie <span class="kw">JOIN</span> ing i <span class="kw">ON</span> i.id = ie.ing_id
-     <span class="kw">WHERE</span> ie.order_item_id = oi.id) <span class="kw">AS</span> exclusions
+     <span class="kw">WHERE</span> ie.order_item_id = oi.id) <span class="kw">AS</span> excluded_ingredients
 <span class="kw">FROM</span> order_item oi
 <span class="kw">JOIN</span> menu m <span class="kw">ON</span> m.id = oi.menu_id
 <span class="kw">ORDER BY</span> oi.order_id, oi.id;</pre>
@@ -855,6 +861,87 @@
 <span class="kw">JOIN</span> opt_group og <span class="kw">ON</span> og.id = oi.opt_group_id;</pre>
   </div>
 
+  <div class="view-card">
+    <div class="view-card-head">
+      <span class="view-name mono">영향 메뉴 개수 미리보기</span>
+      <span class="tag tag-plan">뷰 아님 · 파라미터 쿼리</span>
+    </div>
+    <p class="view-purpose">저장 전 토글 미리보기용. 실제 <span class="mono">sold_out</span> UPDATE 없이 가정해서 계산. 재료/옵션 탭 각각 별도 쿼리 — MENU 탭은 자기 자신만 영향받아 불필요.</p>
+    <pre class="sql"><span class="cm">-- 재료 탭: #{ingredientId}를 품절로 바꿨을 때 막히는 메뉴 수</span>
+<span class="kw">SELECT COUNT</span>(<span class="kw">DISTINCT</span> m.id) <span class="kw">AS</span> affected_menu_count
+<span class="kw">FROM</span> menu m
+<span class="kw">JOIN</span> menu_ing mi <span class="kw">ON</span> mi.menu_id = m.id
+<span class="kw">JOIN</span> common_code rc <span class="kw">ON</span> rc.id = mi.role_id
+<span class="kw">WHERE</span> mi.ing_id = #{ingredientId}
+  <span class="kw">AND</span> (
+      rc.code = <span class="str">'CORE'</span>
+      <span class="kw">OR</span> (rc.code = <span class="str">'DEFAULT'</span> <span class="kw">AND</span> mi.can_remove = 0)
+      <span class="kw">OR</span> (
+          rc.code = <span class="str">'BASE'</span>
+          <span class="kw">AND NOT EXISTS</span> (
+              <span class="kw">SELECT</span> 1 <span class="kw">FROM</span> menu_ing mi2
+              <span class="kw">JOIN</span> ing i2 <span class="kw">ON</span> i2.id = mi2.ing_id
+              <span class="kw">WHERE</span> mi2.menu_id = mi.menu_id <span class="kw">AND</span> mi2.role_id = mi.role_id
+                <span class="kw">AND</span> mi2.ing_id <> #{ingredientId} <span class="kw">AND</span> i2.sold_out = 0
+          )
+      )
+  );
+
+<span class="cm">-- 옵션 탭: #{optionItemId}를 품절로 바꿨을 때 필수그룹이 전멸하는 메뉴 수</span>
+<span class="kw">SELECT COUNT</span>(<span class="kw">DISTINCT</span> mop.menu_id) <span class="kw">AS</span> affected_menu_count
+<span class="kw">FROM</span> opt_policy_item opi
+<span class="kw">JOIN</span> menu_opt_policy mop <span class="kw">ON</span> mop.policy_id = opi.policy_id
+<span class="kw">JOIN</span> opt_policy op <span class="kw">ON</span> op.id = opi.policy_id
+<span class="kw">WHERE</span> opi.opt_item_id = #{optionItemId}
+  <span class="kw">AND</span> (mop.required = 1 <span class="kw">OR</span> op.required = 1)
+  <span class="kw">AND</span> (
+      <span class="kw">SELECT COUNT</span>(*) <span class="kw">FROM</span> opt_policy_item opi2
+      <span class="kw">JOIN</span> opt_item oi2 <span class="kw">ON</span> oi2.id = opi2.opt_item_id
+      <span class="kw">LEFT JOIN</span> menu_opt_override mo2
+             <span class="kw">ON</span> mo2.menu_id = mop.menu_id <span class="kw">AND</span> mo2.opt_item_id = opi2.opt_item_id
+      <span class="kw">WHERE</span> opi2.policy_id = opi.policy_id
+        <span class="kw">AND</span> <span class="kw">COALESCE</span>(mo2.active, opi2.active) = 1
+        <span class="kw">AND</span> opi2.opt_item_id <> #{optionItemId} <span class="kw">AND</span> oi2.sold_out = 0
+  ) < op.min_select;</pre>
+  </div>
+
+  <!-- ================= PAYMENT ================= -->
+  <h2 class="section-title">결제</h2>
+
+  <div class="view-card" id="vw_payment_result">
+    <div class="view-card-head">
+      <span class="view-name">vw_payment_result</span>
+      <span class="tag tag-live">LIVE</span>
+    </div>
+    <p class="view-purpose">결제 승인 응답용(<span class="mono">PAYMENT_API_CONTRACT.md</span>). <span class="mono">waitingOrderCount</span>는 상관 서브쿼리라 조회 시점마다 재계산 — 결제 시점이 아니라 "지금" 대기 건수.</p>
+    <p class="view-used-by">사용: <b>키오스크 결제 승인</b></p>
+    <pre class="sql"><span class="kw">SELECT</span>
+    p.id <span class="kw">AS</span> payment_id, p.order_id, o.order_no,
+    ps.code <span class="kw">AS</span> payment_status,
+    p.amount <span class="kw">AS</span> approved_amount, p.paid_at <span class="kw">AS</span> approved_at,
+    (
+        <span class="kw">SELECT COUNT</span>(*) <span class="kw">FROM</span> orders o2
+        <span class="kw">JOIN</span> common_code st2 <span class="kw">ON</span> st2.id = o2.status_id
+        <span class="kw">WHERE</span> st2.code <span class="kw">IN</span> (<span class="str">'RECEIVED'</span>, <span class="str">'PREPARING'</span>)
+    ) <span class="kw">AS</span> waiting_order_count
+<span class="kw">FROM</span> payment p
+<span class="kw">JOIN</span> orders o <span class="kw">ON</span> o.id = p.order_id
+<span class="kw">JOIN</span> common_code ps <span class="kw">ON</span> ps.id = p.status_id;</pre>
+  </div>
+
+  <div class="view-card">
+    <div class="view-card-head">
+      <span class="view-name mono">결제수단 목록</span>
+      <span class="tag tag-plan">뷰 아님 · 단순 조인</span>
+    </div>
+    <p class="view-purpose"><span class="mono">methodCode</span>/<span class="mono">isEnabled</span> 계약명(비활성이어도 화면엔 표시, 선택만 막음 — <span class="mono">active</span>로 필터링하지 않음).</p>
+    <pre class="sql"><span class="kw">SELECT</span> c.code <span class="kw">AS</span> method_code, pm.name <span class="kw">AS</span> method_name,
+       pm.active <span class="kw">AS</span> is_enabled, pm.sort_no <span class="kw">AS</span> sort_order
+<span class="kw">FROM</span> pay_method_cfg pm
+<span class="kw">JOIN</span> common_code c <span class="kw">ON</span> c.id = pm.method_id
+<span class="kw">ORDER BY</span> pm.sort_no;</pre>
+  </div>
+
   <!-- ================= SALES ================= -->
   <h2 class="section-title">매출 / 대시보드</h2>
   <p class="group-intro"><span class="mono">vw_order_status_summary</span> 외 4개(<span class="mono">vw_sales_*</span>, <span class="mono">vw_top_menu_*</span>)는 원래 있던 뷰. 취소/환불 주문은 <span class="mono">gross</span>에서 빼서 <span class="mono">net_sales_amount</span>를 계산합니다.</p>
@@ -971,7 +1058,7 @@
   </div>
 
   <footer>
-    ASAK · asak_db · 접속 정보는 별도 채널로 공유하세요 (이 문서에는 포함 안 함) · 2026-07-24 기준 · "자바 백단 무가공, SQL로 가공" 원칙 반영
+    ASAK · asak_db · 접속 정보는 별도 채널로 공유하세요 (이 문서에는 포함 안 함) · 2026-07-24 기준 · "자바 백단 무가공, SQL로 가공" 원칙 반영 · 필드명은 <span class="mono">rest-api-spec.md</span> / <span class="mono">MENU·ORDER_API_CONTRACT.md</span> / <span class="mono">canonical-contract-decisions</span>와 대조 완료
   </footer>
 
 </div>

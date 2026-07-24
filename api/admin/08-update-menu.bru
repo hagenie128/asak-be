@@ -1,5 +1,5 @@
 meta {
-  name: SPEC - Admin Update Menu
+  name: Admin Update Menu
   type: http
   seq: 8
 }
@@ -20,6 +20,11 @@ body:json {
     "name": "Bruno Sample Menu",
     "price": 8900,
     "imageUrl": "/assets/menu/sample.png",
-    "description": "Bruno 명세 확인용 메뉴"
+    "description": "Bruno contract sample menu"
   }
+}
+
+docs {
+  # API-013
+  PATCH /api/admin/menus/{menuId}
 }

@@ -1,5 +1,5 @@
 meta {
-  name: SPEC - Kiosk Menu Detail
+  name: Kiosk Menu Detail
   type: http
   seq: 2
 }
@@ -8,4 +8,12 @@ get {
   url: {{baseUrl}}/api/kiosk/menuDetail/{{menuId}}
   body: none
   auth: none
+}
+
+docs {
+  # API-003
+  GET /api/kiosk/menuDetail/{menuId}
+  DB view: vw_menu_ing_json, vw_menu_opt_policy_json
+  헤더 allergens/allergyText는 view.sql [15] 인라인 서브쿼리
+  옵션 items 필드: optionItemId, extraPrice, servingAmount, servingUnit 등
 }

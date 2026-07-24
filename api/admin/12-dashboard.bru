@@ -1,11 +1,17 @@
 meta {
-  name: SPEC - Admin Dashboard
+  name: Admin Dashboard
   type: http
-  seq: 12
+  seq: 13
 }
 
 get {
   url: {{baseUrl}}/api/admin/dashboard
   body: none
   auth: none
+}
+
+docs {
+  # API-020
+  GET /api/admin/dashboard
+  DB: vw_order_status_summary, vw_sales_daily, vw_top_menu_daily, vw_menu_availability
 }

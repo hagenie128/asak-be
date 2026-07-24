@@ -1,5 +1,5 @@
 meta {
-  name: SPEC - Admin Order List
+  name: Admin Order List
   type: http
   seq: 2
 }
@@ -8,4 +8,11 @@ get {
   url: {{baseUrl}}/api/admin/orders
   body: none
   auth: none
+}
+
+docs {
+  # API-007
+  GET /api/admin/orders
+  DB view: vw_order_list_summary
+  응답 금액 필드: totalAmount
 }

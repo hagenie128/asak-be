@@ -1,5 +1,5 @@
 meta {
-  name: SPEC - Admin Update Sold Out
+  name: Admin Update Sold Out
   type: http
   seq: 9
 }
@@ -24,4 +24,12 @@ body:json {
       }
     ]
   }
+}
+
+docs {
+  # API-009
+  PATCH /api/admin/soldOut
+  targetType: MENU | INGREDIENT | OPTION_ITEM
+  DB catalog: vw_soldout_catalog
+  저장 전 영향 메뉴 수 미리보기: view.sql [18] 인라인 (뷰 아님)
 }
