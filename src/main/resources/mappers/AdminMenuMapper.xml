@@ -2,5 +2,44 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.asak.admin.mapper.AdminMenuMapper">
 
+ <resultMap id="menuDetailMap" type="com.asak.admin.dto.response.MenuDetailResponse">
+  <id column="menu_id" property="menuId"/>
+  <result column="cat_id" property="catId"/>
+  <result column="cat_name" property="catName"/>
+  <result column="name" property="name"/>
+  <result column="price" property="price"/>
+  <result column="image_url" property="imageUrl"/>
+  <result column="description" property="description"/>
+  <result column="sold_out" property="isSoldOut"/>
+  <collection property="ingredients" ofType="com.asak.admin.dto.response.MenuIngResponse"
+              column="menu_id" select="findMenuIngredients"/>
+  <collection property="optionPolicies" ofType="com.asak.admin.dto.response.MenuOptPolicyResponse"
+              column="menu_id" select="findMenuOptions"/>
+</resultMap>
+
+<select id="getMenuDetail" resultMap="menuDetailMap">
+  SELECT m.id AS menu_id, m.cat_id, c.name AS cat_name,
+         m.name, m.price, m.image_url, m.description, m.sold_out
+  FROM menu m
+  JOIN category c ON c.id = m.cat_id
+  WHERE m.id = #{menuId}
+</select>
+
+<select id="findMenuIngredients" resultType="com.asak.admin.dto.response.MenuIngResponse">
+  SELECT ing_id AS ingId, ing_name AS name, ing_sold_out AS isSoldOut,
+         role_id AS roleId, quantity, unit_id AS unitId,
+         is_default AS isDefault, can_remove AS canRemove, sort_no AS sortNo,
+         allergens
+  FROM vw_menu_ing_json
+  WHERE menu_id = #{menuId}
+</select>
+
+<select id="findMenuOptions" resultType="com.asak.admin.dto.response.MenuOptPolicyResponse">
+  SELECT policy_id AS policyId, policy_name AS policyName,
+         min_select AS minSelect, max_select AS maxSelect,
+         policy_required AS isRequired, items
+  FROM vw_menu_opt_policy_json
+  WHERE menu_id = #{menuId}
+</select>
 
 </mapper>
