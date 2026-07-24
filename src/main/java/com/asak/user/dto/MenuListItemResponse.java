@@ -18,15 +18,15 @@ import lombok.Setter;
 //   }
 // }
 
-@Getter
-@Setter
-@NoArgsConstructor
-public class MenuListItemResponse {
+// @Getter
+// @Setter
+// @NoArgsConstructor
+// public class MenuListItemResponse {
 
-    private Long menuId;
-    private 
-
-
+//     private Long menuId;
+//     private 
 
 
-}
+
+
+// }
