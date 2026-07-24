@@ -11,13 +11,12 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class ActiveOrderResponse {
-
+public class OrderDetailResponse {
   private Long orderId;
   private String orderNo;
   private String orderType;
   private String orderStatus;
   private int totalAmount;
   private LocalDateTime createdAt;
-  private List<ActiveOrderItemResponse> items;
+  private List<OrderItemResponse> items;
 }
