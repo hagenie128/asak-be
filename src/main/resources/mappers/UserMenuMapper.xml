@@ -2,5 +2,16 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.asak.user.mapper.UserMenuMapper">
 
+    <!-- 카테고리 조회 -->
+    <select id="selectCategory" resultType="com.asak.user.dto.CategoryResponse">
+        select 
+            id as categoryId,
+            name,
+            sort_no as sortOrder,
+            active as isActive
+        from category
+        where active = true
+        order by sort_no asc
+    </select>
 
 </mapper>

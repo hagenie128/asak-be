@@ -1,3 +1,9 @@
 package com.asak.user.mapper;
 
-public interface UserMenuMapper {}
+import java.util.List;
+
+import com.asak.user.dto.CategoryResponse;
+
+public interface UserMenuMapper {
+
+    List<CategoryResponse> selectCategory();}
