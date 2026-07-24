@@ -59,4 +59,14 @@
   <include refid="orderListWhere"/>
 </select>
 
+<select id="getActiveOrders" resultType="com.asak.admin.dto.response.OrderListResponse">
+  SELECT order_id AS orderId, order_no AS orderNo, order_type_code AS orderType,
+         status_code AS orderStatus, payment_status_code AS paymentStatus,
+         total_price AS totalAmount, created_at AS createdAt,
+         item_count AS itemCount, menu_summary AS menuSummary
+  FROM vw_order_list_summary
+  WHERE status_code IN ('RECEIVED', 'PREPARING')
+  ORDER BY created_at
+</select>
+
 </mapper>

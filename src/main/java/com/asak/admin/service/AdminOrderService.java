@@ -23,6 +23,12 @@ public class AdminOrderService {
     return adminOrderMapper.getLiveOrders();
   }
 
+  public Map<String, Object> getActiveOrders() {
+    Map<String, Object> response = new HashMap<>();
+    response.put("data", adminOrderMapper.getActiveOrders());
+    return response;
+  }
+
   public Map<String, Object> getOrderList() {
     OrderListFilter mapperFilter = OrderListFilter.builder()
         .offset(0)
@@ -30,7 +36,13 @@ public class AdminOrderService {
         .build();
 
     Map<String, Object> response = new HashMap<>();
-    response.put("content", adminOrderMapper.getOrderList(mapperFilter));
+    response.put("data", adminOrderMapper.getOrderList(mapperFilter));
+    return response;
+  }
+
+  public Map<String, Object> getOrderDetail(Long orderId) {
+    Map<String, Object> response = new HashMap<>();
+    response.put("data", adminOrderMapper.getOrderDetail(orderId));
     return response;
   }
 }
