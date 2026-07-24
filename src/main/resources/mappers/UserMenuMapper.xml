@@ -3,7 +3,7 @@
 <mapper namespace="com.asak.user.mapper.UserMenuMapper">
 
     <!-- 카테고리 조회 -->
-    <select id="selectCategory" resultType="com.asak.user.dto.CategoryResponse">
+    <select id="selectCategory" resultType="category">
         select 
             id as categoryId,
             name,
