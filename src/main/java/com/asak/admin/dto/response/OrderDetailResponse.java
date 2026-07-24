@@ -16,6 +16,8 @@ public class OrderDetailResponse {
   private String orderNo;
   private String orderType;
   private String orderStatus;
+  private String paymentStatus;
+  private String paymentMethod;
   private int totalAmount;
   private LocalDateTime createdAt;
   private List<OrderItemResponse> items;

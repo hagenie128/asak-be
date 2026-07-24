@@ -2,16 +2,15 @@ package com.asak.admin.controller;
 
 import java.util.Map;
 
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.servlet.ModelAndView;
+import org.springframework.web.bind.annotation.RestController;
 
 import com.asak.admin.service.AdminOrderService;
 import com.asak.common.response.ApiResponse;
 
-@Controller
-@RequestMapping("/admin/orders")
+@RestController
+@RequestMapping("api/admin/orders")
 public class AdminOrderController {
 
   private final AdminOrderService adminOrderService;
@@ -30,12 +29,21 @@ public class AdminOrderController {
   // Live 보드용 DTO는 화면 전용 menus[], 경과시간 등으로 조립할 수 있다. 주문 관리 목록/상세의 items[],
   // optionItems[]와 억지로 같은 DTO로 만들지 않는다.
 
-  @GetMapping("/")
-  public ApiResponse<Map<String, String>> getLiveOrders() {
+  @GetMapping
+  public ApiResponse<Map<String, Object>> getOrders() {
     return ApiResponse.success(
-        "HEALTH_OK",
-        "서버가 정상입니다.",
-        Map.of("service", "ASAK-backend"));
+        "ADMIN_ORDER_LIST_SUCCESS",
+        "관리자 주문 목록 조회 성공",
+        adminOrderService.getOrderList());
   }
+
+  // {"success": true, "status": 200, "code": "ADMIN_ORDER_LIST_SUCCESS",
+  // "message": "관리자 주문 목록 조회 성공", "data": {"content": [{"orderId": 1, "orderNo":
+  // "ASAK-20260703-001", "orderType": "TAKE_OUT", "totalPrice": 8900,
+  // "orderStatus": "RECEIVED", "paymentStatus": "PAID", "createdAt":
+  // "2026-07-03T13:00:00", "items": [{"menuId": 364, "menuName": "스파이시 쉬림프 샌드위치",
+  // "quantity": 1, "unitPrice": 8900, "optionItems": [{"optionItemId": 269,
+  // "name": "크리미칠리", "quantity": 1}], "excludedIngredients": [{"ingredientId":
+  // 169, "name": "양파"}]}]}], "totalElements": 1}}
 
 }

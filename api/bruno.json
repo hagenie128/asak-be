@@ -2,10 +2,7 @@
   "version": "1",
   "name": "ASAK API Contract",
   "type": "collection",
-  "ignore": [
-    "node_modules",
-    ".git"
-  ],
+  "ignore": ["node_modules", ".git"],
   "size": 0.009961128234863281,
   "filesCount": 30,
   "presets": {

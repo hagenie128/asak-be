@@ -18,6 +18,7 @@ public enum ErrorCode {
       "INVALID_ORDER_STATUS_TRANSITION", HttpStatus.CONFLICT, "주문 상태 전환이 유효하지 않습니다."),
   ORDER_CANCEL_NOT_ALLOWED(
       "ORDER_CANCEL_NOT_ALLOWED", HttpStatus.CONFLICT, "주문을 취소할 수 없는 상태입니다."),
+  INVALID_ORDER_QUERY("INVALID_ORDER_QUERY", HttpStatus.BAD_REQUEST, "잘못된 조회 조건입니다."),
 
   PAYMENT_METHOD_DISABLED(
       "PAYMENT_METHOD_DISABLED", HttpStatus.CONFLICT, "결제 방법이 비활성화되었습니다."),
