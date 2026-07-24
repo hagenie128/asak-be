@@ -20,7 +20,7 @@ import lombok.Setter;
 @Getter
 @Setter
 @NoArgsConstructor
-// @Alias("category")
+@Alias("category")
 public class CategoryResponse {
 
     private Long categoryId;
