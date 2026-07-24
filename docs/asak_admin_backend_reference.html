@@ -1,0 +1,410 @@
+<title>ASAK 어드민 백엔드 레퍼런스</title>
+<style>
+  :root {
+    --bg: #faf9f4; --surface: #f0efe4; --surface-raised: #ffffff; --border: #d9d6c4;
+    --text: #23261f; --text-muted: #6c6f5f; --accent: #4f6b45; --accent-soft: #e2e9d8;
+    --accent-strong: #37502f; --code-bg: #1f241c; --code-text: #e7e9dc; --code-key: #a9c98c;
+    --code-str: #d8b479; --code-type: #8fb3c9; --code-muted: #7d8570;
+    --tag-live-bg: #e2e9d8; --tag-live-text: #3c5a32; --tag-warn-bg: #f0e3cf; --tag-warn-text: #8a5a1f;
+    --shadow: 0 1px 2px rgba(35,38,31,0.06), 0 8px 24px rgba(35,38,31,0.05);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #14170f; --surface: #1b1f16; --surface-raised: #20251a; --border: #33392a;
+      --text: #e7e9dc; --text-muted: #9aa08a; --accent: #8fae7e; --accent-soft: #26301f;
+      --accent-strong: #b6d3a3; --code-bg: #0f120c; --code-text: #dfe3d3; --code-key: #9fc283;
+      --code-str: #d6ac74; --code-type: #8fb3c9; --code-muted: #6f7563;
+      --tag-live-bg: #26301f; --tag-live-text: #a7c993; --tag-warn-bg: #332a1b; --tag-warn-text: #e0b877;
+      --shadow: 0 1px 2px rgba(0,0,0,0.3), 0 12px 28px rgba(0,0,0,0.35);
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #14170f; --surface: #1b1f16; --surface-raised: #20251a; --border: #33392a;
+    --text: #e7e9dc; --text-muted: #9aa08a; --accent: #8fae7e; --accent-soft: #26301f;
+    --accent-strong: #b6d3a3; --code-bg: #0f120c; --code-text: #dfe3d3; --code-key: #9fc283;
+    --code-str: #d6ac74; --code-type: #8fb3c9; --code-muted: #6f7563;
+    --tag-live-bg: #26301f; --tag-live-text: #a7c993; --tag-warn-bg: #332a1b; --tag-warn-text: #e0b877;
+    --shadow: 0 1px 2px rgba(0,0,0,0.3), 0 12px 28px rgba(0,0,0,0.35);
+  }
+  :root[data-theme="light"] {
+    --bg: #faf9f4; --surface: #f0efe4; --surface-raised: #ffffff; --border: #d9d6c4;
+    --text: #23261f; --text-muted: #6c6f5f; --accent: #4f6b45; --accent-soft: #e2e9d8;
+    --accent-strong: #37502f; --code-bg: #1f241c; --code-text: #e7e9dc; --code-key: #a9c98c;
+    --code-str: #d8b479; --code-type: #8fb3c9; --code-muted: #7d8570;
+    --tag-live-bg: #e2e9d8; --tag-live-text: #3c5a32; --tag-warn-bg: #f0e3cf; --tag-warn-text: #8a5a1f;
+    --shadow: 0 1px 2px rgba(35,38,31,0.06), 0 8px 24px rgba(35,38,31,0.05);
+  }
+
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: var(--bg); color: var(--text);
+    font-family: ui-sans-serif, "Segoe UI", "Noto Sans KR", "Apple SD Gothic Neo", system-ui, sans-serif;
+    line-height: 1.6; font-size: 16px; word-break: keep-all; overflow-wrap: break-word;
+  }
+  .mono { font-family: ui-monospace, "Cascadia Code", "SF Mono", "JetBrains Mono", Consolas, monospace; }
+  .wrap { max-width: 960px; margin: 0 auto; padding: 56px 24px 96px; }
+
+  header.hero { display: flex; flex-direction: column; gap: 10px; padding-bottom: 28px; margin-bottom: 40px; border-bottom: 1px solid var(--border); }
+  .eyebrow { font-family: ui-monospace, monospace; font-size: 12.5px; letter-spacing: 0.09em; text-transform: uppercase; color: var(--accent); }
+  h1 { margin: 0; font-size: clamp(28px, 4vw, 38px); letter-spacing: -0.01em; text-wrap: balance; font-weight: 700; }
+  .subtitle { color: var(--text-muted); font-size: 16px; max-width: 66ch; }
+  .stat-row { display: flex; gap: 22px; margin-top: 6px; font-variant-numeric: tabular-nums; }
+  .stat { display: flex; flex-direction: column; gap: 2px; }
+  .stat b { font-size: 20px; font-family: ui-monospace, monospace; color: var(--accent-strong); }
+  .stat span { font-size: 12px; color: var(--text-muted); }
+
+  h2.section-title {
+    font-size: 13px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-muted);
+    font-family: ui-monospace, monospace; margin: 56px 0 16px; display: flex; align-items: center; gap: 10px;
+  }
+  h2.section-title::after { content: ""; flex: 1; height: 1px; background: var(--border); }
+  .group-intro { color: var(--text-muted); font-size: 14.5px; margin: -6px 0 18px; max-width: 70ch; }
+
+  nav.toc { display: flex; flex-wrap: wrap; gap: 8px 14px; font-size: 13px; }
+  nav.toc a { color: var(--text-muted); text-decoration: none; font-family: ui-monospace, monospace; }
+  nav.toc a:hover { color: var(--accent-strong); text-decoration: underline; }
+
+  .code-card {
+    background: var(--surface-raised); border: 1px solid var(--border); border-radius: 10px;
+    padding: 18px 20px; margin-bottom: 16px; box-shadow: var(--shadow); scroll-margin-top: 20px;
+  }
+  .code-card-head { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; flex-wrap: wrap; margin-bottom: 4px; }
+  .code-name { font-family: ui-monospace, monospace; font-size: 15.5px; font-weight: 600; color: var(--accent-strong); }
+  .tag { font-size: 11px; font-family: ui-monospace, monospace; padding: 2px 8px; border-radius: 100px; white-space: nowrap; }
+  .tag-live { background: var(--tag-live-bg); color: var(--tag-live-text); }
+  .tag-warn { background: var(--tag-warn-bg); color: var(--tag-warn-text); }
+  .code-note { color: var(--text-muted); font-size: 13px; margin: 0 0 12px; }
+  .code-note b { color: var(--text); font-weight: 600; }
+
+  pre.code { margin: 0; background: var(--code-bg); color: var(--code-text); border-radius: 8px; padding: 16px 18px; overflow-x: auto; font-family: ui-monospace, "Cascadia Code", "SF Mono", Consolas, monospace; font-size: 12.8px; line-height: 1.65; }
+  .kw { color: var(--code-key); font-weight: 600; }
+  .str { color: var(--code-str); }
+  .ty { color: var(--code-type); }
+  .cm { color: var(--code-muted); font-style: italic; }
+
+  .hint-box { background: var(--surface); border: 1px solid var(--border); border-left: 3px solid var(--accent); border-radius: 8px; padding: 14px 18px; margin-bottom: 20px; }
+  .hint-box .hint-title { font-family: ui-monospace, monospace; font-size: 11.5px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--accent-strong); margin: 0 0 8px; }
+  .hint-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 6px; font-size: 13.5px; }
+  .hint-list li { padding-left: 14px; position: relative; color: var(--text); }
+  .hint-list li::before { content: "-"; position: absolute; left: 0; color: var(--text-muted); }
+
+  footer { margin-top: 64px; padding-top: 20px; border-top: 1px solid var(--border); color: var(--text-muted); font-size: 13px; }
+
+  @media (max-width: 640px) {
+    .wrap { padding: 36px 16px 72px; }
+    .stat-row { gap: 16px; flex-wrap: wrap; }
+  }
+</style>
+
+<div class="wrap">
+
+  <header class="hero">
+    <span class="eyebrow">ASAK-back · com.asak.admin</span>
+    <h1>어드민 백엔드 구현 레퍼런스</h1>
+    <p class="subtitle">관리자 API의 매퍼·DTO 정리(현재 실제 파일 그대로) + 아직 코드 없는 쓰기 작업 힌트. Controller/Service 전체 코드는 안 씁니다 — 팀이 직접 짜는 몫입니다.</p>
+    <div class="stat-row">
+      <div class="stat"><b>5</b><span>DTO (반영됨)</span></div>
+      <div class="stat"><b>2</b><span>매퍼 (반영됨)</span></div>
+      <div class="stat"><b>5</b><span>쓰기 작업 (힌트만)</span></div>
+    </div>
+    <nav class="toc">
+      <a href="#dto">응답 DTO</a>
+      <a href="#mapper-order">AdminOrderMapper</a>
+      <a href="#mapper-menu">AdminMenuMapper</a>
+      <a href="#write-hints">쓰기 작업 힌트</a>
+    </nav>
+  </header>
+
+  <div class="hint-box">
+    <p class="hint-title">읽기 vs 쓰기</p>
+    <ul class="hint-list">
+      <li><b>DTO·매퍼(아래)는 실제 프로젝트 파일 그대로</b> — 주문 상세·메뉴 상세 조회는 이미 동작하는 상태</li>
+      <li><b>쓰기 작업(맨 아래)은 힌트만</b> — 코드가 아직 하나도 없고, 뭘 조심해야 하는지만 정리</li>
+    </ul>
+  </div>
+
+  <h2 class="section-title" id="dto">응답 DTO</h2>
+  <p class="group-intro"><span class="mono">com.asak.admin.dto.response</span> — 패키지가 <span class="mono">com.asak.user</span>랑 구분해주니 <span class="mono">Admin</span> 접두어는 안 붙입니다. 옵션/제외재료/알레르기/옵션항목은 뷰가 만든 JSON을 <span class="mono">@JsonRawValue</span>로 그대로 통과시킵니다.</p>
+
+  <div class="code-card" id="OrderDetailResponse">
+    <div class="code-card-head"><span class="code-name">OrderDetailResponse</span><span class="tag tag-live">반영됨</span></div>
+    <p class="code-note">사용: <b>주문 관리 상세</b> 헤더</p>
+    <pre class="code"><span class="kw">package</span> com.asak.admin.dto.response;
+
+<span class="kw">import</span> java.time.LocalDateTime;
+<span class="kw">import</span> java.util.List;
+<span class="kw">import</span> lombok.AllArgsConstructor;
+<span class="kw">import</span> lombok.Builder;
+<span class="kw">import</span> lombok.Getter;
+<span class="kw">import</span> lombok.NoArgsConstructor;
+
+<span class="kw">@Getter</span> <span class="kw">@Builder</span> <span class="kw">@NoArgsConstructor</span> <span class="kw">@AllArgsConstructor</span>
+<span class="kw">public class</span> <span class="ty">OrderDetailResponse</span> {
+  <span class="kw">private</span> <span class="ty">Long</span> orderId;
+  <span class="kw">private</span> <span class="ty">String</span> orderNo;
+  <span class="kw">private</span> <span class="ty">String</span> orderType;
+  <span class="kw">private</span> <span class="ty">String</span> orderStatus;
+  <span class="kw">private</span> <span class="kw">int</span> totalAmount;
+  <span class="kw">private</span> <span class="ty">LocalDateTime</span> createdAt;
+  <span class="kw">private</span> <span class="ty">List</span>&lt;<span class="ty">OrderItemResponse</span>&gt; items;
+}</pre>
+  </div>
+
+  <div class="code-card" id="OrderItemResponse">
+    <div class="code-card-head"><span class="code-name">OrderItemResponse</span><span class="tag tag-live">반영됨</span></div>
+    <p class="code-note">품목 id 필드 없음 — <span class="mono">rest-api-spec.md</span> API-007 계약에 없어서 뺐음</p>
+    <pre class="code"><span class="kw">package</span> com.asak.admin.dto.response;
+
+<span class="kw">import</span> com.fasterxml.jackson.annotation.JsonRawValue;
+<span class="kw">import</span> lombok.AllArgsConstructor;
+<span class="kw">import</span> lombok.Builder;
+<span class="kw">import</span> lombok.Getter;
+<span class="kw">import</span> lombok.NoArgsConstructor;
+
+<span class="kw">@Getter</span> <span class="kw">@Builder</span> <span class="kw">@NoArgsConstructor</span> <span class="kw">@AllArgsConstructor</span>
+<span class="kw">public class</span> <span class="ty">OrderItemResponse</span> {
+  <span class="kw">private</span> <span class="ty">Long</span> menuId;
+  <span class="kw">private</span> <span class="ty">String</span> menuName;
+  <span class="kw">private</span> <span class="kw">int</span> quantity;
+  <span class="kw">private</span> <span class="kw">int</span> unitPrice;
+
+  <span class="kw">@JsonRawValue</span>
+  <span class="kw">private</span> <span class="ty">String</span> optionItems;
+  <span class="kw">@JsonRawValue</span>
+  <span class="kw">private</span> <span class="ty">String</span> excludedIngredients;
+}</pre>
+  </div>
+
+  <div class="code-card" id="MenuDetailResponse">
+    <div class="code-card-head"><span class="code-name">MenuDetailResponse</span><span class="tag tag-live">반영됨</span></div>
+    <p class="code-note">사용: <b>메뉴 상세</b> 헤더</p>
+    <pre class="code"><span class="kw">package</span> com.asak.admin.dto.response;
+
+<span class="kw">import</span> java.util.List;
+<span class="kw">import</span> lombok.AllArgsConstructor;
+<span class="kw">import</span> lombok.Builder;
+<span class="kw">import</span> lombok.Getter;
+<span class="kw">import</span> lombok.NoArgsConstructor;
+
+<span class="kw">@Getter</span> <span class="kw">@Builder</span> <span class="kw">@NoArgsConstructor</span> <span class="kw">@AllArgsConstructor</span>
+<span class="kw">public class</span> <span class="ty">MenuDetailResponse</span> {
+  <span class="kw">private</span> <span class="ty">Long</span> menuId;
+  <span class="kw">private</span> <span class="ty">Long</span> categoryId;
+  <span class="kw">private</span> <span class="ty">String</span> categoryName;
+  <span class="kw">private</span> <span class="ty">String</span> name;
+  <span class="kw">private</span> <span class="kw">int</span> price;
+  <span class="kw">private</span> <span class="ty">String</span> imageUrl;
+  <span class="kw">private</span> <span class="ty">String</span> description;
+  <span class="kw">private</span> <span class="kw">boolean</span> isSoldOut;
+  <span class="kw">private</span> <span class="ty">List</span>&lt;<span class="ty">MenuIngResponse</span>&gt; ingredients;
+  <span class="kw">private</span> <span class="ty">List</span>&lt;<span class="ty">MenuOptPolicyResponse</span>&gt; optionPolicies;
+}</pre>
+  </div>
+
+  <div class="code-card" id="MenuIngResponse">
+    <div class="code-card-head"><span class="code-name">MenuIngResponse</span><span class="tag tag-live">반영됨</span></div>
+    <pre class="code"><span class="kw">package</span> com.asak.admin.dto.response;
+
+<span class="kw">import</span> com.fasterxml.jackson.annotation.JsonRawValue;
+<span class="kw">import</span> lombok.AllArgsConstructor;
+<span class="kw">import</span> lombok.Builder;
+<span class="kw">import</span> lombok.Getter;
+<span class="kw">import</span> lombok.NoArgsConstructor;
+
+<span class="kw">@Getter</span> <span class="kw">@Builder</span> <span class="kw">@NoArgsConstructor</span> <span class="kw">@AllArgsConstructor</span>
+<span class="kw">public class</span> <span class="ty">MenuIngResponse</span> {
+  <span class="kw">private</span> <span class="ty">Long</span> ingredientId;
+  <span class="kw">private</span> <span class="ty">String</span> name;
+  <span class="kw">private</span> <span class="kw">boolean</span> isSoldOut;
+  <span class="kw">private</span> <span class="ty">String</span> role;
+  <span class="kw">private</span> <span class="kw">double</span> quantity;
+  <span class="kw">private</span> <span class="ty">String</span> unit;
+  <span class="kw">private</span> <span class="kw">boolean</span> isDefault;
+  <span class="kw">private</span> <span class="kw">boolean</span> canRemove;
+  <span class="kw">private</span> <span class="kw">int</span> sortNo;
+
+  <span class="kw">@JsonRawValue</span>
+  <span class="kw">private</span> <span class="ty">String</span> allergens;
+}</pre>
+  </div>
+
+  <div class="code-card" id="MenuOptPolicyResponse">
+    <div class="code-card-head"><span class="code-name">MenuOptPolicyResponse</span><span class="tag tag-live">반영됨</span></div>
+    <p class="code-note">Kiosk <span class="mono">UserMenuMapper.getMenuOptions</span>도 이 클래스를 그대로 재사용함</p>
+    <pre class="code"><span class="kw">package</span> com.asak.admin.dto.response;
+
+<span class="kw">import</span> com.fasterxml.jackson.annotation.JsonRawValue;
+<span class="kw">import</span> lombok.AllArgsConstructor;
+<span class="kw">import</span> lombok.Builder;
+<span class="kw">import</span> lombok.Getter;
+<span class="kw">import</span> lombok.NoArgsConstructor;
+
+<span class="kw">@Getter</span> <span class="kw">@Builder</span> <span class="kw">@NoArgsConstructor</span> <span class="kw">@AllArgsConstructor</span>
+<span class="kw">public class</span> <span class="ty">MenuOptPolicyResponse</span> {
+  <span class="kw">private</span> <span class="ty">Long</span> optionGroupId;
+  <span class="kw">private</span> <span class="ty">String</span> name;
+  <span class="kw">private</span> <span class="ty">String</span> groupType;
+  <span class="kw">private</span> <span class="ty">String</span> selectType;
+  <span class="kw">private</span> <span class="kw">int</span> minSelect;
+  <span class="kw">private</span> <span class="kw">int</span> maxSelect;
+  <span class="kw">private</span> <span class="kw">int</span> sortOrder;
+  <span class="kw">private</span> <span class="kw">boolean</span> isRequired;
+
+  <span class="kw">@JsonRawValue</span>
+  <span class="kw">private</span> <span class="ty">String</span> items;
+}</pre>
+  </div>
+
+  <h2 class="section-title" id="mapper-order">AdminOrderMapper</h2>
+  <p class="group-intro"><span class="mono">getLiveOrders()</span>는 그대로 둡니다 — 주문 관리 상세용 <span class="mono">OrderDetailResponse</span>와 절대 같은 DTO로 합치지 않는다는 경고 주석이 이미 코드에 있습니다.</p>
+
+  <div class="code-card">
+    <div class="code-card-head"><span class="code-name">AdminOrderMapper.java</span><span class="tag tag-live">반영됨</span></div>
+    <pre class="code"><span class="kw">package</span> com.asak.admin.mapper;
+
+<span class="kw">import</span> java.util.Map;
+<span class="kw">import</span> org.apache.ibatis.annotations.Param;
+<span class="kw">import</span> com.asak.admin.dto.response.OrderDetailResponse;
+
+<span class="kw">public interface</span> <span class="ty">AdminOrderMapper</span> {
+
+  <span class="ty">Map</span>&lt;<span class="ty">String</span>, <span class="ty">Object</span>&gt; getLiveOrders();
+
+  <span class="cm">// 주문 관리 상세 화면 전용. getLiveOrders()의 DTO와는 별개로 유지한다.</span>
+  <span class="ty">OrderDetailResponse</span> getOrderDetail(<span class="kw">@Param</span>(<span class="str">"orderId"</span>) <span class="ty">Long</span> orderId);
+}</pre>
+  </div>
+
+  <div class="code-card">
+    <div class="code-card-head"><span class="code-name">AdminOrderMapper.xml</span><span class="tag tag-live">반영됨</span></div>
+    <pre class="code">&lt;?<span class="kw">xml</span> version=<span class="str">"1.0"</span> encoding=<span class="str">"UTF-8"</span>?&gt;
+&lt;!DOCTYPE mapper PUBLIC <span class="str">"-//mybatis.org//DTD Mapper 3.0//EN"</span> <span class="str">"https://mybatis.org/dtd/mybatis-3-mapper.dtd"</span>&gt;
+&lt;mapper namespace=<span class="str">"com.asak.admin.mapper.AdminOrderMapper"</span>&gt;
+
+&lt;resultMap id=<span class="str">"orderDetailMap"</span> type=<span class="str">"com.asak.admin.dto.response.OrderDetailResponse"</span>&gt;
+  &lt;id column=<span class="str">"order_id"</span> property=<span class="str">"orderId"</span>/&gt;
+  &lt;result column=<span class="str">"order_no"</span> property=<span class="str">"orderNo"</span>/&gt;
+  &lt;result column=<span class="str">"order_type_code"</span> property=<span class="str">"orderType"</span>/&gt;
+  &lt;result column=<span class="str">"status_code"</span> property=<span class="str">"orderStatus"</span>/&gt;
+  &lt;result column=<span class="str">"total_price"</span> property=<span class="str">"totalAmount"</span>/&gt;
+  &lt;result column=<span class="str">"created_at"</span> property=<span class="str">"createdAt"</span>/&gt;
+  &lt;collection property=<span class="str">"items"</span> ofType=<span class="str">"com.asak.admin.dto.response.OrderItemResponse"</span>
+              column=<span class="str">"order_id"</span> select=<span class="str">"findOrderItems"</span>/&gt;
+&lt;/resultMap&gt;
+
+&lt;select id=<span class="str">"getOrderDetail"</span> resultMap=<span class="str">"orderDetailMap"</span>&gt;
+  <span class="kw">SELECT</span> order_id, order_no, order_type_code, status_code, total_price, created_at
+  <span class="kw">FROM</span> vw_order_summary
+  <span class="kw">WHERE</span> order_id = #{orderId}
+&lt;/select&gt;
+
+&lt;select id=<span class="str">"findOrderItems"</span> resultType=<span class="str">"com.asak.admin.dto.response.OrderItemResponse"</span>&gt;
+  <span class="kw">SELECT</span> menu_id <span class="kw">AS</span> menuId, menu_name <span class="kw">AS</span> menuName, quantity, unit_price <span class="kw">AS</span> unitPrice,
+         option_items <span class="kw">AS</span> optionItems, excluded_ingredients <span class="kw">AS</span> excludedIngredients
+  <span class="kw">FROM</span> vw_order_item_full
+  <span class="kw">WHERE</span> order_id = #{orderId}
+&lt;/select&gt;
+
+&lt;/mapper&gt;</pre>
+  </div>
+
+  <h2 class="section-title" id="mapper-menu">AdminMenuMapper</h2>
+
+  <div class="code-card">
+    <div class="code-card-head"><span class="code-name">AdminMenuMapper.xml</span><span class="tag tag-live">반영됨</span></div>
+    <pre class="code">&lt;?<span class="kw">xml</span> version=<span class="str">"1.0"</span> encoding=<span class="str">"UTF-8"</span>?&gt;
+&lt;!DOCTYPE mapper PUBLIC <span class="str">"-//mybatis.org//DTD Mapper 3.0//EN"</span> <span class="str">"https://mybatis.org/dtd/mybatis-3-mapper.dtd"</span>&gt;
+&lt;mapper namespace=<span class="str">"com.asak.admin.mapper.AdminMenuMapper"</span>&gt;
+
+&lt;resultMap id=<span class="str">"menuDetailMap"</span> type=<span class="str">"com.asak.admin.dto.response.MenuDetailResponse"</span>&gt;
+  &lt;id column=<span class="str">"menu_id"</span> property=<span class="str">"menuId"</span>/&gt;
+  &lt;result column=<span class="str">"category_id"</span> property=<span class="str">"categoryId"</span>/&gt;
+  &lt;result column=<span class="str">"category_name"</span> property=<span class="str">"categoryName"</span>/&gt;
+  &lt;result column=<span class="str">"name"</span> property=<span class="str">"name"</span>/&gt;
+  &lt;result column=<span class="str">"price"</span> property=<span class="str">"price"</span>/&gt;
+  &lt;result column=<span class="str">"image_url"</span> property=<span class="str">"imageUrl"</span>/&gt;
+  &lt;result column=<span class="str">"description"</span> property=<span class="str">"description"</span>/&gt;
+  &lt;result column=<span class="str">"sold_out"</span> property=<span class="str">"isSoldOut"</span>/&gt;
+  &lt;collection property=<span class="str">"ingredients"</span> ofType=<span class="str">"com.asak.admin.dto.response.MenuIngResponse"</span>
+              column=<span class="str">"menu_id"</span> select=<span class="str">"findMenuIngredients"</span>/&gt;
+  &lt;collection property=<span class="str">"optionPolicies"</span> ofType=<span class="str">"com.asak.admin.dto.response.MenuOptPolicyResponse"</span>
+              column=<span class="str">"menu_id"</span> select=<span class="str">"findMenuOptions"</span>/&gt;
+&lt;/resultMap&gt;
+
+&lt;select id=<span class="str">"getMenuDetail"</span> resultMap=<span class="str">"menuDetailMap"</span>&gt;
+  <span class="kw">SELECT</span> m.id <span class="kw">AS</span> menu_id, m.cat_id <span class="kw">AS</span> category_id, c.name <span class="kw">AS</span> category_name,
+         m.name, m.price, m.image_url, m.description, m.sold_out
+  <span class="kw">FROM</span> menu m
+  <span class="kw">JOIN</span> category c <span class="kw">ON</span> c.id = m.cat_id
+  <span class="kw">WHERE</span> m.id = #{menuId}
+&lt;/select&gt;
+
+&lt;select id=<span class="str">"findMenuIngredients"</span> resultType=<span class="str">"com.asak.admin.dto.response.MenuIngResponse"</span>&gt;
+  <span class="kw">SELECT</span> ingredient_id <span class="kw">AS</span> ingredientId, ing_name <span class="kw">AS</span> name, ing_sold_out <span class="kw">AS</span> isSoldOut,
+         role, quantity, unit,
+         is_default <span class="kw">AS</span> isDefault, can_remove <span class="kw">AS</span> canRemove, sort_no <span class="kw">AS</span> sortNo,
+         allergens
+  <span class="kw">FROM</span> vw_menu_ing_json
+  <span class="kw">WHERE</span> menu_id = #{menuId}
+&lt;/select&gt;
+
+&lt;select id=<span class="str">"findMenuOptions"</span> resultType=<span class="str">"com.asak.admin.dto.response.MenuOptPolicyResponse"</span>&gt;
+  <span class="kw">SELECT</span> option_group_id <span class="kw">AS</span> optionGroupId, name,
+         group_type <span class="kw">AS</span> groupType, select_type <span class="kw">AS</span> selectType,
+         min_select <span class="kw">AS</span> minSelect, max_select <span class="kw">AS</span> maxSelect, sort_order <span class="kw">AS</span> sortOrder,
+         is_required <span class="kw">AS</span> isRequired, items
+  <span class="kw">FROM</span> vw_menu_opt_policy_json
+  <span class="kw">WHERE</span> menu_id = #{menuId}
+&lt;/select&gt;
+
+&lt;/mapper&gt;</pre>
+  </div>
+
+  <h2 class="section-title" id="write-hints">쓰기 작업 — 힌트만 (코드 없음)</h2>
+  <p class="group-intro">Controller/Service 코드는 안 씁니다. 여기 5개는 전부 아직 매퍼도 없는 상태입니다.</p>
+
+  <div class="hint-box">
+    <p class="hint-title">주문 상태 변경 — PATCH /api/admin/orders/{orderId}/status</p>
+    <ul class="hint-list">
+      <li><span class="mono">RECEIVED→PREPARING→COMPLETED</span> 순서만 허용, 역행/건너뛰기 막아야 함</li>
+      <li>전이 불가 시 <span class="mono">INVALID_ORDER_STATUS_TRANSITION</span> — <span class="mono">ErrorCode</span>에 이미 있음</li>
+    </ul>
+  </div>
+
+  <div class="hint-box">
+    <p class="hint-title">주문 취소 / 환불</p>
+    <ul class="hint-list">
+      <li>결제 전 취소 = <span class="mono">orders.status→CANCELED</span> + <span class="mono">canceled_at</span> 세팅</li>
+      <li>결제 후 환불 = <span class="mono">payment.status→REFUNDED</span> + <span class="mono">refunded_at</span> 세팅</li>
+      <li><b>결제 승인 안 된 주문은 환불 자체가 불가</b> — 취소만 가능. 같은 메서드로 뭉치면 조건 분기가 헷갈리기 쉬우니 처음부터 분리</li>
+    </ul>
+  </div>
+
+  <div class="hint-box">
+    <p class="hint-title">메뉴 생성 / 수정 — POST·PATCH /api/admin/menus</p>
+    <ul class="hint-list">
+      <li>삭제(DELETE)는 계약서에 "지원 안 함" 명시됨 (soft-delete 컬럼 없음) — 만들 필요 없음</li>
+      <li>이미지 업로드 경로는 <span class="mono">application.properties</span>의 <span class="mono">app.file.menu-upload-dir</span> 이미 있음</li>
+    </ul>
+  </div>
+
+  <div class="hint-box">
+    <p class="hint-title">품절 토글 — PATCH /api/admin/soldOut</p>
+    <ul class="hint-list">
+      <li><span class="mono">changes[]</span> 배열로 여러 건 한 번에 받음, <span class="mono">targetType</span>에 따라 <span class="mono">menu.sold_out</span>/<span class="mono">ing.sold_out</span>/<span class="mono">opt_item.sold_out</span> 중 어디를 UPDATE할지 분기</li>
+      <li>"영향 메뉴 개수" 미리보기 쿼리는 이미 있음(<span class="mono">view.sql</span> [18]번) — 실제 UPDATE 후 그 쿼리 재사용하면 <span class="mono">affectedMenuCount</span> 나옴</li>
+    </ul>
+  </div>
+
+  <div class="hint-box">
+    <p class="hint-title">결제수단 설정 — PATCH /api/admin/payment-methods/{methodId}</p>
+    <ul class="hint-list">
+      <li><span class="mono">pay_method_cfg</span> 한 줄 UPDATE라 5개 중 제일 단순함</li>
+    </ul>
+  </div>
+
+  <footer>
+    ASAK-back · com.asak.admin · DB 접속 정보는 포함 안 함 · 2026-07-24 기준 · Kiosk 쪽은 별도 문서(<span class="mono">asak_kiosk_backend_reference.html</span>) 참고
+  </footer>
+
+</div>
