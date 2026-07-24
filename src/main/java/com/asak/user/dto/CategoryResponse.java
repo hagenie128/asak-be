@@ -11,7 +11,7 @@ import lombok.Setter;
 //   "data": [
 //     {
 //       "categoryId": 1,
-//       "name": "Burger",
+//       "categoryName": "Burger",
 //       "sortOrder": 1,
 //       "isActive": true
 //     }
@@ -24,7 +24,7 @@ import lombok.Setter;
 public class CategoryResponse {
 
     private Long categoryId;
-    private String name;
+    private String categoryName;
     private Integer sortOrder;
     private Boolean isActive;
 

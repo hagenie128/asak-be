@@ -6,7 +6,7 @@
     <select id="selectCategory" resultType="category">
         select 
             id as categoryId,
-            name,
+            name as categoryName,
             sort_no as sortOrder,
             active as isActive
         from category
