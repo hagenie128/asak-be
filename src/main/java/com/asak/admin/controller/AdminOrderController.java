@@ -8,9 +8,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.servlet.ModelAndView;
 
 import com.asak.admin.service.AdminOrderService;
+import com.asak.common.response.ApiResponse;
 
 @Controller
-@RequestMapping("/admin/order")
+@RequestMapping("/admin/orders")
 public class AdminOrderController {
 
   private final AdminOrderService adminOrderService;
@@ -29,13 +30,12 @@ public class AdminOrderController {
   // Live 보드용 DTO는 화면 전용 menus[], 경과시간 등으로 조립할 수 있다. 주문 관리 목록/상세의 items[],
   // optionItems[]와 억지로 같은 DTO로 만들지 않는다.
 
-  @GetMapping("path")
-  public ModelAndView getLiveOrders() {
-    ModelAndView view = new ModelAndView("admin/order/live");
-    Map<String, Object> liveOrders = adminOrderService.getLiveOrders();
-    view.addObject("liveOrders", liveOrders);
-
-    return view;
+  @GetMapping("/")
+  public ApiResponse<Map<String, String>> getLiveOrders() {
+    return ApiResponse.success(
+        "HEALTH_OK",
+        "서버가 정상입니다.",
+        Map.of("service", "ASAK-backend"));
   }
 
 }
