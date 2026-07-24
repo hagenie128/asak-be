@@ -1,7 +1,5 @@
 package com.asak.admin.dto.response;
 
-import java.util.List;
-
 import com.fasterxml.jackson.annotation.JsonRawValue;
 
 import lombok.AllArgsConstructor;
