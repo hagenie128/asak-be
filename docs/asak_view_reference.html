@@ -76,6 +76,8 @@
     font-family: ui-sans-serif, "Segoe UI", "Noto Sans KR", "Apple SD Gothic Neo", system-ui, sans-serif;
     line-height: 1.6;
     font-size: 16px;
+    word-break: keep-all;
+    overflow-wrap: break-word;
   }
   .mono {
     font-family: ui-monospace, "Cascadia Code", "SF Mono", "JetBrains Mono", Consolas, monospace;
@@ -191,7 +193,8 @@
   }
   .flow-steps li {
     display: flex;
-    gap: 10px;
+    flex-wrap: wrap;
+    gap: 4px 10px;
     align-items: flex-start;
     font-size: 13.5px;
   }
@@ -224,7 +227,7 @@
     white-space: nowrap;
   }
   .flow-steps a.step-view:hover { text-decoration: underline; }
-  .flow-steps .step-text { color: var(--text); }
+  .flow-steps .step-text { color: var(--text); flex: 1 1 140px; min-width: 140px; }
   .flow-card .flow-result {
     margin: 14px 0 0;
     padding-top: 12px;
@@ -890,10 +893,8 @@
         <span class="kw">THEN</span> o.id <span class="kw">END</span>) <span class="kw">AS</span> canceled_order_count,
     <span class="kw">COALESCE</span>(<span class="kw">SUM</span>(<span class="kw">CASE WHEN</span> p.paid_at <span class="kw">IS NOT NULL THEN</span> p.amount <span class="kw">ELSE</span> 0 <span class="kw">END</span>), 0) <span class="kw">AS</span> gross_sales_amount,
     <span class="kw">COALESCE</span>(<span class="kw">SUM</span>(<span class="kw">CASE WHEN</span> p.paid_at <span class="kw">IS NOT NULL AND</span> (os.code = <span class="str">'CANCELED'</span> <span class="kw">OR</span> ps.code <span class="kw">IN</span> (<span class="str">'CANCELED'</span>,<span class="str">'REFUNDED'</span>))
-        <span class="kw">THEN</span> p.amount <span class="kw">ELSE</span> 0 <span class="kw">END</span>), 0) <span class="kw">AS</span> canceled_amount,
-    <span class="kw">COALESCE</span>(<span class="kw">SUM</span>(<span class="kw">CASE WHEN</span> p.paid_at <span class="kw">IS NOT NULL THEN</span> p.amount <span class="kw">ELSE</span> 0 <span class="kw">END</span>), 0)
-      - <span class="kw">COALESCE</span>(<span class="kw">SUM</span>(<span class="kw">CASE WHEN</span> p.paid_at <span class="kw">IS NOT NULL AND</span> (os.code = <span class="str">'CANCELED'</span> <span class="kw">OR</span> ps.code <span class="kw">IN</span> (<span class="str">'CANCELED'</span>,<span class="str">'REFUNDED'</span>))
-          <span class="kw">THEN</span> p.amount <span class="kw">ELSE</span> 0 <span class="kw">END</span>), 0) <span class="kw">AS</span> net_sales_amount
+        <span class="kw">THEN</span> p.amount <span class="kw">ELSE</span> 0 <span class="kw">END</span>), 0) <span class="kw">AS</span> canceled_amount
+    <span class="cm">-- net_sales_amount = gross_sales_amount - canceled_amount</span>
 <span class="kw">FROM</span> orders o
 <span class="kw">LEFT JOIN</span> payment p <span class="kw">ON</span> p.order_id = o.id
 <span class="kw">LEFT JOIN</span> common_code ps <span class="kw">ON</span> ps.id = p.status_id
@@ -906,22 +907,13 @@
       <span class="view-name">vw_sales_hourly</span>
       <span class="tag tag-live">LIVE · 기존</span>
     </div>
-    <p class="view-purpose"><span class="mono">vw_sales_daily</span>와 동일한 주문·취소·매출·순매출 집계에 <span class="mono">HOUR(...)</span>를 더한 시간대 단위.</p>
+    <p class="view-purpose"><span class="mono">vw_sales_daily</span>와 동일 로직, <span class="mono">HOUR(...)</span> 추가로 시간대 단위.</p>
     <p class="view-used-by">사용: <b>일별 매출 상세</b> (시간대 그래프)</p>
     <pre class="sql"><span class="kw">SELECT</span>
     <span class="kw">CAST</span>(<span class="kw">COALESCE</span>(p.paid_at, o.created_at) <span class="kw">AS DATE</span>) <span class="kw">AS</span> sales_date,
     <span class="kw">HOUR</span>(<span class="kw">COALESCE</span>(p.paid_at, o.created_at)) <span class="kw">AS</span> sales_hour,
-    <span class="kw">COUNT</span>(<span class="kw">DISTINCT CASE WHEN</span> p.paid_at <span class="kw">IS NOT NULL</span>
-        <span class="kw">AND</span> os.code <> <span class="str">'CANCELED'</span> <span class="kw">AND</span> ps.code <span class="kw">NOT IN</span> (<span class="str">'CANCELED'</span>,<span class="str">'REFUNDED'</span>)
-        <span class="kw">THEN</span> o.id <span class="kw">END</span>) <span class="kw">AS</span> order_count,
-    <span class="kw">COUNT</span>(<span class="kw">DISTINCT CASE WHEN</span> os.code = <span class="str">'CANCELED'</span> <span class="kw">OR</span> ps.code <span class="kw">IN</span> (<span class="str">'CANCELED'</span>,<span class="str">'REFUNDED'</span>)
-        <span class="kw">THEN</span> o.id <span class="kw">END</span>) <span class="kw">AS</span> canceled_order_count,
-    <span class="kw">COALESCE</span>(<span class="kw">SUM</span>(<span class="kw">CASE WHEN</span> p.paid_at <span class="kw">IS NOT NULL THEN</span> p.amount <span class="kw">ELSE</span> 0 <span class="kw">END</span>), 0) <span class="kw">AS</span> gross_sales_amount,
-    <span class="kw">COALESCE</span>(<span class="kw">SUM</span>(<span class="kw">CASE WHEN</span> p.paid_at <span class="kw">IS NOT NULL AND</span> (os.code = <span class="str">'CANCELED'</span> <span class="kw">OR</span> ps.code <span class="kw">IN</span> (<span class="str">'CANCELED'</span>,<span class="str">'REFUNDED'</span>))
-        <span class="kw">THEN</span> p.amount <span class="kw">ELSE</span> 0 <span class="kw">END</span>), 0) <span class="kw">AS</span> canceled_amount,
-    <span class="kw">COALESCE</span>(<span class="kw">SUM</span>(<span class="kw">CASE WHEN</span> p.paid_at <span class="kw">IS NOT NULL THEN</span> p.amount <span class="kw">ELSE</span> 0 <span class="kw">END</span>), 0)
-      - <span class="kw">COALESCE</span>(<span class="kw">SUM</span>(<span class="kw">CASE WHEN</span> p.paid_at <span class="kw">IS NOT NULL AND</span> (os.code = <span class="str">'CANCELED'</span> <span class="kw">OR</span> ps.code <span class="kw">IN</span> (<span class="str">'CANCELED'</span>,<span class="str">'REFUNDED'</span>))
-          <span class="kw">THEN</span> p.amount <span class="kw">ELSE</span> 0 <span class="kw">END</span>), 0) <span class="kw">AS</span> net_sales_amount,
+    <span class="cm">-- 이하 order_count / canceled_order_count / gross_sales_amount / canceled_amount는 vw_sales_daily와 동일</span>
+    <span class="cm">-- ...</span>
 <span class="kw">FROM</span> orders o
 <span class="kw">LEFT JOIN</span> payment p <span class="kw">ON</span> p.order_id = o.id
 <span class="kw">LEFT JOIN</span> common_code ps <span class="kw">ON</span> ps.id = p.status_id
