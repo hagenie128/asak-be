@@ -20,4 +20,6 @@ public interface AdminOrderMapper {
 
   long countOrderList(@Param("filter") OrderListFilter filter);
 
+  List<OrderListResponse> getActiveOrders();
+
 }
