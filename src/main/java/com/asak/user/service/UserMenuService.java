@@ -33,15 +33,13 @@ public class UserMenuService {
         MenuDetailResponse response = menuMapper.selectMenuDetail(menuId);
 
         response.setIngredients(menuMapper.selectIngredients(menuId));
-        
+
         List<OptionGroupResponse> groups = menuMapper.selectOptionGroups(menuId);
 
-
-        //group 담을 그릇 , groups반복할 객체
-        for(OptionGroupResponse group : groups){
+        // group 담을 그릇 , groups반복할 객체
+        for (OptionGroupResponse group : groups) {
             group.setItems(
-                menuMapper.selectOptionItems(group.getOptionGroupId())
-            );
+                    menuMapper.selectOptionItems(group.getOptionGroupId()));
         }
 
         response.setOptionGroups(groups);
