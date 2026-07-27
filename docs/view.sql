@@ -399,19 +399,7 @@ FROM opt_item oi
 -- [11] 실시간 주문 보드용
 --     경과 시간(elapsed_sec) 포함 — 키오스크/주방 모니터 등에서 사용
 -- -----------------------------------------------------------------------------
-CREATE OR REPLACE VIEW vw_order_live AS
-SELECT
-    o.id AS order_id,
-    o.order_no,
-    ot.name AS order_type_label,
-    st.code AS status_code,
-    o.total_price,
-    o.created_at,
-    TIMESTAMPDIFF(SECOND, o.created_at, NOW()) AS elapsed_sec
-FROM
-    orders o
-    JOIN common_code ot ON ot.id = o.order_type_id
-    JOIN common_code st ON st.id = o.status_id;
+-- vw_order_live is defined after the live-order helper views below.
 
 -- 옵션 중 BASE/DRESSING만 따로 뽑아서 pivot (주문라인당 1행, 컬럼으로 펼침)
 CREATE OR REPLACE VIEW vw_order_item_base_dressing AS
@@ -456,6 +444,51 @@ UNION ALL
 SELECT ie.order_item_id, 'exclude' AS tone, i.name AS label
 FROM item_exclusion ie
     JOIN ing i ON i.id = ie.ing_id;
+
+CREATE OR REPLACE VIEW vw_order_live AS
+SELECT
+    o.id AS order_id,
+    o.order_no,
+    ot.name AS order_type_label,
+    st.code AS status_code,
+    o.total_price,
+    o.created_at,
+    TIMESTAMPDIFF(SECOND, o.created_at, NOW()) AS elapsed_sec,
+    JSON_ARRAYAGG(
+        JSON_OBJECT(
+            'menuId', oi.menu_id,
+            'menuName', m.name,
+            'quantity', oi.quantity,
+            'unitPrice', oi.price,
+            'base', bd.base_name,
+            'dressing', bd.dressing_name,
+            'options', COALESCE(
+                (
+                    SELECT JSON_ARRAYAGG(
+                        JSON_OBJECT('tone', tag.tone, 'label', tag.label)
+                    )
+                    FROM vw_order_item_tag tag
+                    WHERE tag.order_item_id = oi.id
+                ),
+                JSON_ARRAY()
+            )
+        )
+    ) AS menus
+FROM orders o
+    JOIN common_code ot ON ot.id = o.order_type_id
+    JOIN common_code st ON st.id = o.status_id
+    JOIN order_item oi ON oi.order_id = o.id
+    JOIN menu m ON m.id = oi.menu_id
+    LEFT JOIN vw_order_item_base_dressing bd ON bd.order_item_id = oi.id
+WHERE st.code IN ('RECEIVED', 'PREPARING')
+GROUP BY
+    o.id,
+    o.order_no,
+    ot.name,
+    st.code,
+    o.total_price,
+    o.created_at
+ORDER BY o.created_at ASC;
 
 -- -----------------------------------------------------------------------------
 -- [12] 주문 집계 / 목록 요약

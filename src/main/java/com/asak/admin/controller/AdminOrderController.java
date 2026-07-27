@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.asak.admin.service.AdminOrderService;
+import com.asak.admin.dto.response.LiveOrderListResponse;
 import com.asak.common.response.ApiResponse;
 import org.springframework.web.bind.annotation.RequestParam;
 
@@ -48,11 +49,11 @@ public class AdminOrderController {
   }
 
   @GetMapping("/active")
-  public ApiResponse<Map<String, Object>> getActiveOrders() {
+  public ApiResponse<LiveOrderListResponse> getActiveOrders() {
     return ApiResponse.success(
         "ADMIN_ACTIVE_ORDERS_SUCCESS",
         "관리자 활성 주문 조회 성공",
-        adminOrderService.getActiveOrders());
+        adminOrderService.getLiveOrders());
   }
 
 }

@@ -1,11 +1,14 @@
 package com.asak.admin.service;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.springframework.stereotype.Service;
 
 import com.asak.admin.dto.request.OrderListFilter;
+import com.asak.admin.dto.response.LiveOrderListResponse;
+import com.asak.admin.dto.response.LiveOrderResponse;
 import com.asak.admin.mapper.AdminOrderMapper;
 
 @Service
@@ -19,8 +22,12 @@ public class AdminOrderService {
     this.adminOrderMapper = adminOrderMapper;
   }
 
-  public Map<String, Object> getLiveOrders() {
-    return adminOrderMapper.getLiveOrders();
+  public LiveOrderListResponse getLiveOrders() {
+    List<LiveOrderResponse> orders = adminOrderMapper.getLiveOrders();
+    return LiveOrderListResponse.builder()
+        .content(orders)
+        .totalElements(orders.size())
+        .build();
   }
 
   public Map<String, Object> getActiveOrders() {
