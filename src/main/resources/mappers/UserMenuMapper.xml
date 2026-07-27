@@ -27,6 +27,23 @@
         ORDER BY cat_id ASC, id ASC
     </select>
 
+    <!-- 메뉴 디테일 -->
+    <select id="selectMenuDetail" resultType="menuDetail">
+        select
+            id as menuId,
+            cat_id as categoryId,
+            name,
+            price,
+            image_url as imageUrl,
+            sold_out as isSoldOut
+        from menu
+        where id = #{ menuId }
+    </select>
+
+    <!-- 재료 조회 -->
+    <!-- 옵션 그룹 조회 -->
+    <!-- 옵션 아이템 조회 -->
+    <!-- 영양 정보 조회 -->
 
 
 </mapper>
