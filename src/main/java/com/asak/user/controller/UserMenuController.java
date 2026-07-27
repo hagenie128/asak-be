@@ -5,6 +5,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.asak.common.response.ApiResponse;
 import com.asak.user.dto.CategoryResponse;
+import com.asak.user.dto.MenuListResponse;
 import com.asak.user.service.UserMenuService;
 
 import lombok.RequiredArgsConstructor;
@@ -13,7 +14,6 @@ import java.util.List;
 
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-
 
 /*
 * RestController 에서는 요청별 이노테이션을 적용시켜줘야함
@@ -36,9 +36,10 @@ import org.springframework.web.bind.annotation.RequestParam;
 @RequiredArgsConstructor
 public class UserMenuController {
 
-    //메뉴 서비스 연결
+    // 메뉴 서비스 연결
     private final UserMenuService menuService;
 
+    // 카테고리 조회
     @GetMapping("/categories")
     public ApiResponse<List<CategoryResponse>> getCategories() {
 
@@ -46,12 +47,14 @@ public class UserMenuController {
 
         return ApiResponse.success(categories);
     }
-    
 
-    
+    // 메뉴 목록 조회
+    @GetMapping("/menuList")
+    public ApiResponse<MenuListResponse> getMenuList() {
 
+        MenuListResponse menuList = menuService.selectMenuList();
 
-
-
+        return ApiResponse.success(menuList);
+    }
 
 }

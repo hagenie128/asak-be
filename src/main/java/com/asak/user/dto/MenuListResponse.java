@@ -1,5 +1,13 @@
 package com.asak.user.dto;
 
+import java.util.List;
+
+import org.apache.ibatis.type.Alias;
+
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
 // menuList -> categories & menus 둘다 담아야함
 
 // {
@@ -25,7 +33,13 @@ package com.asak.user.dto;
 //   }
 // }
 
-
+@Getter
+@Setter
+@Alias("menuList")
+@NoArgsConstructor
 public class MenuListResponse {
+
+    private List<CategoryResponse> categories;
+    private List<MenuListItemResponse> menus;
 
 }
