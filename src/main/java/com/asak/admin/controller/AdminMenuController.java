@@ -4,14 +4,13 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.asak.admin.dto.request.MenuListRequest;
+import com.asak.admin.dto.response.MenuDetailResponse;
 import com.asak.admin.dto.response.MenuListResponse;
 import com.asak.admin.service.AdminMenuService;
 import com.asak.common.response.ApiResponse;
 import com.asak.common.response.PageResult;
 
 import jakarta.validation.Valid;
-
-import java.util.Map;
 
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
@@ -36,6 +35,14 @@ public class AdminMenuController {
         "ADMIN_MENU_LIST_SUCCESS",
         "관리자 메뉴 목록 조회 성공",
         adminMenuService.getMenus(request));
+  }
+
+  @GetMapping("/{menuId}")
+  public ApiResponse<MenuDetailResponse> getMenuDetail(@PathVariable Long menuId) {
+    return ApiResponse.success(
+        "ADMIN_MENU_DETAIL_SUCCESS",
+        "관리자 메뉴 상세 조회 성공",
+        adminMenuService.getMenuDetail(menuId));
   }
 
 }

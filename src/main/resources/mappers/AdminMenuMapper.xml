@@ -11,10 +11,16 @@
   <result column="image_url" property="imageUrl"/>
   <result column="description" property="description"/>
   <result column="sold_out" property="isSoldOut"/>
-  <collection property="ingredients" ofType="com.asak.admin.dto.response.MenuIngResponse"
-              column="menu_id" select="findMenuIngredients"/>
-  <collection property="optionPolicies" ofType="com.asak.admin.dto.response.MenuOptPolicyResponse"
-              column="menu_id" select="findMenuOptions"/>
+  <association property="nutrition" javaType="com.asak.admin.dto.response.MenuNutritionResponse"
+               column="menu_id" select="findMenuNutrition"/>
+  <collection property="ingredients" ofType="com.asak.admin.dto.response.MenuIngredientSummaryResponse"
+              column="menu_id" select="findMenuIngredientSummaries"/>
+  <collection property="optionGroups" ofType="com.asak.admin.dto.response.MenuOptionGroupSummaryResponse"
+              column="menu_id" select="findMenuOptionGroupSummaries"/>
+  <collection property="allergens" ofType="java.lang.String"
+              column="menu_id" select="findMenuAllergens"/>
+  <collection property="tags" ofType="java.lang.String"
+              column="menu_id" select="findMenuTagNames"/>
 </resultMap>
 
 <select id="getMenuDetail" resultMap="menuDetailMap">
@@ -25,22 +31,79 @@
   WHERE m.id = #{menuId}
 </select>
 
-<select id="findMenuIngredients" resultType="com.asak.admin.dto.response.MenuIngResponse">
+<select id="findMenuIngredientSummaries" resultType="com.asak.admin.dto.response.MenuIngredientSummaryResponse">
   SELECT ingredient_id AS ingredientId, ing_name AS name, ing_sold_out AS isSoldOut,
          role, quantity, unit,
-         is_default AS isDefault, can_remove AS canRemove, sort_no AS sortNo,
-         allergens
+         is_default AS isDefault, can_remove AS canRemove
   FROM vw_menu_ing_json
+  WHERE menu_id = #{menuId}
+  ORDER BY CASE UPPER(role)
+             WHEN 'CORE' THEN 1
+             WHEN 'BASE' THEN 2
+             ELSE 3
+           END,
+           sort_no,
+           ingredient_id
+</select>
+
+<select id="findMenuOptionGroupSummaries" resultType="com.asak.admin.dto.response.MenuOptionGroupSummaryResponse">
+  SELECT policy.option_group_id AS optionGroupId,
+         policy.name,
+         policy.is_required AS isRequired,
+         (
+           SELECT recommended_item.item_name
+           FROM JSON_TABLE(
+             policy.items,
+             '$[*]' COLUMNS (
+               item_name VARCHAR(120) PATH '$.name',
+               is_recommended TINYINT PATH '$.isRecommended'
+             )
+           ) AS recommended_item
+           WHERE recommended_item.is_recommended = 1
+           LIMIT 1
+         ) AS recommendedLabel
+  FROM vw_menu_opt_policy_json policy
+  WHERE policy.menu_id = #{menuId}
+  ORDER BY policy.sort_order
+</select>
+
+<select id="findMenuNutrition" resultType="com.asak.admin.dto.response.MenuNutritionResponse">
+  SELECT kcal,
+         carb_g AS carbG,
+         protein_g AS proteinG,
+         fat_g AS fatG,
+         sodium_mg AS sodiumMg
+  FROM menu_nutr
   WHERE menu_id = #{menuId}
 </select>
 
-<select id="findMenuOptions" resultType="com.asak.admin.dto.response.MenuOptPolicyResponse">
-  SELECT option_group_id AS optionGroupId, name,
-         group_type AS groupType, select_type AS selectType,
-         min_select AS minSelect, max_select AS maxSelect, sort_order AS sortOrder,
-         is_required AS isRequired, items
-  FROM vw_menu_opt_policy_json
-  WHERE menu_id = #{menuId}
+<select id="findMenuAllergens" resultType="string">
+  SELECT DISTINCT allergen_name
+  FROM (
+    SELECT a.name AS allergen_name
+    FROM menu_ing mi
+    JOIN ing_allergen ia ON ia.ing_id = mi.ing_id
+    JOIN allergen a ON a.id = ia.allergen_id
+    WHERE mi.menu_id = #{menuId}
+    UNION
+    SELECT a.name AS allergen_name
+    FROM menu_opt_policy mop
+    JOIN opt_policy_item opi ON opi.policy_id = mop.policy_id
+    JOIN opt_item oi ON oi.id = opi.opt_item_id
+    JOIN ing_allergen ia ON ia.ing_id = oi.ing_id
+    JOIN allergen a ON a.id = ia.allergen_id
+    WHERE mop.menu_id = #{menuId}
+  ) menu_allergens
+  ORDER BY allergen_name
+</select>
+
+<select id="findMenuTagNames" resultType="string">
+  SELECT t.name
+  FROM menu_tag mt
+  JOIN tag t ON t.id = mt.tag_id
+  WHERE mt.menu_id = #{menuId}
+    AND t.active = 1
+  ORDER BY t.name
 </select>
 
 <sql id="menuListWhere">

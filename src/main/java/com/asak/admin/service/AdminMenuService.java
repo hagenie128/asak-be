@@ -9,11 +9,11 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.asak.admin.dto.request.MenuListRequest;
+import com.asak.admin.dto.response.MenuDetailResponse;
 import com.asak.admin.dto.response.MenuListResponse;
 import com.asak.admin.mapper.AdminMenuMapper;
 import com.asak.common.response.PageResult;
 import com.asak.common.util.FileUtil;
-
 
 @Service
 public class AdminMenuService {
@@ -41,5 +41,10 @@ public class AdminMenuService {
     List<MenuListResponse> content = adminMenuMapper.getMenus(request);
     long totalElements = adminMenuMapper.countMenus(request);
     return new PageResult<>(content, request.getPage(), request.getSize(), totalElements);
+  }
+
+  public MenuDetailResponse getMenuDetail(Long menuId) {
+    // 메뉴 상세 조회 로직 구현
+    return adminMenuMapper.getMenuDetail(menuId);
   }
 }

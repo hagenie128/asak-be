@@ -1,10 +1,11 @@
 package com.asak.admin.dto.response;
 
+import org.apache.ibatis.type.Alias;
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import org.apache.ibatis.type.Alias;
 
 @Alias("AdminMenuListResponse")
 @Getter

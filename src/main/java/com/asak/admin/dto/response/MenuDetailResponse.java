@@ -20,7 +20,10 @@ public class MenuDetailResponse {
   private String imageUrl;
   private String description;
   private boolean isSoldOut;
-  private List<MenuIngResponse> ingredients;
-  private List<MenuOptPolicyResponse> optionPolicies;
+  private List<MenuIngredientSummaryResponse> ingredients;
+  private List<MenuOptionGroupSummaryResponse> optionGroups;
+  private MenuNutritionResponse nutrition;
+  private List<String> allergens;
+  private List<String> tags;
 
 }

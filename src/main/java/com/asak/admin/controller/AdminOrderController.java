@@ -1,16 +1,18 @@
 package com.asak.admin.controller;
 
-import java.util.Map;
+import java.util.List;
 
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.asak.admin.service.AdminOrderService;
 import com.asak.admin.dto.response.LiveOrderListResponse;
+import com.asak.admin.dto.response.OrderDetailResponse;
+import com.asak.admin.dto.response.OrderListResponse;
+import com.asak.admin.service.AdminOrderService;
+import com.asak.common.exception.ErrorCode;
 import com.asak.common.response.ApiResponse;
-import org.springframework.web.bind.annotation.RequestParam;
 
 @RestController
 @RequestMapping("api/admin/orders")
@@ -33,27 +35,36 @@ public class AdminOrderController {
   // optionItems[]와 억지로 같은 DTO로 만들지 않는다.
 
   @GetMapping
-  public ApiResponse<Map<String, Object>> getOrders() {
+  public ApiResponse<List<OrderListResponse>> getOrders() {
+    List<OrderListResponse> result = adminOrderService.getOrderList();
     return ApiResponse.success(
         "ADMIN_ORDER_LIST_SUCCESS",
         "관리자 주문 목록 조회 성공",
-        adminOrderService.getOrderList());
+        result);
   }
 
   @GetMapping("/{orderId}")
-  public ApiResponse<Map<String, Object>> getOrderDetail(@PathVariable Long orderId) {
+  public ApiResponse<OrderDetailResponse> getOrderDetail(
+      @PathVariable Long orderId) {
+    OrderDetailResponse result = adminOrderService.getOrderDetail(orderId);
+    if (result == null) {
+      return ApiResponse.error(ErrorCode.ORDER_NOT_FOUND);
+    }
     return ApiResponse.success(
         "ADMIN_ORDER_DETAIL_SUCCESS",
         "관리자 주문 상세 조회 성공",
-        adminOrderService.getOrderDetail(orderId));
+        result);
   }
 
   @GetMapping("/active")
-  public ApiResponse<Map<String, Object>> getActiveOrders() {
+  public ApiResponse<List<LiveOrderListResponse>> getActiveOrders() {
+    List<LiveOrderListResponse> result = adminOrderService.getActiveOrders();
+    if (result == null || result.isEmpty()) {
+      return ApiResponse.error(ErrorCode.ORDER_NOT_FOUND);
+    }
     return ApiResponse.success(
         "ADMIN_ACTIVE_ORDERS_SUCCESS",
         "관리자 활성 주문 조회 성공",
-        adminOrderService.getActiveOrders());
+        result);
   }
-
 }
