@@ -49,11 +49,11 @@ public class AdminOrderController {
   }
 
   @GetMapping("/active")
-  public ApiResponse<LiveOrderListResponse> getActiveOrders() {
+  public ApiResponse<Map<String, Object>> getActiveOrders() {
     return ApiResponse.success(
         "ADMIN_ACTIVE_ORDERS_SUCCESS",
         "관리자 활성 주문 조회 성공",
-        adminOrderService.getLiveOrders());
+        adminOrderService.getActiveOrders());
   }
 
 }

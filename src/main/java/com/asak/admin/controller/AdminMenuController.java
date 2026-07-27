@@ -1,3 +1,41 @@
 package com.asak.admin.controller;
 
-public class AdminMenuController {}
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import com.asak.admin.dto.request.MenuListRequest;
+import com.asak.admin.dto.response.MenuListResponse;
+import com.asak.admin.service.AdminMenuService;
+import com.asak.common.response.ApiResponse;
+import com.asak.common.response.PageResult;
+
+import jakarta.validation.Valid;
+
+import java.util.Map;
+
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestParam;
+
+@RestController
+@RequestMapping("/api/admin/menus")
+public class AdminMenuController {
+
+  private final AdminMenuService adminMenuService;
+
+  public AdminMenuController(AdminMenuService adminMenuService) {
+    this.adminMenuService = adminMenuService;
+  }
+
+  // {{baseUrl}}/api/admin/menus?categoryId={{categoryId}}&keyword=&isSoldOut=false&tagId=&page=0&size=20&sort=name,asc
+  @GetMapping
+  public ApiResponse<PageResult<MenuListResponse>> getMenus(
+      @Valid @ModelAttribute MenuListRequest request) {
+    return ApiResponse.success(
+        "ADMIN_MENU_LIST_SUCCESS",
+        "관리자 메뉴 목록 조회 성공",
+        adminMenuService.getMenus(request));
+  }
+
+}

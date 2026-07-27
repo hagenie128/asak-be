@@ -22,14 +22,6 @@ public class AdminOrderService {
     this.adminOrderMapper = adminOrderMapper;
   }
 
-  public LiveOrderListResponse getLiveOrders() {
-    List<LiveOrderResponse> orders = adminOrderMapper.getLiveOrders();
-    return LiveOrderListResponse.builder()
-        .content(orders)
-        .totalElements(orders.size())
-        .build();
-  }
-
   public Map<String, Object> getActiveOrders() {
     Map<String, Object> response = new HashMap<>();
     response.put("data", adminOrderMapper.getActiveOrders());

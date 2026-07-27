@@ -1,26 +1,24 @@
 package com.asak.admin.dto.response;
 
-import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.apache.ibatis.type.Alias;
 
+@Alias("AdminMenuListResponse")
 @Getter
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class MenuDetailResponse {
-
+// 상단 카드 목록용: 재료는 넣지 않음
+public class MenuListResponse {
   private Long menuId;
   private Long categoryId;
-  private String categoryName;
   private String name;
   private int price;
   private String imageUrl;
-  private String description;
   private boolean isSoldOut;
-  private List<MenuIngResponse> ingredients;
-  private List<MenuOptPolicyResponse> optionPolicies;
-
+  private boolean hasSoldOutIngredient;
+  private boolean isOrderable;
 }

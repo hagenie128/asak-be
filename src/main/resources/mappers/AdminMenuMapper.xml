@@ -43,4 +43,52 @@
   WHERE menu_id = #{menuId}
 </select>
 
+<sql id="menuListWhere">
+  <where>
+    <if test="request.categoryId != null">
+      AND ml.category_id = #{request.categoryId}
+    </if>
+    <if test="request.keyword != null and request.keyword != ''">
+      AND ml.name LIKE CONCAT('%', #{request.keyword}, '%')
+    </if>
+    <if test="request.isSoldOut != null">
+      AND ml.is_sold_out = #{request.isSoldOut}
+    </if>
+    <if test="request.tagId != null">
+      AND EXISTS (
+        SELECT 1
+        FROM menu_tag mt
+        WHERE mt.menu_id = ml.menu_id
+          AND mt.tag_id = #{request.tagId}
+      )
+    </if>
+  </where>
+</sql>
+
+<select id="getMenus" resultType="com.asak.admin.dto.response.MenuListResponse">
+  SELECT ml.menu_id AS menuId,
+         ml.category_id AS categoryId,
+         ml.name,
+         ml.price,
+         ml.image_url AS imageUrl,
+         ml.is_sold_out AS isSoldOut,
+         ml.has_sold_out_ingredient AS hasSoldOutIngredient,
+         ml.is_orderable AS isOrderable
+  FROM vw_menu_list ml
+  <include refid="menuListWhere"/>
+  <choose>
+    <when test="request.sort == 'price,asc'">ORDER BY ml.price ASC</when>
+    <when test="request.sort == 'price,desc'">ORDER BY ml.price DESC</when>
+    <when test="request.sort == 'name,desc'">ORDER BY ml.name DESC</when>
+    <otherwise>ORDER BY ml.name ASC</otherwise>
+  </choose>
+  LIMIT #{request.size} OFFSET #{request.offset}
+</select>
+
+<select id="countMenus" resultType="long">
+  SELECT COUNT(*)
+  FROM vw_menu_list ml
+  <include refid="menuListWhere"/>
+</select>
+
 </mapper>
