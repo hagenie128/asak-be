@@ -5,7 +5,7 @@ import java.util.List;
 import org.springframework.stereotype.Service;
 
 import com.asak.user.dto.CategoryResponse;
-import com.asak.user.dto.MenuListResponse;
+import com.asak.user.dto.MenuListItemResponse;
 import com.asak.user.mapper.UserMenuMapper;
 
 import lombok.RequiredArgsConstructor;
@@ -20,7 +20,7 @@ public class UserMenuService {
         return menuMapper.selectCategory();
     }
 
-    public MenuListResponse selectMenuList() {
+    public List<MenuListItemResponse> selectMenuList() {
         return menuMapper.selectMenuList();
     }
 }

@@ -5,6 +5,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.asak.common.response.ApiResponse;
 import com.asak.user.dto.CategoryResponse;
+import com.asak.user.dto.MenuListItemResponse;
 import com.asak.user.dto.MenuListResponse;
 import com.asak.user.service.UserMenuService;
 
@@ -52,7 +53,12 @@ public class UserMenuController {
     @GetMapping("/menuList")
     public ApiResponse<MenuListResponse> getMenuList() {
 
-        MenuListResponse menuList = menuService.selectMenuList();
+        List<CategoryResponse> categories = menuService.selectCategory();
+        List<MenuListItemResponse> menus = menuService.selectMenuList();
+
+        MenuListResponse menuList = new MenuListResponse();
+        menuList.setCategories(categories);
+        menuList.setMenus(menus);
 
         return ApiResponse.success(menuList);
     }
