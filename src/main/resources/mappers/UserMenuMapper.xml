@@ -14,4 +14,19 @@
         order by sort_no asc
     </select>
 
+    <!-- 메뉴 조회 -->
+    <select id="selectMenuList" resultType="menuList">
+        SELECT
+            id AS menuId,
+            cat_id AS categoryId,
+            name,
+            price,
+            image_url AS imageUrl,
+            sold_out AS isSoldOut
+        FROM menu
+        ORDER BY cat_id ASC, id ASC
+    </select>
+
+
+
 </mapper>
