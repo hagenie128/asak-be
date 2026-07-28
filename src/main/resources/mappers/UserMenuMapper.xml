@@ -27,6 +27,118 @@
         ORDER BY cat_id ASC, id ASC
     </select>
 
+    <!-- 메뉴 디테일 -->
+    <select id="selectMenuDetail" resultType="menuDetail">
+        select
+            id as menuId,
+            cat_id as categoryId,
+            name,
+            price,
+            image_url as imageUrl,
+            sold_out as isSoldOut
+        from menu
+        where id = #{ menuId }
+    </select>
 
+    <!-- 재료 조회 -->
+    <select id="selectIngredients" resultType="ingredient">
+        select
+            i.id as ingredientId,
+            i.name as ingName,
+            role.code as role,
+            unit,name as unit
+        from menu_ing mi
+
+        join ing i 
+        on mi.ing_id = i.id
+
+        join common_code role
+        on mi.role_id = role.id
+
+        join common_code unit
+        on mi.unit_id = unit.id
+
+        where mi.menu_id = #{ menuId }
+        order by mi.sort_no 
+    </select>
+    
+    <!-- 옵션 그룹 조회 -->
+    <select id="selectOptionGroups" resultType="optionGroup">
+        select
+            og.id as optionGroupId,
+            og.name as name,
+            groupType.code as groupType,
+            
+            case
+                when op.max_select  = 1 then 'SINGLE',
+                else 'MULTIPLE'
+            end as selectType
+
+            op.min_select as minSelect,
+            op.max_select as maxSelect,
+
+            mop.sort_no AS sortOrder,
+            op.required as isRequired
+                
+        from menu_opt_policy mop
+
+        join opt_policy op
+        on mop.policy_id = op.id
+
+        join opt_group og
+        on op.opt_group_id = og.id
+
+        join common_code groupType
+        on op.group_type_id = groupType.id
+
+
+        where mop.menu_id = #{ menuId }
+        
+    
+    </select>
+    <!-- 옵션 아이템 조회 -->
+    <select id="selectOptionItems" resultType="optionItem">
+
+        select
+
+        oi.id as optionItemId,
+        oi.ing_id as ingredientId,
+        oi.name as name,
+        oi.add_price as extraPrice,
+        oi.list_price as originalPrice,
+        oi.amount as servingAmount,
+        unit.name as servingUnit,
+        opi.recommended as isRecommended,
+        opi.is_default as isDefault,
+        oi.sold_out as isSoldOut,
+        ing.kcal  as kcal
+
+        from opt_policy op
+        join opt_policy_item opi
+        on op.id = opi.policy_id
+
+        join opt_item oi
+        on opi.opt_item_id = oi.id
+
+        join common_code unit
+        on oi.unit_id = unit.id
+
+        join ing
+        on oi.ing_id = ing.id
+
+        where op.opt_group_id = #{ optionGroupId }
+
+        order by opi.sort_no
+
+    </select>
+    <!-- 영양 정보 조회 -->
+    <select id="selectNutrition" resultType="Nutrition">
+        select
+            SUM(ing.kcal) AS kcal
+        from menu_ing mi
+        join ing
+            on mi.ing_id = ing.id
+        where mi.menu_id = #{menuId}
+    </select>
 
 </mapper>
