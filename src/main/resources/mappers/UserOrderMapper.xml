@@ -3,5 +3,35 @@
 "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.asak.user.mapper.UserOrderMapper">
 
+    <select id="selectByMenuId" resultType="menuQueryDTO" >
+        select *
+        from  menu
+        where id = #{menuId}
+    </select>
+
+    <select id="findByOptionItem" resultType="optionItemQueryDTO">
+
+        select
+            oi.id AS optionItemId,
+            oi.extra_price AS extraPrice,
+            oi.sold_out AS isSoldOut
+
+        from menu_opt_policy mop
+        join opt_policy op
+        on mop.opt_policy_id = op.id
+
+        join opt_policy_item opi
+        on op.id = opi.opt_policy_id
+
+        join opt_item oi
+        on opi.opt_item_id = oi.id
+
+        where mop.menu_id = #{menuId}
+        and oi.id = #{optionItemId}
+
+
+
+    </select>
+
 
 </mapper>
