@@ -35,7 +35,7 @@ public class UserOrderService {
         public CartValidateResponse cartValidate(CartValidateRequest request) {
 
             //장바구니 전체 가격
-            int totalPrice = 0;
+            int totalAmount = 0;
 
             // 장바구니 검증 후 메뉴를 담을 배열
             List<CartValidateItemResponse> items = new ArrayList<>();
@@ -51,7 +51,7 @@ public class UserOrderService {
                 }
 
                 // 메뉴 기본 가격
-                int unitPrice = menu.getPrice();
+                int unitAmount = menu.getPrice();
 
                 // 메뉴의 옵션 아이템을 담을 배열
                 List<CartValidateOptionItemResponse> menuItemOptions = new ArrayList<>();
@@ -65,7 +65,7 @@ public class UserOrderService {
                         throw new CustomException(ErrorCode.INVALID_OPTION_SELECTION);
                     }
 
-                    unitPrice += optionItem.getExtraPrice() * option.getQuantity();
+                    unitAmount += optionItem.getExtraPrice() * option.getQuantity();
 
                     CartValidateOptionItemResponse optionResponse = new CartValidateOptionItemResponse();
                     optionResponse.setOptionItemId(option.getOptionItemId());
@@ -73,13 +73,13 @@ public class UserOrderService {
                     menuItemOptions.add(optionResponse);
                 }
 
-                int itemTotalPrice = unitPrice * item.getQuantity();
-                totalPrice += itemTotalPrice;
+                int lineAmount = unitAmount * item.getQuantity();
+                totalAmount += lineAmount;
 
                 CartValidateItemResponse itemResponse = new CartValidateItemResponse();
                 itemResponse.setMenuId(item.getMenuId());
                 itemResponse.setQuantity(item.getQuantity());
-                itemResponse.setUnitPrice(unitPrice);
+                itemResponse.setUnitAmount(unitAmount);
                 itemResponse.setOptionItems(menuItemOptions);
                 itemResponse.setExcludedIngredientIds(item.getExcludedIngredientIds()); // TODO: 검증 필요
 
@@ -87,7 +87,7 @@ public class UserOrderService {
             }
 
             CartValidateResponse response = new CartValidateResponse();
-            response.setTotalAmount(totalPrice);
+            response.setTotalAmount(totalAmount);
             response.setItems(items);
 
             return response;
@@ -100,7 +100,7 @@ public class UserOrderService {
     // ② common_code에서 RECEIVED 상태 조회
     // ③ 메뉴 가격 조회
     // ④ 옵션 가격 조회
-    // ⑤ totalPrice 계산
+    // ⑤ totalAmount 계산
     // ⑥ orders INSERT
     // ⑦ 생성된 orderId 반환
     
