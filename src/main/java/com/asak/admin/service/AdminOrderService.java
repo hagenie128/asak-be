@@ -6,7 +6,6 @@ import java.util.List;
 import org.springframework.stereotype.Service;
 
 import com.asak.admin.dto.request.OrderListFilter;
-import com.asak.admin.dto.response.LiveOrderListResponse;
 import com.asak.admin.dto.response.OrderDetailResponse;
 import com.asak.admin.dto.response.OrderListResponse;
 import com.asak.admin.mapper.AdminOrderMapper;
@@ -23,7 +22,7 @@ public class AdminOrderService {
     this.adminOrderMapper = adminOrderMapper;
   }
 
-  public List<LiveOrderListResponse> getActiveOrders() {
+  public List<OrderListResponse> getActiveOrders() {
     return adminOrderMapper.getActiveOrders();
   }
 

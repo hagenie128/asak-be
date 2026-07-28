@@ -56,8 +56,40 @@
 
 <select id="countOrderList" resultType="long">
   SELECT COUNT(*)
-  FROM vw_order_list_summary
-  <include refid="orderListWhere"/>
+  FROM orders o
+  JOIN common_code ot ON ot.id = o.order_type_id
+  JOIN common_code st ON st.id = o.status_id
+  LEFT JOIN payment p ON p.order_id = o.id
+  LEFT JOIN common_code ps ON ps.id = p.status_id
+  <where>
+    <if test="filter.status != null">
+      AND st.code = #{filter.status}
+    </if>
+    <if test="filter.paymentStatus != null">
+      AND ps.code = #{filter.paymentStatus}
+    </if>
+    <if test="filter.orderType != null">
+      AND ot.code = #{filter.orderType}
+    </if>
+    <if test="filter.startAt != null">
+      AND o.created_at &gt;= #{filter.startAt}
+    </if>
+    <if test="filter.endAt != null">
+      AND o.created_at &lt; #{filter.endAt}
+    </if>
+    <if test="filter.keyword != null">
+      AND (
+        o.order_no LIKE CONCAT('%', #{filter.keyword}, '%')
+        OR EXISTS (
+          SELECT 1
+          FROM order_item oi
+          JOIN menu m ON m.id = oi.menu_id
+          WHERE oi.order_id = o.id
+            AND m.name LIKE CONCAT('%', #{filter.keyword}, '%')
+        )
+      )
+    </if>
+  </where>
 </select>
 
 <select id="getLiveOrders" resultType="com.asak.admin.dto.response.LiveOrderResponse">

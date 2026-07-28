@@ -7,7 +7,6 @@ import org.apache.ibatis.annotations.Param;
 import com.asak.admin.dto.request.OrderListFilter;
 import com.asak.admin.dto.response.OrderDetailResponse;
 import com.asak.admin.dto.response.OrderListResponse;
-import com.asak.admin.dto.response.LiveOrderListResponse;
 import com.asak.admin.dto.response.LiveOrderResponse;
 
 public interface AdminOrderMapper {
@@ -21,6 +20,6 @@ public interface AdminOrderMapper {
 
   long countOrderList(@Param("filter") OrderListFilter filter);
 
-  List<LiveOrderListResponse> getActiveOrders();
+  List<OrderListResponse> getActiveOrders();
 
 }

@@ -148,18 +148,32 @@ ORDER BY o.id, oi.id;
 -- -----------------------------------------------------------------------------
 
 -- 주문 라인에 선택된 옵션 목록
-CREATE OR REPLACE VIEW vw_order_item_option AS
-SELECT oio.order_item_id, oio.opt_item_id, oit.name AS opt_item_name, oio.quantity, oio.price
-FROM
-    order_item_option oio
-    JOIN opt_item oit ON oit.id = oio.opt_item_id
-ORDER BY oio.order_item_id, oio.opt_item_id;
+CREATE OR REPLACE
+ALGORITHM = UNDEFINED VIEW `vw_order_item_option` AS
+select
+    `oio`.`order_item_id` AS `order_item_id`,
+    `oio`.`opt_item_id` AS `opt_item_id`,
+    `oit`.`name` AS `opt_item_name`,
+    `oio`.`quantity` AS `quantity`,
+    `oio`.`price` AS `price`,
+    `oit`.`opt_group_id` AS `opt_gruop`
+from
+    (`order_item_option` `oio`
+join `opt_item` `oit` on
+    ((`oit`.`id` = `oio`.`opt_item_id`)))
+order by
+    `oio`.`order_item_id`,
+    `oio`.`opt_item_id`;
 
--- 주문 라인에서 제외한 재료 목록
-CREATE OR REPLACE VIEW vw_order_item_exclusion AS
-SELECT ie.order_item_id, ie.ing_id, i.name AS ing_name
+-- Order-line exclusions. This definition exists in the live database.
+CREATE OR REPLACE
+ALGORITHM = UNDEFINED VIEW `vw_order_item_exclusion` AS
+SELECT
+    ie.order_item_id AS order_item_id,
+    ie.ing_id AS ing_id,
+    i.name AS ing_name
 FROM item_exclusion ie
-    JOIN ing i ON i.id = ie.ing_id
+JOIN ing i ON i.id = ie.ing_id
 ORDER BY ie.order_item_id, ie.ing_id;
 
 -- -----------------------------------------------------------------------------
@@ -862,6 +876,119 @@ FROM payment p
 -- -----------------------------------------------------------------------------
 -- [19] 메타 확인용 (전체 테이블/뷰 목록)
 -- -----------------------------------------------------------------------------
+-- -----------------------------------------------------------------------------
+-- [19] Sales aggregates and top-menu rankings (live DB definitions)
+-- -----------------------------------------------------------------------------
+CREATE OR REPLACE VIEW vw_sales_daily AS
+SELECT
+    CAST(COALESCE(p.paid_at, o.created_at) AS DATE) AS sales_date,
+    COUNT(DISTINCT CASE
+        WHEN p.paid_at IS NOT NULL
+         AND os.code <> 'CANCELED'
+         AND ps.code NOT IN ('CANCELED', 'REFUNDED')
+        THEN o.id
+    END) AS order_count,
+    COUNT(DISTINCT CASE
+        WHEN os.code = 'CANCELED'
+          OR ps.code IN ('CANCELED', 'REFUNDED')
+        THEN o.id
+    END) AS canceled_order_count,
+    COALESCE(SUM(CASE WHEN p.paid_at IS NOT NULL THEN p.amount ELSE 0 END), 0) AS gross_sales_amount,
+    COALESCE(SUM(CASE
+        WHEN p.paid_at IS NOT NULL
+         AND (os.code = 'CANCELED' OR ps.code IN ('CANCELED', 'REFUNDED'))
+        THEN p.amount ELSE 0
+    END), 0) AS canceled_amount,
+    COALESCE(SUM(CASE WHEN p.paid_at IS NOT NULL THEN p.amount ELSE 0 END), 0)
+      - COALESCE(SUM(CASE
+          WHEN p.paid_at IS NOT NULL
+           AND (os.code = 'CANCELED' OR ps.code IN ('CANCELED', 'REFUNDED'))
+          THEN p.amount ELSE 0
+        END), 0) AS net_sales_amount
+FROM orders o
+LEFT JOIN payment p ON p.order_id = o.id
+LEFT JOIN common_code ps ON ps.id = p.status_id
+LEFT JOIN common_code os ON os.id = o.status_id
+GROUP BY CAST(COALESCE(p.paid_at, o.created_at) AS DATE);
+
+CREATE OR REPLACE VIEW vw_sales_hourly AS
+SELECT
+    CAST(COALESCE(p.paid_at, o.created_at) AS DATE) AS sales_date,
+    HOUR(COALESCE(p.paid_at, o.created_at)) AS sales_hour,
+    COUNT(DISTINCT CASE
+        WHEN p.paid_at IS NOT NULL
+         AND os.code <> 'CANCELED'
+         AND ps.code NOT IN ('CANCELED', 'REFUNDED')
+        THEN o.id
+    END) AS order_count,
+    COUNT(DISTINCT CASE
+        WHEN os.code = 'CANCELED'
+          OR ps.code IN ('CANCELED', 'REFUNDED')
+        THEN o.id
+    END) AS canceled_order_count,
+    COALESCE(SUM(CASE WHEN p.paid_at IS NOT NULL THEN p.amount ELSE 0 END), 0) AS gross_sales_amount,
+    COALESCE(SUM(CASE
+        WHEN p.paid_at IS NOT NULL
+         AND (os.code = 'CANCELED' OR ps.code IN ('CANCELED', 'REFUNDED'))
+        THEN p.amount ELSE 0
+    END), 0) AS canceled_amount,
+    COALESCE(SUM(CASE WHEN p.paid_at IS NOT NULL THEN p.amount ELSE 0 END), 0)
+      - COALESCE(SUM(CASE
+          WHEN p.paid_at IS NOT NULL
+           AND (os.code = 'CANCELED' OR ps.code IN ('CANCELED', 'REFUNDED'))
+          THEN p.amount ELSE 0
+        END), 0) AS net_sales_amount
+FROM orders o
+LEFT JOIN payment p ON p.order_id = o.id
+LEFT JOIN common_code ps ON ps.id = p.status_id
+LEFT JOIN common_code os ON os.id = o.status_id
+GROUP BY
+    CAST(COALESCE(p.paid_at, o.created_at) AS DATE),
+    HOUR(COALESCE(p.paid_at, o.created_at));
+
+CREATE OR REPLACE VIEW vw_top_menu_daily AS
+SELECT
+    CAST(COALESCE(p.paid_at, o.created_at) AS DATE) AS sales_date,
+    m.id AS menu_id,
+    m.name AS menu_name,
+    SUM(oi.quantity) AS quantity,
+    COUNT(DISTINCT o.id) AS order_count,
+    SUM(oi.price * oi.quantity) AS sales_amount
+FROM orders o
+JOIN order_item oi ON oi.order_id = o.id
+JOIN menu m ON m.id = oi.menu_id
+LEFT JOIN payment p ON p.order_id = o.id
+LEFT JOIN common_code ps ON ps.id = p.status_id
+LEFT JOIN common_code os ON os.id = o.status_id
+WHERE p.paid_at IS NOT NULL
+  AND os.code <> 'CANCELED'
+  AND ps.code NOT IN ('CANCELED', 'REFUNDED')
+GROUP BY CAST(COALESCE(p.paid_at, o.created_at) AS DATE), m.id, m.name;
+
+CREATE OR REPLACE VIEW vw_top_menu_hourly AS
+SELECT
+    CAST(COALESCE(p.paid_at, o.created_at) AS DATE) AS sales_date,
+    HOUR(COALESCE(p.paid_at, o.created_at)) AS sales_hour,
+    m.id AS menu_id,
+    m.name AS menu_name,
+    SUM(oi.quantity) AS quantity,
+    COUNT(DISTINCT o.id) AS order_count,
+    SUM(oi.price * oi.quantity) AS sales_amount
+FROM orders o
+JOIN order_item oi ON oi.order_id = o.id
+JOIN menu m ON m.id = oi.menu_id
+LEFT JOIN payment p ON p.order_id = o.id
+LEFT JOIN common_code ps ON ps.id = p.status_id
+LEFT JOIN common_code os ON os.id = o.status_id
+WHERE p.paid_at IS NOT NULL
+  AND os.code <> 'CANCELED'
+  AND ps.code NOT IN ('CANCELED', 'REFUNDED')
+GROUP BY
+    CAST(COALESCE(p.paid_at, o.created_at) AS DATE),
+    HOUR(COALESCE(p.paid_at, o.created_at)),
+    m.id,
+    m.name;
+
 SHOW FULL TABLES;
 
 SHOW full VIEWs;
