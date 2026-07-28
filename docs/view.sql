@@ -229,6 +229,8 @@ ORDER BY o.created_at DESC;
 --     - 주의: 매칭 행이 0개면 JSON_ARRAYAGG 결과는 NULL
 --         (필요하면 COALESCE(..., JSON_ARRAY()) 로 빈 배열 [] 처리)
 -- -----------------------------------------------------------------------------
+-- 2026-07-28 수정: 제외 재료는 item_exclusion만 정본으로 사용한다.
+--   과거 REQUEST("빼기") 옵션은 optionItems에서 제외해 이중 표시를 막는다.
 -- 2026-07-24 수정: Admin OrderDetailPanel.jsx / rest-api-spec.md API-007 실제 필드명에 맞춤
 --   options→optionItems, exclusions→excludedIngredients, optItemId→optionItemId,
 --   ingId→ingredientId, price 컬럼을 unit_price로 별칭(품목 단가 명시)
@@ -250,8 +252,11 @@ SELECT
         FROM
             order_item_option oio
             JOIN opt_item oit ON oit.id = oio.opt_item_id
+            JOIN opt_group og ON og.id = oit.opt_group_id
+            JOIN common_code gt ON gt.id = og.group_type_id
         WHERE
             oio.order_item_id = oi.id
+            AND gt.code <> 'REQUEST'
     ) AS option_items,
     -- 이 주문라인의 제외재료들을 [{...}, {...}] 한 컬럼으로
     (
@@ -453,7 +458,7 @@ FROM
     JOIN opt_group og ON og.id = oit.opt_group_id
     JOIN common_code gt ON gt.id = og.group_type_id
 WHERE
-    gt.code NOT IN('BASE', 'DRESSING')
+    gt.code NOT IN('BASE', 'DRESSING', 'REQUEST')
 UNION ALL
 SELECT ie.order_item_id, 'exclude' AS tone, i.name AS label
 FROM item_exclusion ie
