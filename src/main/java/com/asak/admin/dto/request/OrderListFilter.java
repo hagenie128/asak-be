@@ -10,6 +10,7 @@ import lombok.Getter;
 @Builder
 public class OrderListFilter {
   private String status;
+  private String paymentStatus;
   private String orderType;
   private LocalDateTime startAt;
   private LocalDateTime endAt;

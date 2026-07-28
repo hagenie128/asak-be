@@ -32,6 +32,7 @@
 <sql id="orderListWhere">
   <where>
     <if test="filter.status != null">AND status_code = #{filter.status}</if>
+    <if test="filter.paymentStatus != null">AND payment_status_code = #{filter.paymentStatus}</if>
     <if test="filter.orderType != null">AND order_type_code = #{filter.orderType}</if>
     <if test="filter.startAt != null">AND created_at &gt;= #{filter.startAt}</if>
     <if test="filter.endAt != null">AND created_at &lt; #{filter.endAt}</if>
