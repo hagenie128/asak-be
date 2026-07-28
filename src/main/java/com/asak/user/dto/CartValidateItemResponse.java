@@ -14,7 +14,7 @@ import lombok.Setter;
 //       {
 //         "menuId": 364,
 //         "quantity": 1,
-//         "unitPrice": 8900,
+//         "unitAmount": 8900,
 //         "optionItems": [
 //           {
 //             "optionItemId": 269,
@@ -33,7 +33,7 @@ public class CartValidateItemResponse {
 
     private Long menuId;
     private Integer quantity;
-    private Integer unitPrice;
+    private Integer unitAmount;
     private List<CartValidateOptionItemResponse> optionItems;
     private List<Long> excludedIngredientIds;
 

@@ -10,7 +10,7 @@ import lombok.Getter;
 // Request: orderType(TAKE_OUT/EAT_IN),
 //         items[].{menuId, quantity,
 //              optionItems[], excludedIngredientIds[]}
-// Response data: orderId, orderNo, totalAmount, status(RECEIVED/PREPARING/COMPLETED)
+// Response data: orderId, orderNo, totalAmount, orderStatus(RECEIVED/PREPARING/COMPLETED)
 //          — orderType, paymentStatus는 응답에 없음
 
 @Getter
