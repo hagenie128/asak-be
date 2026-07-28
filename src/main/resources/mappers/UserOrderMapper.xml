@@ -13,15 +13,15 @@
 
         select
             oi.id AS optionItemId,
-            oi.extra_price AS extraPrice,
+            oi.add_price AS extraPrice,
             oi.sold_out AS isSoldOut
 
         from menu_opt_policy mop
         join opt_policy op
-        on mop.opt_policy_id = op.id
+        on mop.policy_id = op.id
 
         join opt_policy_item opi
-        on op.id = opi.opt_policy_id
+        on op.id = opi.policy_id
 
         join opt_item oi
         on opi.opt_item_id = oi.id
