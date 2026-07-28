@@ -29,54 +29,13 @@
   WHERE order_id = #{orderId}
 </select>
 
-<sql id="orderListWhere">
+<sql id="orderListBaseWhere">
   <where>
-    <if test="filter.status != null">AND status_code = #{filter.status}</if>
-    <if test="filter.paymentStatus != null">AND payment_status_code = #{filter.paymentStatus}</if>
-    <if test="filter.orderType != null">AND order_type_code = #{filter.orderType}</if>
-    <if test="filter.startAt != null">AND created_at &gt;= #{filter.startAt}</if>
-    <if test="filter.endAt != null">AND created_at &lt; #{filter.endAt}</if>
-    <if test="filter.keyword != null">
-      AND (order_no LIKE CONCAT('%', #{filter.keyword}, '%')
-           OR menu_summary LIKE CONCAT('%', #{filter.keyword}, '%'))
-    </if>
-  </where>
-</sql>
-
-<select id="getOrderList" resultType="com.asak.admin.dto.response.OrderListResponse">
-  SELECT order_id AS orderId, order_no AS orderNo, order_type_code AS orderType,
-         status_code AS orderStatus, payment_status_code AS paymentStatus,
-         total_price AS totalAmount, created_at AS createdAt,
-         item_count AS itemCount, menu_summary AS menuSummary
-  FROM vw_order_list_summary
-  <include refid="orderListWhere"/>
-  ORDER BY created_at DESC
-  LIMIT #{filter.limit} OFFSET #{filter.offset}
-</select>
-
-<select id="countOrderList" resultType="long">
-  SELECT COUNT(*)
-  FROM orders o
-  JOIN common_code ot ON ot.id = o.order_type_id
-  JOIN common_code st ON st.id = o.status_id
-  LEFT JOIN payment p ON p.order_id = o.id
-  LEFT JOIN common_code ps ON ps.id = p.status_id
-  <where>
-    <if test="filter.status != null">
-      AND st.code = #{filter.status}
-    </if>
-    <if test="filter.paymentStatus != null">
-      AND ps.code = #{filter.paymentStatus}
-    </if>
-    <if test="filter.orderType != null">
-      AND ot.code = #{filter.orderType}
-    </if>
-    <if test="filter.startAt != null">
-      AND o.created_at &gt;= #{filter.startAt}
-    </if>
-    <if test="filter.endAt != null">
-      AND o.created_at &lt; #{filter.endAt}
-    </if>
+    <if test="filter.status != null">AND st.code = #{filter.status}</if>
+    <if test="filter.paymentStatus != null">AND ps.code = #{filter.paymentStatus}</if>
+    <if test="filter.orderType != null">AND ot.code = #{filter.orderType}</if>
+    <if test="filter.startAt != null">AND o.created_at &gt;= #{filter.startAt}</if>
+    <if test="filter.endAt != null">AND o.created_at &lt; #{filter.endAt}</if>
     <if test="filter.keyword != null">
       AND (
         o.order_no LIKE CONCAT('%', #{filter.keyword}, '%')
@@ -90,6 +49,69 @@
       )
     </if>
   </where>
+</sql>
+
+<select id="getOrderList" resultType="com.asak.admin.dto.response.OrderListResponse">
+  WITH paged_orders AS (
+    SELECT o.id AS order_id,
+           o.order_no,
+           o.created_at,
+           o.total_price,
+           ot.code AS order_type_code,
+           st.code AS status_code,
+           ps.code AS payment_status_code
+    FROM orders o
+    JOIN common_code ot ON ot.id = o.order_type_id
+    JOIN common_code st ON st.id = o.status_id
+    LEFT JOIN payment p ON p.order_id = o.id
+    LEFT JOIN common_code ps ON ps.id = p.status_id
+    <include refid="orderListBaseWhere"/>
+    ORDER BY o.created_at DESC
+    LIMIT #{filter.limit} OFFSET #{filter.offset}
+  ),
+  item_summary AS (
+    SELECT oi.order_id,
+           COUNT(*) AS line_count,
+           SUM(oi.quantity) AS item_count,
+           SUBSTRING_INDEX(
+             GROUP_CONCAT(m.name ORDER BY oi.id SEPARATOR '||'),
+             '||',
+             1
+           ) AS first_menu_name
+    FROM order_item oi
+    JOIN menu m ON m.id = oi.menu_id
+    JOIN paged_orders po ON po.order_id = oi.order_id
+    GROUP BY oi.order_id
+  )
+  SELECT po.order_id AS orderId,
+         po.order_no AS orderNo,
+         po.order_type_code AS orderType,
+         po.status_code AS orderStatus,
+         po.payment_status_code AS paymentStatus,
+         po.total_price AS totalAmount,
+         po.created_at AS createdAt,
+         item_summary.item_count AS itemCount,
+         CASE
+           WHEN item_summary.line_count > 1 THEN CONCAT(
+             item_summary.first_menu_name,
+             ' 외 ',
+             item_summary.line_count - 1
+           )
+           ELSE item_summary.first_menu_name
+         END AS menuSummary
+  FROM paged_orders po
+  JOIN item_summary ON item_summary.order_id = po.order_id
+  ORDER BY po.created_at DESC
+</select>
+
+<select id="countOrderList" resultType="long">
+  SELECT COUNT(*)
+  FROM orders o
+  JOIN common_code ot ON ot.id = o.order_type_id
+  JOIN common_code st ON st.id = o.status_id
+  LEFT JOIN payment p ON p.order_id = o.id
+  LEFT JOIN common_code ps ON ps.id = p.status_id
+  <include refid="orderListBaseWhere"/>
 </select>
 
 <select id="getLiveOrders" resultType="com.asak.admin.dto.response.LiveOrderResponse">
