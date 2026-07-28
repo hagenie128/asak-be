@@ -66,7 +66,7 @@ public class UserMenuController {
 
     // 메뉴 디테일 목록 조회
     @GetMapping("menuDetail/{menuId}")
-    public ApiResponse<MenuDetailResponse> getMenuDetail(@PathVariable Long menuId) {
+    public ApiResponse<MenuDetailResponse> getMenuDetail(@PathVariable("menuId") Long menuId) {
 
         MenuDetailResponse menuDetailResponse = menuService.selectMenuDetail(menuId);
 

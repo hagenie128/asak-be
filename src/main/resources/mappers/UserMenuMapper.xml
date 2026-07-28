@@ -46,7 +46,7 @@
             i.id as ingredientId,
             i.name as ingName,
             role.code as role,
-            unit,name as unit
+            unit.name as unit
         from menu_ing mi
 
         join ing i 
@@ -70,9 +70,9 @@
             groupType.code as groupType,
             
             case
-                when op.max_select  = 1 then 'SINGLE',
+                when op.max_select  = 1 then 'SINGLE'
                 else 'MULTIPLE'
-            end as selectType
+            end as selectType,
 
             op.min_select as minSelect,
             op.max_select as maxSelect,
@@ -89,7 +89,7 @@
         on op.opt_group_id = og.id
 
         join common_code groupType
-        on op.group_type_id = groupType.id
+        on og.group_type_id = groupType.id
 
 
         where mop.menu_id = #{ menuId }
