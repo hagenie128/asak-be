@@ -67,7 +67,7 @@
 | API-006 | POST | `/api/kiosk/payments` | 가상 결제 승인 |
 | API-014 | GET | `/api/kiosk/payment-methods` | 키오스크 결제수단 목록 |
 
-주문 요청은 `orderType`, `items[].menuId`, `quantity`, `selectedOptionItemIds`, `excludedIngredientIds`를 사용한다. (ORDER/CART API Contract와 동일) 클라이언트가 결제 금액을 정본으로 보내지 않는다.
+주문 요청은 `orderType`, `items[].menuId`, `quantity`, `optionItems[].optionItemId`, `optionItems[].quantity`, `excludedIngredientIds`를 사용한다. 현재 DTO와 Bruno도 이 모양을 따른다. 클라이언트가 결제 금액을 정본으로 보내지 않는다.
 
 ### 관리자
 

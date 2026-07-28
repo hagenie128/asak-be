@@ -33,5 +33,7 @@ docs {
   # API-004
   POST /api/kiosk/cart/validate
   CART_API_AND_DATA_CONTRACT.md
-  요청 필드: selectedOptionItemIds, excludedIngredientIds (optionItems 아님)
+  요청 옵션: items[].optionItems[].{optionItemId, quantity}
+  요청 재료 제외: items[].excludedIngredientIds
+  응답 금액: totalAmount, items[].unitAmount
 }

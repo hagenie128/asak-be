@@ -1,6 +1,6 @@
 # 백엔드 정본 참조 팩
 
-> 상태: Current · 확인일: 2026-07-23
+> 상태: Current · 확인일: 2026-07-28
 > 목적: API를 구현할 때 Product Bible, Bruno, Admin/Kiosk mock, 현재 소스를 다시
 > 흩어져 찾지 않도록 **실행에 필요한 내용만** 한 곳에 모은다. 이 문서는 계약 요약이며,
 > 소스 코드를 대신하거나 구현 완료를 뜻하지 않는다.
@@ -21,10 +21,10 @@
 | 항목 | 현재 확인값 | 구현 시 의미 |
 | --- | --- | --- |
 | 빌드 | Spring Boot `4.0.7`, Java `25`, Gradle | Product Bible의 4.1.0 표기보다 실제 `build.gradle`을 우선한다. 버전을 임의 변경하지 않는다. |
-| HTTP API | Controller에 mapping annotation 없음 | Bruno 요청은 모두 `SPEC_ONLY`; 2xx 응답을 기대하지 않는다. |
+| HTTP API | health, Kiosk 장바구니 검증·주문 생성, Admin 주문 조회·메뉴 조회 Controller mapping 존재 | 주문 생성은 저장/응답 조립이 미완료다. 결제·상태 변경·취소 등 mapping이 없는 Bruno 요청은 `SPEC_ONLY`로 유지한다. |
 | 공통 응답 | `ApiResponse<T>`에 `success`, `status`, `code`, `message`, `data` 필드 존재 | factory·예외 handler와 실제 Controller 적용은 남아 있다. |
 | 페이지 응답 | `PageResult`는 빈 골격 | 목록 API 전 page 0/1-base, size, totalElements/totalPages 모양을 먼저 확정한다. |
-| 주문 DTO | `CreateOrderRequest`, `OrderItemRequest`, `OptionItemRequest`, `CreateOrderResponse` 존재 | validation·저장·API 계약 정렬은 아직 필요하다. |
+| 주문 DTO | `CreateOrderRequest`, `OrderItemRequest`, `OptionItemRequest`, `CreateOrderResponse` 존재 | 요청 옵션은 `optionItems[]`를 사용한다. 주문 생성 DTO의 상태 필드는 현재 `status`이며, 저장·응답 조립은 아직 필요하다. |
 | 상태 enum | `OrderStatus`: RECEIVED/PREPARING/COMPLETED/CANCELED, `PaymentStatus`: READY/APPROVED/FAILED/CANCELED/REFUNDED | 신규 API는 이 코드값을 사용한다. |
 
 **현재 파일 위치**
@@ -72,9 +72,9 @@
 POST /api/kiosk/orders
 ```
 
-구현에 필요한 요청 데이터는 `orderType`, `items[].menuId`, `quantity`, `optionItems`,
-`excludedIngredientIds`다. 서버는 메뉴·옵션·필수 옵션·품절·수량을 다시 검사하고
-`totalAmount`를 계산한다. 성공 응답에는 최소 `orderId`, `orderNo`, `orderStatus`,
+구현에 필요한 요청 데이터는 `orderType`, `items[].menuId`, `quantity`, `optionItems[]`
+(`optionItemId`, `quantity`), `excludedIngredientIds`다. 서버는 메뉴·옵션·필수 옵션·품절·수량을 다시 검사하고
+`totalAmount`를 계산한다. 현재 DTO 응답에는 최소 `orderId`, `orderNo`, `status`,
 `paymentStatus`, `totalAmount`, `waitingOrderCount`가 필요하다.
 
 저장 순서는 **주문 헤더 → 주문 아이템 → 선택 옵션/재료 제외**이며 하나의 transaction으로
@@ -139,7 +139,7 @@ PREPARING → COMPLETED
 
 ### 목록·상세·취소 — API-007/022/024
 
-- 목록 filter: `status`, `orderType`, `startDate`, `endDate`, `keyword`, `page`, `size`
+- 목록 filter: `orderStatus`, `paymentStatus`, `orderType`, `dateFrom`, `dateTo`, `keyword`, `page`, `size`
 - 상세: item, option, payment, timestamp를 조립하고 없으면 `404 ORDER_NOT_FOUND`
 - 취소는 `RECEIVED` 또는 `PREPARING`일 때만 가능하다.
 - 취소 시 order=`CANCELED` + `canceledAt`, 승인 결제라면 payment=`REFUNDED` +
@@ -197,8 +197,8 @@ API는 항상 정본 값을 반환한다. adapter가 legacy mock을 변환하며
 
 | 항목 | 현재 차이 | 이 문서의 처리 |
 | --- | --- | --- |
-| 주문 요청 옵션 | Product Bible `ORDER_API_CONTRACT`는 `selectedOptionItemIds`, 현재 DTO·구현 계획은 `optionItems[]` | 현재 구현 계획과 DTO에 맞춘 `optionItems[]`를 작업 기준으로 두되, API-005 구현 전 최종 contract를 팀이 확정한다. |
-| 주문 생성 응답 상태명 | Product Bible은 `orderStatus`, 현재 `CreateOrderResponse` 골격은 `status` | 신규 API response는 Product Bible/프론트에 맞춰 `orderStatus`로 통일할지 먼저 결정한다. 골격 필드만 보고 고정하지 않는다. |
+| 주문 요청 옵션 | Product Bible `ORDER_API_CONTRACT`에는 `selectedOptionItemIds` 표기가 남아 있고, 현재 DTO·구현 계획·Bruno는 `optionItems[]`를 사용한다. | 실제 백엔드 요청 계약은 `optionItems[]`로 통일한다. Product Bible 원문 갱신은 별도 문서 작업으로 남긴다. |
+| 주문 생성 상태 필드 | Product Bible은 `orderStatus`를 사용하지만, 현재 `CreateOrderResponse`는 `status`다. | 이번 Bruno는 실제 DTO의 `status`를 따른다. `orderStatus` 통일은 DTO·호출부 변경과 함께 별도 구현 작업으로 처리한다. |
 | 메뉴 관리 | Product Bible Draft에 `categoryCode`, `isActive`, DELETE가 있음 | 실제 DB에는 category code와 `menu.active` 근거가 없고 삭제 정책도 보류다. API-012/013만 현재 합의 범위로 구현한다. |
 | 프레임워크 버전 | Product Bible은 Spring Boot 4.1.0, `build.gradle`은 4.0.7 | 실제 `build.gradle` 유지. 별도 팀 승인 없이 올리지 않는다. |
 

@@ -12,7 +12,7 @@
 | API-008 | `PATCH /api/admin/orders/{orderId}/status` | 허용 상태 전이와 동시 변경 충돌 처리 | 404, 409 상태 전이 충돌 |
 | API-024 | `PATCH /api/admin/orders/{orderId}/cancel` | 주문 취소·승인 결제 환불·시각 저장 | 409 `ORDER_CANCEL_NOT_ALLOWED` |
 
-`RECEIVED`, `PREPARING`에서만 취소할 수 있다. 승인 결제는 `REFUNDED`와 `refundedAt`을 기록하며 `paidAt`은 보존한다.
+`RECEIVED`, `PREPARING`에서만 취소할 수 있다. 승인 결제는 `REFUNDED`와 `refundedAt`을 기록하며 `approvedAt`은 보존한다.
 
 ## 메뉴·품절·결제수단
 

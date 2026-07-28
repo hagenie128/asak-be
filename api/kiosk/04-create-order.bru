@@ -21,7 +21,9 @@ body:json {
       {
         "menuId": {{menuId}},
         "quantity": 1,
-        "selectedOptionItemIds": [269],
+        "optionItems": [
+          { "optionItemId": 269, "quantity": 1 }
+        ],
         "excludedIngredientIds": []
       }
     ]
@@ -32,6 +34,8 @@ docs {
   # API-005
   POST /api/kiosk/orders
   ORDER_API_CONTRACT.md · IMPLEMENTATION_PLAN
-  응답: totalAmount (orders.total_price 매핑). 클라이언트가 금액 보내지 않음.
+  요청 옵션: items[].optionItems[].{optionItemId, quantity}
+  현재 DTO 응답: totalAmount (orders.total_price 매핑), status.
+  클라이언트가 금액 보내지 않음. 현재 저장/응답 조립은 미완료이므로 성공 응답 assert를 두지 않음.
   orderType: EAT_IN | TAKE_OUT
 }
