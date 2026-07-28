@@ -1,15 +1,26 @@
-// 해당 페이지는 되도록이면 마지막 부분 -> 기능 구현 다 하고 추후 작업
-// but url로 어느 부분까지는 접근을 해줄지 정도는 적어두는게 좋음
-// 고객 키오스크는 jwt(키오스크 단말 자체 토큰)로 인증 X , 관리자만 O 적용
-
 package com.asak.common.config;
+
+import java.util.List;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+
+import lombok.RequiredArgsConstructor;
 
 @Configuration
+@EnableWebSecurity
+@RequiredArgsConstructor
 public class SecurityConfig {
 
   @Bean
@@ -18,10 +29,71 @@ public class SecurityConfig {
 
     return http
         .csrf(csrf -> csrf.disable())
-        .authorizeHttpRequests(auth -> auth
-            .anyRequest().permitAll())
+
+        .cors(cors -> cors.configurationSource(corsConfigurationSource()))
+
+        // 추후 관리자 JWT 인증을 사용할 예정이므로 세션은 사용하지 않음
+        .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+
+        // JWT 인증 구현 전까지 모든 API 임시 허용
+        .authorizeHttpRequests(auth -> auth.anyRequest().permitAll())
+
         .formLogin(form -> form.disable())
         .httpBasic(basic -> basic.disable())
+
         .build();
+  }
+
+  @Bean
+  public CorsConfigurationSource corsConfigurationSource() {
+
+    CorsConfiguration config = new CorsConfiguration();
+
+    config.setAllowedOrigins(List.of(
+        "http://localhost:5173",
+        "http://localhost:5174",
+        "http://localhost:5175",
+        "http://localhost:5176",
+        "http://localhost:5177",
+        "http://localhost:5178"));
+
+    config.setAllowedMethods(List.of(
+        "GET",
+        "POST",
+        "PUT",
+        "PATCH",
+        "DELETE",
+        "OPTIONS"));
+
+    config.setAllowedHeaders(List.of(
+        "Authorization",
+        "Content-Type",
+        "Accept",
+        "X-Requested-With"));
+
+    config.setAllowCredentials(true);
+    config.setMaxAge(3600L);
+
+    UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+
+    // 모든 API 경로에 CORS 설정 적용
+    source.registerCorsConfiguration("/**", config);
+
+    return source;
+  }
+
+  @Bean
+  public PasswordEncoder passwordEncoder() {
+    return new BCryptPasswordEncoder();
+  }
+
+  /**
+   * 추후 관리자 로그인 구현 시 사용.
+   * 아이디/비밀번호 인증을 수행한다.
+   */
+  @Bean
+  public AuthenticationManager authenticationManager(
+      AuthenticationConfiguration config) throws Exception {
+    return config.getAuthenticationManager();
   }
 }
