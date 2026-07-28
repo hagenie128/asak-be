@@ -34,29 +34,26 @@ public class UserOrderService {
     //장바구니 검증 api-004
         public CartValidateResponse cartValidate(CartValidateRequest request) {
 
-            //장바구니 전체 가격
             int totalPrice = 0;
-
-            // 장바구니 검증 후 메뉴를 담을 배열
             List<CartValidateItemResponse> items = new ArrayList<>();
 
             for (CartValidateItemRequest item : request.getItems()) {
 
+                // 1단계. 메뉴 존재 여부 확인
                 MenuQueryDTO menu = orderMapper.selectByMenuId(item.getMenuId());
                 if (menu == null) {
                     throw new CustomException(ErrorCode.MENU_NOT_FOUND);
                 }
+
+                // 2단계. 품절 확인
                 if (Boolean.TRUE.equals(menu.isSoldOut())) {
                     throw new CustomException(ErrorCode.MENU_SOLD_OUT);
                 }
 
-                // 메뉴 기본 가격
                 int unitPrice = menu.getPrice();
+                List<CartValidateOptionItemResponse> validatedOptions = new ArrayList<>();
 
-                // 메뉴의 옵션 아이템을 담을 배열
-                List<CartValidateOptionItemResponse> menuItemOptions = new ArrayList<>();
-
-                // 메뉴의 옵션 아이템을 반복
+                // 3단계. 옵션 검증
                 for (OptionItemRequest option : item.getOptionItems()) {
                     OptionItemQueryDTO optionItem =
                             orderMapper.findByOptionItem(item.getMenuId(), option.getOptionItemId());
@@ -70,18 +67,31 @@ public class UserOrderService {
                     CartValidateOptionItemResponse optionResponse = new CartValidateOptionItemResponse();
                     optionResponse.setOptionItemId(option.getOptionItemId());
                     optionResponse.setQuantity(option.getQuantity());
-                    menuItemOptions.add(optionResponse);
+                    validatedOptions.add(optionResponse);
                 }
 
+                // 3-2단계. 제외 재료 검증
+                List<Long> excludedIds = item.getExcludedIngredientIds();
+                if (excludedIds != null) {
+                    for (Long ingredientId : excludedIds) {
+                        Long validIngId = orderMapper.findRemovableIngredient(item.getMenuId(), ingredientId);
+                        if (validIngId == null) {
+                            throw new CustomException(ErrorCode.INVALID_INGREDIENT_EXCLUSION);
+                        }
+                    }
+                }
+
+                // 4단계. 수량 적용
                 int itemTotalPrice = unitPrice * item.getQuantity();
                 totalPrice += itemTotalPrice;
 
+                // 5단계. 응답 객체 생성
                 CartValidateItemResponse itemResponse = new CartValidateItemResponse();
                 itemResponse.setMenuId(item.getMenuId());
                 itemResponse.setQuantity(item.getQuantity());
                 itemResponse.setUnitPrice(unitPrice);
-                itemResponse.setOptionItems(menuItemOptions);
-                itemResponse.setExcludedIngredientIds(item.getExcludedIngredientIds()); // TODO: 검증 필요
+                itemResponse.setOptionItems(validatedOptions);
+                itemResponse.setExcludedIngredientIds(excludedIds);
 
                 items.add(itemResponse);
             }

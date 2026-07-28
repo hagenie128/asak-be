@@ -29,8 +29,15 @@
         where mop.menu_id = #{menuId}
         and oi.id = #{optionItemId}
 
+    </select>
 
-
+    <!-- 제외할 수 있는 재료 조회 -->
+    <select id="findRemovableIngredient" resultType="java.lang.Long">
+        select ing_id
+        from menu_ing
+        where menu_id = #{menuId}
+        and ing_id = #{ingId}
+        and can_remove = 1
     </select>
 
 

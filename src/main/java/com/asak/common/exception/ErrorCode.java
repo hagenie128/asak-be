@@ -9,6 +9,9 @@ public enum ErrorCode {
   INVALID_OPTION_SELECTION(
       "INVALID_OPTION_SELECTION", HttpStatus.BAD_REQUEST, "옵션 선택이 유효하지 않습니다."),
 
+  INVALID_INGREDIENT_EXCLUSION(
+      "INVALID_INGREDIENT_EXCLUSION", HttpStatus.BAD_REQUEST, "제외할 수 없는 재료입니다."),
+
   MENU_NOT_FOUND("MENU_NOT_FOUND", HttpStatus.NOT_FOUND, "메뉴를 찾을 수 없습니다."),
   MENU_SOLD_OUT("MENU_SOLD_OUT", HttpStatus.CONFLICT, "메뉴가 품절되었습니다."),
 
