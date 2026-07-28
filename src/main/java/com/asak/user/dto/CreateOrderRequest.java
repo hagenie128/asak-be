@@ -3,17 +3,22 @@ package com.asak.user.dto;
 import com.asak.common.enums.OrderType;
 import java.util.List;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 // 프론트앤드에서 받아온 request를 받는 그릇 역할
-// ----[API정보 및 명세 작성]
-// Endpoint: POST /api/kiosk/orders
-// Request: orderType(TAKE_OUT/EAT_IN),
-//         items[].{menuId, quantity,
-//              optionItems[], excludedIngredientIds[]}
-// Response data: orderId, orderNo, totalAmount, orderStatus(RECEIVED/PREPARING/COMPLETED)
-//          — orderType, paymentStatus는 응답에 없음
+
+// {"orderType": "TAKE_OUT", 
+// "items": [
+//       {"menuId": 364, 
+//       "quantity": 1, 
+//       "optionItems": [], 
+//       "excludedIngredientIds": []}
+//     ]}
 
 @Getter
+@Setter
+@NoArgsConstructor
 public class CreateOrderRequest {
   private OrderType orderType;
   private List<OrderItemRequest> items;

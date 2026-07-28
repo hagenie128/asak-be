@@ -23,9 +23,11 @@ import com.asak.user.dto.query.OptionItemQueryDTO;
 import com.asak.user.mapper.UserOrderMapper;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
+@Transactional(readOnly = true)
 public class UserOrderService {
 
     private final UserOrderMapper orderMapper;
@@ -113,10 +115,56 @@ public class UserOrderService {
     // ⑤ totalAmount 계산
     // ⑥ orders INSERT
     // ⑦ 생성된 orderId 반환
+
+    // {"orderType": "TAKE_OUT", 
+    // "items": [
+    //       {"menuId": 364, 
+    //       "quantity": 1, 
+    //       "optionItems": [
+    //        {"optionItemId": 101,
+    //         "quantity": 1}
+    //    ],
+    //   "excludedIngredientIds": []}
+    //     ]}
     
     // 주문 생성  api-005
+    @Transactional(readOnly = false)
     public CreateOrderResponse createOrder(CreateOrderRequest request) {
         
+
+        //주문 총 가격
+        int totalAmount = 0;
+
+        //1. 메뉴의 품절 유무
+        for(OrderItemRequest item : request.getItems() ){
+
+            MenuQueryDTO menu = orderMapper.selectByMenuId(item.getMenuId());
+
+            if(menu == null){
+                throw new CustomException(ErrorCode.MENU_NOT_FOUND);
+            }
+            
+            if(menu.isSoldOut()){
+                throw new CustomException(ErrorCode.MENU_SOLD_OUT);
+            }
+
+            for(OptionItemRequest opi : item.getOptionItems()){
+                OptionItemQueryDTO opInfo =  orderMapper.findByOptionItem(item.getMenuId(),opi.getOptionItemId());
+                
+                if(opInfo == null){
+                    throw new CustomException(ErrorCode.INVALID_OPTION_SELECTION);
+                }
+
+                if(Boolean.TRUE.equals(opInfo.getIsSoldOut())){
+                    throw new CustomException(ErrorCode.INVALID_OPTION_SELECTION);
+                }
+    
+            }
+        }
+
+
+
+
         OrderType orderType = request.getOrderType();
         List<OrderItemRequest> items = request.getItems();
 

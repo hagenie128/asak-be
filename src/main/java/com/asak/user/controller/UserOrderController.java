@@ -52,7 +52,7 @@ public class UserOrderController {
     
 
 
-    //api-005
+    //주문 생성 (api-005)
     @PostMapping("/orders")
     public ApiResponse<CreateOrderResponse> createOrder(@RequestBody CreateOrderRequest request){
 
