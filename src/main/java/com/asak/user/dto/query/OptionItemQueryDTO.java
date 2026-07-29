@@ -14,7 +14,8 @@ import lombok.Setter;
 @Alias("optionItemQueryDTO")
 public class OptionItemQueryDTO {
 
-       private Long optionItemId;
+    private Long policyId;
+    private Long optionItemId;
     private Integer extraPrice;
     private Boolean isSoldOut;
 

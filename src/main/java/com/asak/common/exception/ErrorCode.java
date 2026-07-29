@@ -9,6 +9,15 @@ public enum ErrorCode {
   INVALID_OPTION_SELECTION(
       "INVALID_OPTION_SELECTION", HttpStatus.BAD_REQUEST, "옵션 선택이 유효하지 않습니다."),
 
+  OPTION_ITEM_SOLD_OUT(
+      "OPTION_ITEM_SOLD_OUT", HttpStatus.CONFLICT, "선택한 옵션 아이템이 품절되었습니다."),
+
+  ITEM_QUANTITY_LIMIT_EXCEEDED(
+      "ITEM_QUANTITY_LIMIT_EXCEEDED", HttpStatus.BAD_REQUEST, "아이템 수량 제한 9개를 초과했습니다."),
+
+  CART_QUANTITY_LIMIT_EXCEEDED(
+      "CART_QUANTITY_LIMIT_EXCEEDED", HttpStatus.BAD_REQUEST, "장바구니 전체 수량 제한 30개를 초과했습니다."),
+
   INVALID_INGREDIENT_EXCLUSION(
       "INVALID_INGREDIENT_EXCLUSION", HttpStatus.BAD_REQUEST, "제외할 수 없는 재료입니다."),
 

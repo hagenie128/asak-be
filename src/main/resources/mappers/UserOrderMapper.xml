@@ -12,6 +12,7 @@
     <select id="findByOptionItem" resultType="optionItemQueryDTO">
 
         select
+            op.id AS policyId,
             oi.id AS optionItemId,
             oi.add_price AS extraPrice,
             oi.sold_out AS isSoldOut
@@ -31,12 +32,25 @@
 
     </select>
 
+    <!-- 메뉴에 연결된 옵션 정책의 선택 조건 조회 -->
+    <select id="findOptionPoliciesByMenuId" resultType="optionPolicyQueryDTO">
+        select
+            op.id AS policyId,
+            op.min_select AS minSelect,
+            op.max_select AS maxSelect,
+            (mop.required = 1 OR op.required = 1) AS isRequired
+        from menu_opt_policy mop
+        join opt_policy op
+            on mop.policy_id = op.id
+        where mop.menu_id = #{menuId}
+    </select>
+
     <!-- 제외할 수 있는 재료 조회 -->
     <select id="findRemovableIngredient" resultType="java.lang.Long">
         select ing_id
         from menu_ing
         where menu_id = #{menuId}
-        and ing_id = #{ingId}
+        and ing_id = #{ingredientId}
         and can_remove = 1
     </select>
 
