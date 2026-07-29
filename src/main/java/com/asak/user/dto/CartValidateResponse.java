@@ -16,7 +16,7 @@ import lombok.Setter;
 //       {
 //         "menuId": 364,
 //         "quantity": 1,
-//         "unitAmount": 8900,
+//         "unitPrice": 8900,
 //         "optionItems": [
 //           {
 //             "optionItemId": 269,

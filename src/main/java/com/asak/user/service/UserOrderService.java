@@ -52,7 +52,7 @@ public class UserOrderService {
                     throw new CustomException(ErrorCode.MENU_SOLD_OUT);
                 }
 
-                int unitAmount = menu.getPrice();
+                int unitPrice = menu.getPrice();
                 List<CartValidateOptionItemResponse> validatedOptions = new ArrayList<>();
 
                 // 3단계. 옵션 검증
@@ -64,7 +64,7 @@ public class UserOrderService {
                         throw new CustomException(ErrorCode.INVALID_OPTION_SELECTION);
                     }
 
-                    unitAmount += optionItem.getExtraPrice() * option.getQuantity();
+                    unitPrice += optionItem.getExtraPrice() * option.getQuantity();
 
                     CartValidateOptionItemResponse optionResponse = new CartValidateOptionItemResponse();
                     optionResponse.setOptionItemId(option.getOptionItemId());
@@ -84,14 +84,14 @@ public class UserOrderService {
                 }
 
                 // 4단계. 수량 적용
-                int lineAmount = unitAmount * item.getQuantity();
+                int lineAmount = unitPrice * item.getQuantity();
                 totalAmount += lineAmount;
 
                 // 5단계. 응답 객체 생성
                 CartValidateItemResponse itemResponse = new CartValidateItemResponse();
                 itemResponse.setMenuId(item.getMenuId());
                 itemResponse.setQuantity(item.getQuantity());
-                itemResponse.setUnitAmount(unitAmount);
+                itemResponse.setUnitPrice(unitPrice);
                 itemResponse.setOptionItems(validatedOptions);
                 itemResponse.setExcludedIngredientIds(excludedIds);
 
