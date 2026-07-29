@@ -41,7 +41,7 @@ public class UserOrderService {
         public CartValidateResponse cartValidate(CartValidateRequest request) {
 
             if (request == null) {
-                throw new CustomException(ErrorCode.INVALID_OPTION_SELECTION);
+                throw new CustomException(ErrorCode.CART_EMPTY);
             }
             validateItemQuantityLimits(request.getItems(), CartValidateItemRequest::getQuantity);
 
@@ -154,8 +154,8 @@ public class UserOrderService {
             List<T> items,
             Function<T, Integer> quantityExtractor) {
 
-        if (items == null) {
-            throw new CustomException(ErrorCode.INVALID_OPTION_SELECTION);
+        if (items == null || items.isEmpty()) {
+            throw new CustomException(ErrorCode.CART_EMPTY);
         }
 
         int totalQuantity = 0;

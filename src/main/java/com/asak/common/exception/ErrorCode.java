@@ -18,6 +18,9 @@ public enum ErrorCode {
   CART_QUANTITY_LIMIT_EXCEEDED(
       "CART_QUANTITY_LIMIT_EXCEEDED", HttpStatus.BAD_REQUEST, "장바구니 전체 수량 제한 30개를 초과했습니다."),
 
+  CART_EMPTY(
+      "CART_EMPTY", HttpStatus.BAD_REQUEST, "장바구니가 비어있습니다."),
+
   INVALID_INGREDIENT_EXCLUSION(
       "INVALID_INGREDIENT_EXCLUSION", HttpStatus.BAD_REQUEST, "제외할 수 없는 재료입니다."),
 
