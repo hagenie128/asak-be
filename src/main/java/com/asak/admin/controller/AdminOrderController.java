@@ -39,14 +39,14 @@ public class AdminOrderController {
 
   @GetMapping
   public ApiResponse<PageResult<OrderListResponse>> getOrders(
-      @RequestParam(defaultValue = "0") int page,
-      @RequestParam(defaultValue = "20") int size,
-      @RequestParam(required = false) String orderStatus,
-      @RequestParam(required = false) String paymentStatus,
-      @RequestParam(required = false) String orderType,
-      @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate dateFrom,
-      @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate dateTo,
-      @RequestParam(required = false) String keyword) {
+      @RequestParam(name = "page", defaultValue = "0") int page,
+      @RequestParam(name = "size", defaultValue = "20") int size,
+      @RequestParam(name = "orderStatus", required = false) String orderStatus,
+      @RequestParam(name = "paymentStatus", required = false) String paymentStatus,
+      @RequestParam(name = "orderType", required = false) String orderType,
+      @RequestParam(name = "dateFrom", required = false) LocalDate dateFrom,
+      @RequestParam(name = "dateTo", required = false) LocalDate dateTo,
+      @RequestParam(name = "keyword", required = false) String keyword) {
     PageResult<OrderListResponse> result = adminOrderService.getOrderList(
         page,
         size,
@@ -64,7 +64,7 @@ public class AdminOrderController {
 
   @GetMapping("/{orderId}")
   public ApiResponse<OrderDetailResponse> getOrderDetail(
-      @PathVariable Long orderId) {
+      @PathVariable(name = "orderId") Long orderId) {
     OrderDetailResponse result = adminOrderService.getOrderDetail(orderId);
     if (result == null) {
       return ApiResponse.error(ErrorCode.ORDER_NOT_FOUND);
