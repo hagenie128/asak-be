@@ -8,6 +8,8 @@ import org.springframework.stereotype.Service;
 import com.asak.admin.dto.request.OrderListFilter;
 import com.asak.admin.dto.response.OrderDetailResponse;
 import com.asak.admin.dto.response.OrderListResponse;
+import com.asak.admin.dto.response.LiveOrderListResponse;
+import com.asak.admin.dto.response.LiveOrderResponse;
 import com.asak.admin.mapper.AdminOrderMapper;
 import com.asak.common.response.PageResult;
 
@@ -22,8 +24,12 @@ public class AdminOrderService {
     this.adminOrderMapper = adminOrderMapper;
   }
 
-  public List<OrderListResponse> getActiveOrders() {
-    return adminOrderMapper.getActiveOrders();
+  public LiveOrderListResponse getLiveOrders() {
+    List<LiveOrderResponse> content = adminOrderMapper.getLiveOrders();
+    return LiveOrderListResponse.builder()
+        .content(content)
+        .totalElements(content.size())
+        .build();
   }
 
   public PageResult<OrderListResponse> getOrderList(

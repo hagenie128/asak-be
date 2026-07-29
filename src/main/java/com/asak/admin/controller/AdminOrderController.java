@@ -1,8 +1,6 @@
 package com.asak.admin.controller;
 
 import java.time.LocalDate;
-import java.util.List;
-
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -12,6 +10,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.asak.admin.dto.response.OrderDetailResponse;
 import com.asak.admin.dto.response.OrderListResponse;
+import com.asak.admin.dto.response.LiveOrderListResponse;
 import com.asak.admin.service.AdminOrderService;
 import com.asak.common.exception.ErrorCode;
 import com.asak.common.response.ApiResponse;
@@ -75,12 +74,12 @@ public class AdminOrderController {
         result);
   }
 
-  @GetMapping("/active")
-  public ApiResponse<List<OrderListResponse>> getActiveOrders() {
-    List<OrderListResponse> result = adminOrderService.getActiveOrders();
+  @GetMapping("/live")
+  public ApiResponse<LiveOrderListResponse> getLiveOrders() {
+    LiveOrderListResponse result = adminOrderService.getLiveOrders();
     return ApiResponse.success(
-        "ADMIN_ACTIVE_ORDERS_SUCCESS",
-        "관리자 활성 주문 조회 성공",
+        "ADMIN_LIVE_ORDERS_SUCCESS",
+        "관리자 Live 주문 조회 성공",
         result);
   }
 }

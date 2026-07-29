@@ -1,18 +1,18 @@
 meta {
-  name: Admin Active Orders
+  name: Admin Live Orders
   type: http
   seq: 1
 }
 
 get {
-  url: {{baseUrl}}/api/admin/orders/active
+  url: {{baseUrl}}/api/admin/orders/live
   body: none
   auth: none
 }
 
 docs {
   # API-021
-  GET /api/admin/orders/active
+  GET /api/admin/orders/live
   DB view: vw_order_live (+ base_dressing/tag)
   status IN (RECEIVED, PREPARING), createdAt ASC
 }
