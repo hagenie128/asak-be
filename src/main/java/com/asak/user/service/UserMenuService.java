@@ -39,7 +39,7 @@ public class UserMenuService {
         // group 담을 그릇 , groups반복할 객체
         for (OptionGroupResponse group : groups) {
             group.setItems(
-                    menuMapper.selectOptionItems(group.getOptionGroupId()));
+                    menuMapper.selectOptionItems(menuId,group.getOptionGroupId()));
         }
 
         response.setOptionGroups(groups);
