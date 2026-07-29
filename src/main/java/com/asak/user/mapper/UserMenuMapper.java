@@ -2,6 +2,8 @@ package com.asak.user.mapper;
 
 import java.util.List;
 
+import org.apache.ibatis.annotations.Param;
+
 import com.asak.user.dto.MenuDetailResponse;
 import com.asak.user.dto.CategoryResponse;
 import com.asak.user.dto.IngredientResponse;
@@ -25,7 +27,7 @@ public interface UserMenuMapper {
 
     List<OptionGroupResponse> selectOptionGroups(Long menuId);
 
-    List<OptionItemResponse> selectOptionItems(Long optionGroupId);
+    List<OptionItemResponse> selectOptionItems(@Param("menuId") Long menuId, @Param("policyId") Long policyId);
 
     Nutrition selectNutrition(Long menuId);
 

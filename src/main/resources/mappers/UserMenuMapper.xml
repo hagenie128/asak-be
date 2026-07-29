@@ -65,7 +65,7 @@
     <!-- 옵션 그룹 조회 -->
     <select id="selectOptionGroups" resultType="optionGroup">
         select
-            og.id as optionGroupId,
+            op.id AS optionGroupId,
             og.name as name,
             groupType.code as groupType,
             
@@ -126,7 +126,11 @@
         join ing
         on oi.ing_id = ing.id
 
-        where op.opt_group_id = #{ optionGroupId }
+        join menu_opt_policy mop
+        on op.id = mop.policy_id
+
+        where mop.menu_id = #{menuId}
+        and opi.policy_id = #{policyId}
 
         order by opi.sort_no
 
