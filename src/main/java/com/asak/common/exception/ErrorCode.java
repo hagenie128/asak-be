@@ -26,6 +26,8 @@ public enum ErrorCode {
 
   MENU_NOT_FOUND("MENU_NOT_FOUND", HttpStatus.NOT_FOUND, "메뉴를 찾을 수 없습니다."),
   MENU_SOLD_OUT("MENU_SOLD_OUT", HttpStatus.CONFLICT, "메뉴가 품절되었습니다."),
+  INVALID_ORDER_REQUEST("INVALID_ORDER_REQUEST",HttpStatus.BAD_REQUEST, "주문 요청이 올바르지 않습니다."),
+  INVALID_ORDER_TYPE("INVALID_ORDER_TYPE",HttpStatus.BAD_REQUEST,"올바른 주문 유형이 아닙니다."),
 
   ORDER_PRICE_CHANGED("ORDER_PRICE_CHANGED", HttpStatus.CONFLICT, "주문 가격이 변경되었습니다."),
   ORDER_NOT_FOUND("ORDER_NOT_FOUND", HttpStatus.NOT_FOUND, "주문을 찾을 수 없습니다."),

@@ -28,7 +28,7 @@ import org.apache.ibatis.type.Alias;
 @Setter
 @NoArgsConstructor
 @Alias("cartItem")
-public class CartValidateItemRequest {
+public class CartValidateItemRequest implements OrderItemCommand {
 
   private Long menuId;
   private Integer quantity;

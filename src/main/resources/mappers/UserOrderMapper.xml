@@ -54,5 +54,12 @@
         and can_remove = 1
     </select>
 
+    <!-- 주문 유형 찾기 -->
+
+    <select id="findOrderTypeId" resultType="java.lang.Long">
+    
+
+    </select>
+
 
 </mapper>

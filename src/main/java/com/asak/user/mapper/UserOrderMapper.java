@@ -11,10 +11,14 @@ import com.asak.user.dto.order.query.OptionPolicyQueryDto;
 public interface UserOrderMapper {
 
     
+    // 장바구니 & 주문
     MenuQueryDto selectByMenuId(Long menuId);
 
     OptionItemQueryDto findByOptionItem(@Param("menuId") Long menuId, @Param("optionItemId") Long optionItemId);
 
     List<OptionPolicyQueryDto> findOptionPoliciesByMenuId(Long menuId);
 
-    Long findRemovableIngredient(@Param("menuId")Long menuId, @Param("ingredientId") Long ingredientId);}
+    Long findRemovableIngredient(@Param("menuId")Long menuId, @Param("ingredientId") Long ingredientId);
+
+    // 주문 insert
+    Long findOrderTypeId(@Param("code") String code);}

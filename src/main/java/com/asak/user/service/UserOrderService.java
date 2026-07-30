@@ -8,9 +8,13 @@ import java.util.function.Function;
 
 import org.springframework.stereotype.Service;
 
+import com.asak.common.enums.OrderStatus;
 import com.asak.common.enums.OrderType;
 import com.asak.common.exception.CustomException;
 import com.asak.common.exception.ErrorCode;
+import com.asak.user.dto.order.internal.ValidatedOptionItem;
+import com.asak.user.dto.order.internal.ValidatedOrderItem;
+import com.asak.user.dto.order.internal.ValidatedOrderResult;
 import com.asak.user.dto.order.query.MenuQueryDto;
 import com.asak.user.dto.order.query.OptionItemQueryDto;
 import com.asak.user.dto.order.query.OptionPolicyQueryDto;
@@ -18,6 +22,7 @@ import com.asak.user.dto.order.request.CartValidateItemRequest;
 import com.asak.user.dto.order.request.CartValidateRequest;
 import com.asak.user.dto.order.request.CreateOrderRequest;
 import com.asak.user.dto.order.request.OptionItemRequest;
+import com.asak.user.dto.order.request.OrderItemCommand;
 import com.asak.user.dto.order.request.OrderItemRequest;
 import com.asak.user.dto.order.response.CartValidateItemResponse;
 import com.asak.user.dto.order.response.CartValidateOptionItemResponse;
@@ -35,119 +40,210 @@ public class UserOrderService {
 
     private final UserOrderMapper orderMapper;
 
+    
+    //장바구니 & 주문 생성 공통 로직 통힙
+    private ValidatedOrderResult validateAndPriceItems(
+            List<? extends OrderItemCommand> requestedItems) {
 
-    //장바구니 검증 api-004
-        public CartValidateResponse cartValidate(CartValidateRequest request) {
+        validateItemQuantityLimits(
+                requestedItems,
+                OrderItemCommand::getQuantity);
 
-            if (request == null) {
-                throw new CustomException(ErrorCode.CART_EMPTY);
-            }
-            validateItemQuantityLimits(request.getItems(), CartValidateItemRequest::getQuantity);
+        int totalAmount = 0;
+        List<ValidatedOrderItem> validatedItems = new ArrayList<>();
 
-            int totalAmount = 0;
-            List<CartValidateItemResponse> items = new ArrayList<>();
+        for (OrderItemCommand item : requestedItems) {
 
-            for (CartValidateItemRequest item : request.getItems()) {
+            // 1. 메뉴 확인
+            MenuQueryDto menu = orderMapper.selectByMenuId(item.getMenuId());
 
-                // 1단계. 메뉴 존재 여부 확인
-                MenuQueryDto menu = orderMapper.selectByMenuId(item.getMenuId());
-                if (menu == null) {
-                    throw new CustomException(ErrorCode.MENU_NOT_FOUND);
-                }
-
-                // 2단계. 품절 확인
-                if (Boolean.TRUE.equals(menu.isSoldOut())) {
-                    throw new CustomException(ErrorCode.MENU_SOLD_OUT);
-                }
-
-                int unitPrice = menu.getPrice();
-                List<CartValidateOptionItemResponse> validatedOptions = new ArrayList<>();
-                List<OptionItemRequest> requestedOptions = item.getOptionItems() == null
-                        ? List.of()
-                        : item.getOptionItems();
-                Map<Long, Integer> selectedQuantityByPolicy = new HashMap<>();
-
-                // 3단계. 옵션 검증
-                for (OptionItemRequest option : requestedOptions) {
-                    if (option == null
-                            || option.getOptionItemId() == null
-                            || option.getQuantity() == null
-                            || option.getQuantity() <= 0) {
-                        throw new CustomException(ErrorCode.INVALID_OPTION_SELECTION);
-                    }
-
-                    OptionItemQueryDto optionItem =
-                            orderMapper.findByOptionItem(item.getMenuId(), option.getOptionItemId());
-
-                    if (optionItem == null) {
-                        throw new CustomException(ErrorCode.INVALID_OPTION_SELECTION);
-                    }
-
-                    // 옵션 선택 아이템이 품절인 경우
-                    if (Boolean.TRUE.equals(optionItem.getIsSoldOut())) {
-                        throw new CustomException(ErrorCode.OPTION_ITEM_SOLD_OUT);
-                    }
-
-                    unitPrice += optionItem.getExtraPrice() * option.getQuantity();
-                    selectedQuantityByPolicy.merge(
-                            optionItem.getPolicyId(), option.getQuantity(), Integer::sum);
-
-                    CartValidateOptionItemResponse optionResponse = new CartValidateOptionItemResponse();
-                    optionResponse.setOptionItemId(option.getOptionItemId());
-                    optionResponse.setQuantity(option.getQuantity());
-                    validatedOptions.add(optionResponse);
-                }
-
-                // 3-1단계. 메뉴별 옵션 정책의 필수/최소/최대 선택 수 검증
-                for (OptionPolicyQueryDto policy : orderMapper.findOptionPoliciesByMenuId(item.getMenuId())) {
-                    int selectedQuantity = selectedQuantityByPolicy.getOrDefault(policy.getPolicyId(), 0);
-                    int minSelect = policy.getMinSelect() == null ? 0 : policy.getMinSelect();
-                    int maxSelect = policy.getMaxSelect() == null ? Integer.MAX_VALUE : policy.getMaxSelect();
-                    int requiredMinSelect = Boolean.TRUE.equals(policy.getIsRequired())
-                            ? Math.max(1, minSelect)
-                            : minSelect;
-
-                    if (selectedQuantity < requiredMinSelect || selectedQuantity > maxSelect) {
-                        throw new CustomException(ErrorCode.INVALID_OPTION_SELECTION);
-                    }
-                }
-
-                // 3-2단계. 제외 재료 검증
-                List<Long> excludedIds = item.getExcludedIngredientIds() == null
-                        ? List.of()
-                        : item.getExcludedIngredientIds();
-                for (Long ingredientId : excludedIds) {
-                    Long validIngId = orderMapper.findRemovableIngredient(item.getMenuId(), ingredientId);
-                    if (validIngId == null) {
-                        throw new CustomException(ErrorCode.INVALID_INGREDIENT_EXCLUSION);
-                    }
-                }
-
-                // 4단계. 수량 적용
-                int lineAmount = unitPrice * item.getQuantity();
-                totalAmount += lineAmount;
-
-                // 5단계. 응답 객체 생성
-                CartValidateItemResponse itemResponse = new CartValidateItemResponse();
-                itemResponse.setMenuId(item.getMenuId());
-                itemResponse.setQuantity(item.getQuantity());
-                itemResponse.setUnitPrice(unitPrice);
-                itemResponse.setOptionItems(validatedOptions);
-                itemResponse.setExcludedIngredientIds(excludedIds);
-
-                items.add(itemResponse);
+            if (menu == null) {
+                throw new CustomException(
+                        ErrorCode.MENU_NOT_FOUND);
             }
 
-            CartValidateResponse response = new CartValidateResponse();
-            response.setTotalAmount(totalAmount);
-            response.setItems(items);
+            // 2. 메뉴 품절 확인
+            if (Boolean.TRUE.equals(menu.isSoldOut())) {
+                throw new CustomException(
+                        ErrorCode.MENU_SOLD_OUT);
+            }
 
-            return response;
+            int unitPrice = menu.getPrice();
+
+            // null이면 빈 목록으로 정규화
+            List<OptionItemRequest> requestedOptions = item.getOptionItems() == null
+                    ? List.of()
+                    : item.getOptionItems();
+
+            List<ValidatedOptionItem> validatedOptions = new ArrayList<>();
+
+            Map<Long, Integer> selectedQuantityByPolicy = new HashMap<>();
+
+            // 3. 옵션 검증
+            for (OptionItemRequest option : requestedOptions) {
+
+                if (option == null
+                        || option.getOptionItemId() == null
+                        || option.getQuantity() == null
+                        || option.getQuantity() <= 0) {
+
+                    throw new CustomException(
+                            ErrorCode.INVALID_OPTION_SELECTION);
+                }
+
+                OptionItemQueryDto optionInfo = orderMapper.findByOptionItem(
+                        item.getMenuId(),
+                        option.getOptionItemId());
+
+                if (optionInfo == null) {
+                    throw new CustomException(
+                            ErrorCode.INVALID_OPTION_SELECTION);
+                }
+
+                if (Boolean.TRUE.equals(
+                        optionInfo.getIsSoldOut())) {
+
+                    throw new CustomException(
+                            ErrorCode.OPTION_ITEM_SOLD_OUT);
+                }
+
+                unitPrice += optionInfo.getExtraPrice()
+                        * option.getQuantity();
+
+                selectedQuantityByPolicy.merge(
+                        optionInfo.getPolicyId(),
+                        option.getQuantity(),
+                        Integer::sum);
+
+                validatedOptions.add(
+                        new ValidatedOptionItem(
+                                option.getOptionItemId(),
+                                optionInfo.getPolicyId(),
+                                option.getQuantity(),
+                                optionInfo.getExtraPrice()));
+            }
+
+            // 4. 옵션 정책 검증
+            List<OptionPolicyQueryDto> policies = orderMapper.findOptionPoliciesByMenuId(
+                    item.getMenuId());
+
+            for (OptionPolicyQueryDto policy : policies) {
+
+                int selectedQuantity = selectedQuantityByPolicy.getOrDefault(
+                        policy.getPolicyId(),
+                        0);
+
+                int minSelect = policy.getMinSelect() == null
+                        ? 0
+                        : policy.getMinSelect();
+
+                int maxSelect = policy.getMaxSelect() == null
+                        ? Integer.MAX_VALUE
+                        : policy.getMaxSelect();
+
+                int requiredMinSelect = Boolean.TRUE.equals(policy.getIsRequired())
+                        ? Math.max(1, minSelect)
+                        : minSelect;
+
+                if (selectedQuantity < requiredMinSelect
+                        || selectedQuantity > maxSelect) {
+
+                    throw new CustomException(
+                            ErrorCode.INVALID_OPTION_SELECTION);
+                }
+            }
+
+            // 5. 제외 재료 검증
+            List<Long> excludedIngredientIds = item.getExcludedIngredientIds() == null
+                    ? List.of()
+                    : item.getExcludedIngredientIds();
+
+            for (Long ingredientId : excludedIngredientIds) {
+
+                Long validIngredientId = orderMapper.findRemovableIngredient(
+                        item.getMenuId(),
+                        ingredientId);
+
+                if (validIngredientId == null) {
+                    throw new CustomException(
+                            ErrorCode.INVALID_INGREDIENT_EXCLUSION);
+                }
+            }
+
+            // 6. 금액 계산
+            int lineAmount = unitPrice * item.getQuantity();
+
+            totalAmount += lineAmount;
+
+            validatedItems.add(
+                    new ValidatedOrderItem(
+                            item.getMenuId(),
+                            item.getQuantity(),
+                            unitPrice,
+                            validatedOptions,
+                            excludedIngredientIds));
         }
 
+        return new ValidatedOrderResult(
+                totalAmount,
+                validatedItems);
+    }
+
+
+    // ------------ 장바구니 api-004 ------------
+    public CartValidateResponse cartValidate(CartValidateRequest request) {
+        if (request == null) {
+            throw new CustomException(ErrorCode.CART_EMPTY);
+        }
+        
+        ValidatedOrderResult result = validateAndPriceItems(request.getItems());
+        
+        List<CartValidateItemResponse> responseItems = result.items().stream()
+        .map(this::toCartValidateItemResponse)
+        .toList();
+        
+        CartValidateResponse response = new CartValidateResponse();
+        
+        response.setTotalAmount(result.totalAmount());
+        response.setItems(responseItems);
+        
+        return response;
+    }
+    
+    // 공통 로직을 통해 -> api-004 장바구니로 변환
+    private CartValidateItemResponse toCartValidateItemResponse(
+            ValidatedOrderItem item) {
+
+        CartValidateItemResponse response = new CartValidateItemResponse();
+
+        response.setMenuId(item.menuId());
+        response.setQuantity(item.quantity());
+        response.setUnitPrice(item.unitPrice());
+        response.setExcludedIngredientIds(
+                item.excludedIngredientIds());
+
+        List<CartValidateOptionItemResponse> options = item.optionItems().stream()
+                .map(option -> {
+                    CartValidateOptionItemResponse optionResponse = new CartValidateOptionItemResponse();
+
+                    optionResponse.setOptionItemId(
+                            option.optionItemId());
+                    optionResponse.setQuantity(
+                            option.quantity());
+
+                    return optionResponse;
+                })
+                .toList();
+
+        response.setOptionItems(options);
+
+        return response;
+    }
+
+
     /**
-     * 주문/장바구니 공통 수량 제한을 검증한다.
-     * 각 장바구니 아이템은 1~9개, 모든 아이템 수량의 합계는 30개까지 허용한다.
+     * 주문/장바구니 공통 수량 제한 검증
+     * 각 장바구니 아이템은 1~9개, 모든 아이템 수량의 합계는 30개까지 허용
      */
     private <T> void validateItemQuantityLimits(
             List<T> items,
@@ -174,8 +270,6 @@ public class UserOrderService {
         }
     }
 
-        
-
     /*
      * API-004(장바구니 검증)와 API-005(주문 생성)의 공통 처리
      *
@@ -191,7 +285,7 @@ public class UserOrderService {
      * ⑥ 옵션 품절 여부를 확인한다. 품절이면 OPTION_ITEM_SOLD_OUT을 반환한다.
      * ⑦ 옵션 정책별 필수 선택, minSelect, maxSelect를 확인한다.
      * ⑧ excludedIngredientIds가 null이면 빈 목록으로 정규화하고, 각 재료가 해당 메뉴에서
-     *    제거 가능한 재료인지 확인한다.
+     * 제거 가능한 재료인지 확인한다.
      * ⑨ 메뉴 가격과 옵션 추가 금액을 DB에서 읽어 아이템 단가와 totalAmount를 계산한다.
      *
      * 위 ①~⑨는 API별로 복사하지 말고 validateAndPriceItems 같은 private 공통 메서드로 추출하는 것이 좋다.
@@ -215,56 +309,211 @@ public class UserOrderService {
      * 주문 헤더부터 제외재료 저장까지 하나의 쓰기 트랜잭션으로 처리한다. 중간 INSERT가 하나라도 실패하면
      * 전체 주문이 롤백되어야 한다. 클라이언트 금액은 요청에 없으므로 totalAmount는 항상 서버 계산값을 사용한다.
      */
-    
-    // 주문 생성  api-005
-    @Transactional(readOnly = false)
-    public CreateOrderResponse createOrder(CreateOrderRequest request) {
 
-        if (request == null) {
-            throw new CustomException(ErrorCode.INVALID_OPTION_SELECTION);
-        }
-        validateItemQuantityLimits(request.getItems(), OrderItemRequest::getQuantity);
+        // 주문 생성 api-005
+        // @Transactional
+        // public CreateOrderResponse createOrder(CreateOrderRequest request) {
 
-        //주문 총 가격
-        int totalAmount = 0;
+        //     //CreateOrderRequest 자체가 없는 경우를 차단(주문 요청이 올바르지 않음 에러)
+        //     if (request == null) {
+        //         throw new CustomException(
+        //                 ErrorCode.INVALID_ORDER_REQUEST);
+        //     }
 
-        //1. 메뉴의 품절 유무
-        for(OrderItemRequest item : request.getItems() ){
+        //     //take_out || eat_in 유형 검증
+        //     validateOrderType(request.getOrderType());
 
-            MenuQueryDto menu = orderMapper.selectByMenuId(item.getMenuId());
+        //     ValidatedOrderResult result = validateAndPriceItems(request.getItems());
 
-            if(menu == null){
-                throw new CustomException(ErrorCode.MENU_NOT_FOUND);
+        //     Long orderTypeId = orderMapper.findOrderTypeId(
+        //             request.getOrderType().name());
+
+        //     Long receivedStatusId = orderMapper.findOrderStatusId("RECEIVED");
+
+        //     String orderNo = generateOrderNo();
+
+        //     OrderInsertDto order = new OrderInsertDto();
+        //     order.setOrderNo(orderNo);
+        //     order.setOrderTypeId(orderTypeId);
+        //     order.setStatusId(receivedStatusId);
+        //     order.setTotalAmount(result.totalAmount());
+
+        //     orderMapper.insertOrder(order);
+
+        //     Long orderId = order.getOrderId();
+
+        //     for (ValidatedOrderItem item : result.items()) {
+
+        //         OrderItemInsertDto orderItem = new OrderItemInsertDto();
+
+        //         orderItem.setOrderId(orderId);
+        //         orderItem.setMenuId(item.menuId());
+        //         orderItem.setQuantity(item.quantity());
+        //         orderItem.setUnitPrice(item.unitPrice());
+
+        //         orderMapper.insertOrderItem(orderItem);
+
+        //         Long orderItemId = orderItem.getOrderItemId();
+
+        //         for (ValidatedOptionItem option : item.optionItems()) {
+
+        //             orderMapper.insertOrderItemOption(
+        //                     orderItemId,
+        //                     option.optionItemId(),
+        //                     option.quantity(),
+        //                     option.extraPrice());
+        //         }
+
+        //         for (Long ingredientId : item.excludedIngredientIds()) {
+
+        //             orderMapper.insertItemExclusion(
+        //                     orderItemId,
+        //                     ingredientId);
+        //         }
+        //     }
+
+        //     CreateOrderResponse response = new CreateOrderResponse();
+
+        //     response.setOrderId(orderId);
+        //     response.setOrderNo(orderNo);
+        //     response.setTotalAmount(result.totalAmount());
+        //     response.setStatus("RECEIVED");
+
+        //     return response;
+        // }
+
+        @Transactional
+        public CreateOrderResponse createOrder(
+                CreateOrderRequest request) {
+
+            // 1. 요청 객체 확인
+            if (request == null) {
+                throw new CustomException(
+                        ErrorCode.INVALID_ORDER_REQUEST);
             }
-            
-            if(menu.isSoldOut()){
-                throw new CustomException(ErrorCode.MENU_SOLD_OUT);
+
+            // 2. 주문 유형 확인
+            validateOrderType(request.getOrderType());
+
+            // 3. 메뉴·옵션·제외 재료 검증 및 서버 가격 계산
+            ValidatedOrderResult result = validateAndPriceItems(
+                    request.getItems());
+
+            // 4. 공통 코드 조회
+            String orderTypeCode = request.getOrderType().name();
+
+            String initialStatus = OrderStatus.RECEIVED.name();
+
+            Long orderTypeId = orderMapper.findOrderTypeId(
+                    orderTypeCode);
+
+            if (orderTypeId == null) {
+                throw new CustomException(
+                        ErrorCode.INVALID_ORDER_TYPE);
             }
 
-            for(OptionItemRequest opi : item.getOptionItems()){
-                OptionItemQueryDto opInfo =  orderMapper.findByOptionItem(item.getMenuId(),opi.getOptionItemId());
-                
-                
-                if(opInfo == null){
-                    throw new CustomException(ErrorCode.INVALID_OPTION_SELECTION);
+            Long statusId = orderMapper.findOrderStatusId(
+                    initialStatus);
+
+            if (statusId == null) {
+                throw new CustomException(
+                        ErrorCode.ORDER_STATUS_NOT_FOUND);
+            }
+
+            // 5. 주문번호 생성
+            String orderNo = generateOrderNo();
+
+            // 6. 주문 헤더 저장
+            OrderInsertDto order = new OrderInsertDto();
+
+            order.setOrderNo(orderNo);
+            order.setOrderTypeId(orderTypeId);
+            order.setStatusId(statusId);
+            order.setTotalAmount(
+                    result.totalAmount());
+
+            int insertedOrderCount = orderMapper.insertOrder(order);
+
+            if (insertedOrderCount != 1
+                    || order.getOrderId() == null) {
+
+                throw new CustomException(
+                        ErrorCode.ORDER_CREATE_FAILED);
+            }
+
+            Long orderId = order.getOrderId();
+
+            // 7. 주문 아이템 저장
+            for (ValidatedOrderItem item : result.items()) {
+
+                OrderItemInsertDto orderItem = new OrderItemInsertDto();
+
+                orderItem.setOrderId(orderId);
+                orderItem.setMenuId(item.menuId());
+                orderItem.setQuantity(item.quantity());
+                orderItem.setUnitPrice(item.unitPrice());
+
+                int insertedItemCount = orderMapper.insertOrderItem(
+                        orderItem);
+
+                if (insertedItemCount != 1
+                        || orderItem.getOrderItemId() == null) {
+
+                    throw new CustomException(
+                            ErrorCode.ORDER_ITEM_CREATE_FAILED);
                 }
 
-                if(Boolean.TRUE.equals(opInfo.getIsSoldOut())){
-                    throw new CustomException(ErrorCode.OPTION_ITEM_SOLD_OUT);
+                Long orderItemId = orderItem.getOrderItemId();
+
+                // 8. 선택 옵션 저장
+                for (ValidatedOptionItem option : item.optionItems()) {
+
+                    int insertedOptionCount = orderMapper
+                            .insertOrderItemOption(
+                                    orderItemId,
+                                    option.optionItemId(),
+                                    option.quantity(),
+                                    option.extraPrice());
+
+                    if (insertedOptionCount != 1) {
+                        throw new CustomException(
+                                ErrorCode.ORDER_OPTION_CREATE_FAILED);
+                    }
                 }
-    
+
+                // 9. 제외 재료 저장
+                for (Long ingredientId : item.excludedIngredientIds()) {
+
+                    int insertedExclusionCount = orderMapper
+                            .insertItemExclusion(
+                                    orderItemId,
+                                    ingredientId);
+
+                    if (insertedExclusionCount != 1) {
+                        throw new CustomException(
+                                ErrorCode.ORDER_EXCLUSION_CREATE_FAILED);
+                    }
+                }
             }
+
+            // 10. 응답 생성
+            CreateOrderResponse response = new CreateOrderResponse();
+
+            response.setOrderId(orderId);
+            response.setOrderNo(orderNo);
+            response.setTotalAmount(
+                    result.totalAmount());
+            response.setStatus(initialStatus);
+
+            return response;
         }
 
-
-
-
-        OrderType orderType = request.getOrderType();
-        List<OrderItemRequest> items = request.getItems();
-
-        return null;
-    }
+        //주문 형식 확인하는 메서드
+        private void validateOrderType(OrderType orderType) {
+            if (orderType == null) {
+                throw new CustomException(
+                        ErrorCode.INVALID_ORDER_TYPE);
+            }
+        }
 
 }
-
-
