@@ -41,7 +41,7 @@ public class UserOrderService {
     private final UserOrderMapper orderMapper;
 
     
-    //장바구니 & 주문 생성 공통 로직 통힙
+    //------------ 장바구니 & 주문 생성 공통 로직 통합 ------------
     private ValidatedOrderResult validateAndPriceItems(
             List<? extends OrderItemCommand> requestedItems) {
 
