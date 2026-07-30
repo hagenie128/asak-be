@@ -1,7 +1,9 @@
 package com.asak.admin.service;
 
 import java.time.LocalDate;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.stereotype.Service;
 
@@ -80,5 +82,24 @@ public class AdminOrderService {
 
   public OrderDetailResponse getOrderDetail(Long orderId) {
     return adminOrderMapper.getOrderDetail(orderId);
+  }
+
+  public int changeOrderStatus(OrderDetailResponse response, String status) {
+
+    int statusId;
+    if ("PREPARING".equals(status))
+      statusId = 12;
+    else if ("COMPLETED".equals(status))
+      statusId = 13;
+    else
+      return 0;
+    Map<String, Object> map = new HashMap<>();
+    map.put("orderId", response.getOrderId());
+    map.put("statusId", statusId);
+    return adminOrderMapper.changeOrderStatus(map);
+  }
+
+  public int cancelOrder(Long orderId) {
+    return adminOrderMapper.cancleOrder(orderId);
   }
 }

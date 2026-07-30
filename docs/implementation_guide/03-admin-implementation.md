@@ -6,7 +6,7 @@
 
 | API | 경로 | 핵심 책임 | 우선 오류 |
 | --- | --- | --- | --- |
-| API-021 | `GET /api/admin/orders/active` | 현재 처리 대상 주문과 대기 수 조회 | 빈 목록 |
+| API-021 | `GET /api/admin/orders/live` | 현재 처리 대상 주문과 대기 수 조회 | 빈 목록 |
 | API-007 | `GET /api/admin/orders` | 페이지·상태·기간·주문유형 필터 목록 | 400 잘못된 query |
 | API-022 | `GET /api/admin/orders/{orderId}` | 주문·아이템·옵션·결제 상세 조립 | 404 `ORDER_NOT_FOUND` |
 | API-008 | `PATCH /api/admin/orders/{orderId}/status` | 허용 상태 전이와 동시 변경 충돌 처리 | 404, 409 상태 전이 충돌 |

@@ -12,7 +12,7 @@
 | Kiosk 주문 | API-005 | `POST /api/kiosk/orders` | SPEC_ONLY | 주문 저장 transaction |
 | Kiosk 결제 | API-014 | `GET /api/kiosk/payment-methods` | SPEC_ONLY | `pay_method_cfg` 조회 |
 | Kiosk 결제 | API-006 | `POST /api/kiosk/payments` | SPEC_ONLY | 멱등성·상태 전이 |
-| Admin 주문 | API-021 | `GET /api/admin/orders/active` | SPEC_ONLY | 주문 조회 |
+| Admin 주문 | API-021 | `GET /api/admin/orders/live` | SPEC_ONLY | 주문 조회 |
 | Admin 주문 | API-007/022 | `GET /api/admin/orders`, `/{orderId}` | SPEC_ONLY | pagination·상세 DTO |
 | Admin 주문 | API-008 | `PATCH /api/admin/orders/{orderId}/status` | SPEC_ONLY | 상태 전이 |
 | Admin 주문 | API-024 | `PATCH /api/admin/orders/{orderId}/cancel` | SPEC_ONLY | 환불·매출 반영 |

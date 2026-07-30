@@ -1,16 +1,17 @@
 package com.asak.admin.controller;
 
 import java.time.LocalDate;
-import org.springframework.format.annotation.DateTimeFormat;
+
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.asak.admin.dto.response.LiveOrderListResponse;
 import com.asak.admin.dto.response.OrderDetailResponse;
 import com.asak.admin.dto.response.OrderListResponse;
-import com.asak.admin.dto.response.LiveOrderListResponse;
 import com.asak.admin.service.AdminOrderService;
 import com.asak.common.exception.ErrorCode;
 import com.asak.common.response.ApiResponse;
@@ -19,7 +20,6 @@ import com.asak.common.response.PageResult;
 @RestController
 @RequestMapping("api/admin/orders")
 public class AdminOrderController {
-
   private final AdminOrderService adminOrderService;
 
   public AdminOrderController(AdminOrderService adminOrderService) {
@@ -81,5 +81,39 @@ public class AdminOrderController {
         "ADMIN_LIVE_ORDERS_SUCCESS",
         "관리자 Live 주문 조회 성공",
         result);
+  }
+
+  // | API-008 | `PATCH /api/admin/orders/{orderId}/status` | 허용 상태 전이와 동시 변경 충돌
+  // 처리 | 404, 409 상태 전이 충돌 |
+
+  @PatchMapping("/{orderId}/{status}")
+  public ApiResponse<Void> changeOrderStatus(@PathVariable(name = "orderId") Long orderId,
+      @PathVariable(name = "status") String status) {
+    OrderDetailResponse response = adminOrderService.getOrderDetail(orderId);
+    if (response.getOrderStatus().equals("COMPLETED") || response.getOrderStatus().equals("CANCELED")) {
+      return ApiResponse.error(ErrorCode.ORDER_CANCEL_NOT_ALLOWED);
+    }
+    if (adminOrderService.changeOrderStatus(response, status) == 0)
+      return ApiResponse.error(ErrorCode.INVALID_ORDER_STATUS_TRANSITION);
+    return ApiResponse.success(
+        "ADMIN_ORDER_STATUS_CHANGE_SUCCESS",
+        "관리자 주문 상태 변경 성공",
+        null);
+  }
+
+  // | API-024 | `PATCH /api/admin/orders/{orderId}/cancel` | 주문 취소·승인 결제 환불·시각 저장
+  // | 409 `ORDER_CANCEL_NOT_ALLOWED` |
+  @PatchMapping("/{orderId}/cancel")
+  public ApiResponse<Void> cancelOrder(@PathVariable(name = "orderId") Long orderId) {
+    OrderDetailResponse response = adminOrderService.getOrderDetail(orderId);
+    if (response.getOrderStatus().equals("COMPLETED") || response.getOrderStatus().equals("CANCELED")) {
+      return ApiResponse.error(ErrorCode.ORDER_CANCEL_NOT_ALLOWED);
+    }
+    if (adminOrderService.cancelOrder(orderId) == 0)
+      return ApiResponse.error(ErrorCode.ORDER_CANCEL_NOT_ALLOWED);
+    return ApiResponse.success(
+        "ADMIN_ORDER_CANCEL_SUCCESS",
+        "관리자 주문 취소 성공",
+        null);
   }
 }
