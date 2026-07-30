@@ -127,4 +127,17 @@
   ORDER BY created_at ASC
 </select>
 
+<update id="changeOrderStatus">
+UPDATE orders
+SET status_id = #{statusId}
+WHERE id = #{orderId};
+</update>
+
+<update id="cancleOrder">
+UPDATE orders
+SET status_id = 43,
+canceled_at = NOW()
+WHERE id = #{orderId};
+</update>
+
 </mapper>

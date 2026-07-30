@@ -33,7 +33,7 @@
 - 상태 enum: `src/main/java/com/asak/common/enums/OrderStatus.java`, `PaymentStatus.java`
 - 관리자 시작점: `src/main/java/com/asak/admin/controller/AdminOrderController.java`
 - 관리자 Mapper XML: `src/main/resources/mappers/AdminOrderMapper.xml`
-- Bruno Admin 요청: `api/admin/01-active-orders.bru` ~ `16-cancel-order.bru`
+- Bruno Admin 요청: `api/admin/01-live-orders.bru` ~ `16-cancel-order.bru`
 
 ## 3. 모든 API의 공통 계약
 
@@ -105,7 +105,7 @@ POST /api/kiosk/payments
 ### 활성 주문 조회 — API-021
 
 ```http
-GET /api/admin/orders/active
+GET /api/admin/orders/live
 ```
 
 - 조회 조건: `orderStatus IN (RECEIVED, PREPARING)`
@@ -145,6 +145,10 @@ PREPARING → COMPLETED
 - 취소 시 order=`CANCELED` + `canceledAt`, 승인 결제라면 payment=`REFUNDED` +
   `refundedAt`으로 변경한다. 원 `approvedAt`은 지우지 않는다.
 - 완료/이미 취소 주문 취소는 `409 ORDER_CANCEL_NOT_ALLOWED`다.
+- 제품 전달 후 환불은 주문 취소가 아닌 별도 환불 API로 처리한다. order=`COMPLETED`는 유지하고
+  payment=`REFUNDED` + `refundedAt`만 변경한다.
+- 완료되지 않았거나 결제가 승인되지 않았거나 이미 환불된 주문의 환불은
+  `409 ORDER_REFUND_NOT_ALLOWED`다.
 
 ## 6. Admin: 품절·결제수단·매출에서 바로 쓸 규칙
 
@@ -215,7 +219,7 @@ Bruno**까지 같은 작업에서 끝낸다. 2xx만 보지 말고 400/404/409/50
 
 | 기능 | Bruno 요청 |
 | --- | --- |
-| Admin 활성 주문 | `../../api/admin/01-active-orders.bru` |
+| Admin Live 주문 | `../../api/admin/01-live-orders.bru` |
 | Admin 주문 목록·상세·상태 | `02-order-list.bru`, `03-order-detail.bru`, `04-order-status.bru` |
 | Admin 취소/환불 | `16-cancel-order.bru` |
 | Admin 품절 | `09-get-sold-out.bru`, `09-sold-out.bru` |

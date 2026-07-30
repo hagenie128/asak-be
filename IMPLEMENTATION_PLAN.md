@@ -81,7 +81,7 @@
 | API-015 / 016 | GET / PATCH | `/api/admin/payment-methods`, `/api/admin/payment-methods/{methodId}` | LMIS-PAY-001 |
 | API-017 / 018 / 019 | GET | `/api/admin/sales/daily`, `/summary`, `/monthly` | LMIS-ORDER-005 |
 | API-020 | GET | `/api/admin/dashboard` | LMIS-DASH-001 |
-| API-021 | GET | `/api/admin/orders/active` | LMIS-ORDER-001 |
+| API-021 | GET | `/api/admin/orders/live` | LMIS-ORDER-001 |
 | API-022 | GET | `/api/admin/orders/{orderId}` | LMIS-ORDER-002 |
 | API-023 | GET | `/api/admin/menus/{menuId}` | LMIS-MENU-004 |
 | API-024 | PATCH | `/api/admin/orders/{orderId}/cancel` | DEV-ORDER-002 |

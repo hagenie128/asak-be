@@ -1,13 +1,14 @@
 package com.asak.admin.mapper;
 
 import java.util.List;
+import java.util.Map;
 
 import org.apache.ibatis.annotations.Param;
 
 import com.asak.admin.dto.request.OrderListFilter;
+import com.asak.admin.dto.response.LiveOrderResponse;
 import com.asak.admin.dto.response.OrderDetailResponse;
 import com.asak.admin.dto.response.OrderListResponse;
-import com.asak.admin.dto.response.LiveOrderResponse;
 
 public interface AdminOrderMapper {
 
@@ -20,4 +21,7 @@ public interface AdminOrderMapper {
 
   long countOrderList(@Param("filter") OrderListFilter filter);
 
+  int changeOrderStatus(Map<String, Object> map);
+
+  int cancleOrder(Long orderId);
 }
