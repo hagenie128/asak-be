@@ -1,8 +1,6 @@
-package com.asak.user.dto;
+package com.asak.user.dto.menu;
 
 import java.util.List;
-
-
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -37,7 +35,6 @@ import lombok.Setter;
 @NoArgsConstructor
 public class MenuListResponse {
 
-    private List<CategoryResponse> categories;
-    private List<MenuListItemResponse> menus;
-
+  private List<CategoryResponse> categories;
+  private List<MenuListItemResponse> menus;
 }

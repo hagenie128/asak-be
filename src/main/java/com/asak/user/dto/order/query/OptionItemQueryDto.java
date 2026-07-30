@@ -1,4 +1,4 @@
-package com.asak.user.dto.query;
+package com.asak.user.dto.order.query;
 
 import org.apache.ibatis.type.Alias;
 
@@ -11,8 +11,8 @@ import lombok.Setter;
 @Getter
 @Setter
 @NoArgsConstructor
-@Alias("optionItemQueryDTO")
-public class OptionItemQueryDTO {
+@Alias("optionItemQueryDto")
+public class OptionItemQueryDto {
 
     private Long policyId;
     private Long optionItemId;

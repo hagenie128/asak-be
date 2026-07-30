@@ -1,12 +1,10 @@
-package com.asak.user.dto;
+package com.asak.user.dto.menu;
 
 import java.math.BigDecimal;
-
-import org.apache.ibatis.type.Alias;
-
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.apache.ibatis.type.Alias;
 
 // 메뉴 옵션 아이템
 
@@ -21,7 +19,7 @@ import lombok.Setter;
 //   "isRecommended": true,
 //   "isDefault": true,
 //   "isSoldOut": false
-//    private BigDecimal kcal -> 옵션 칼로리 추가시 
+//    private BigDecimal kcal -> 옵션 칼로리 추가시
 // }
 
 @Getter
@@ -30,16 +28,15 @@ import lombok.Setter;
 @NoArgsConstructor
 public class OptionItemResponse {
 
-    private Long optionItemId;
-    private Long ingredientId;
-    private String name;
-    private Integer extraPrice;
-    private Integer originalPrice;
-    private BigDecimal servingAmount;
-    private String servingUnit;
-    private BigDecimal kcal;
-    private Boolean isRecommended;
-    private Boolean isDefault;
-    private Boolean isSoldOut;
-
+  private Long optionItemId;
+  private Long ingredientId;
+  private String name;
+  private Integer extraPrice;
+  private Integer originalPrice;
+  private BigDecimal servingAmount;
+  private String servingUnit;
+  private BigDecimal kcal;
+  private Boolean isRecommended;
+  private Boolean isDefault;
+  private Boolean isSoldOut;
 }

@@ -1,12 +1,10 @@
-package com.asak.user.dto;
+package com.asak.user.dto.menu;
 
 import java.util.List;
-
-import org.apache.ibatis.type.Alias;
-
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.apache.ibatis.type.Alias;
 
 // 메뉴 디테일
 
@@ -37,13 +35,13 @@ import lombok.Setter;
 @NoArgsConstructor
 public class MenuDetailResponse {
 
-    private Long menuId;
-    private Long categoryId;
-    private String name;
-    private Integer price;
-    private String imageUrl;
-    private Boolean isSoldOut;
-    private List<IngredientResponse> ingredients;
-    private List<OptionGroupResponse> optionGroups;
-    private Nutrition nutrition;
+  private Long menuId;
+  private Long categoryId;
+  private String name;
+  private Integer price;
+  private String imageUrl;
+  private Boolean isSoldOut;
+  private List<IngredientResponse> ingredients;
+  private List<OptionGroupResponse> optionGroups;
+  private Nutrition nutrition;
 }

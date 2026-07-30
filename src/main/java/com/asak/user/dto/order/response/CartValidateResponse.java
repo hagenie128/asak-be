@@ -1,14 +1,12 @@
-package com.asak.user.dto;
+package com.asak.user.dto.order.response;
 
 import java.util.List;
-
-import org.apache.ibatis.type.Alias;
-
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.apache.ibatis.type.Alias;
 
-//주문 1건에 대한 응답 dto
+// 주문 1건에 대한 응답 dto
 
 //   "data": {
 //     "totalAmount": 8900,
@@ -34,8 +32,6 @@ import lombok.Setter;
 @Alias("cartValidateResponse")
 public class CartValidateResponse {
 
-    private Integer totalAmount;
-    private List<CartValidateItemResponse> items;
-
-
+  private Integer totalAmount;
+  private List<CartValidateItemResponse> items;
 }

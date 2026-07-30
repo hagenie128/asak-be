@@ -4,10 +4,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.asak.common.response.ApiResponse;
-import com.asak.user.dto.CartValidateRequest;
-import com.asak.user.dto.CartValidateResponse;
-import com.asak.user.dto.CreateOrderRequest;
-import com.asak.user.dto.CreateOrderResponse;
+import com.asak.user.dto.order.request.CartValidateRequest;
+import com.asak.user.dto.order.request.CreateOrderRequest;
+import com.asak.user.dto.order.response.CartValidateResponse;
+import com.asak.user.dto.order.response.CreateOrderResponse;
 import com.asak.user.service.UserOrderService;
 
 import lombok.RequiredArgsConstructor;

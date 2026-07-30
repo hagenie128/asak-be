@@ -1,4 +1,4 @@
-package com.asak.user.dto;
+package com.asak.user.dto.order.request;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -6,15 +6,16 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-// {"orderType": "TAKE_OUT", 
+// {"orderType": "TAKE_OUT",
 // "items": [
-//       {"menuId": 364, 
-//       "quantity": 1, 
-//       "optionItems": [], 
+//       {"menuId": 364,
+//       "quantity": 1,
+//       "optionItems": [],
 //       "excludedIngredientIds": []}
 //     ]}
 
-// -> API-004(CartValidateRequest), API-005(CreateOrderRequest) 공용으로 씀
+// API-005(CreateOrderRequest)의 주문 아이템 요청 DTO.
+// API-004는 CartValidateItemRequest를 사용하고, 내부 OptionItemRequest 형식만 API-005와 공유한다.
 
 @Getter
 @Setter

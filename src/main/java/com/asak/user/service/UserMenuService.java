@@ -4,11 +4,11 @@ import java.util.List;
 
 import org.springframework.stereotype.Service;
 
-import com.asak.user.dto.MenuDetailResponse;
-import com.asak.user.dto.CategoryResponse;
-import com.asak.user.dto.MenuListItemResponse;
-import com.asak.user.dto.OptionGroupResponse;
-import com.asak.user.dto.OptionItemResponse;
+import com.asak.user.dto.menu.CategoryResponse;
+import com.asak.user.dto.menu.MenuDetailResponse;
+import com.asak.user.dto.menu.MenuListItemResponse;
+import com.asak.user.dto.menu.OptionGroupResponse;
+import com.asak.user.dto.menu.OptionItemResponse;
 import com.asak.user.mapper.UserMenuMapper;
 
 import lombok.RequiredArgsConstructor;

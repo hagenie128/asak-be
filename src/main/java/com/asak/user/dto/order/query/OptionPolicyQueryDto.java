@@ -1,4 +1,4 @@
-package com.asak.user.dto.query;
+package com.asak.user.dto.order.query;
 
 import org.apache.ibatis.type.Alias;
 
@@ -10,8 +10,8 @@ import lombok.Setter;
 @Getter
 @Setter
 @NoArgsConstructor
-@Alias("optionPolicyQueryDTO")
-public class OptionPolicyQueryDTO {
+@Alias("optionPolicyQueryDto")
+public class OptionPolicyQueryDto {
 
     private Long policyId;
     private Integer minSelect;

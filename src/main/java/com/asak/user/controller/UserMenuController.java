@@ -3,11 +3,11 @@ package com.asak.user.controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.asak.user.dto.MenuDetailResponse;
 import com.asak.common.response.ApiResponse;
-import com.asak.user.dto.CategoryResponse;
-import com.asak.user.dto.MenuListItemResponse;
-import com.asak.user.dto.MenuListResponse;
+import com.asak.user.dto.menu.CategoryResponse;
+import com.asak.user.dto.menu.MenuDetailResponse;
+import com.asak.user.dto.menu.MenuListItemResponse;
+import com.asak.user.dto.menu.MenuListResponse;
 import com.asak.user.service.UserMenuService;
 
 import lombok.RequiredArgsConstructor;

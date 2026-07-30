@@ -1,12 +1,10 @@
-package com.asak.user.dto;
+package com.asak.user.dto.menu;
 
 import java.math.BigDecimal;
-
-import org.apache.ibatis.type.Alias;
-
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.apache.ibatis.type.Alias;
 
 // 메뉴 영양정보
 
@@ -16,6 +14,5 @@ import lombok.Setter;
 @NoArgsConstructor
 public class Nutrition {
 
-    private BigDecimal kcal;
-
+  private BigDecimal kcal;
 }

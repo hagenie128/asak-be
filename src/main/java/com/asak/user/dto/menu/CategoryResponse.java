@@ -1,12 +1,11 @@
-package com.asak.user.dto;
-
-import org.apache.ibatis.type.Alias;
+package com.asak.user.dto.menu;
 
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.apache.ibatis.type.Alias;
 
-//카테고리 데이터 보내주는 그릇
+// 카테고리 데이터 보내주는 그릇
 
 //   "data": [
 //     {
@@ -23,10 +22,8 @@ import lombok.Setter;
 @Alias("category")
 public class CategoryResponse {
 
-    private Long categoryId;
-    private String categoryName;
-    private Integer sortOrder;
-    private Boolean isActive;
-
-
+  private Long categoryId;
+  private String categoryName;
+  private Integer sortOrder;
+  private Boolean isActive;
 }

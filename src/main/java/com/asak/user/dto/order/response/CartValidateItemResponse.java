@@ -1,14 +1,12 @@
-package com.asak.user.dto;
+package com.asak.user.dto.order.response;
 
 import java.util.List;
-
-import org.apache.ibatis.type.Alias;
-
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.apache.ibatis.type.Alias;
 
-//주문 -> 1건의 주문 아이템에 대한 응답 그릇
+// 주문 -> 1건의 주문 아이템에 대한 응답 그릇
 
 //     "items": [
 //       {
@@ -31,10 +29,9 @@ import lombok.Setter;
 @Alias("cartValidateItemResponse")
 public class CartValidateItemResponse {
 
-    private Long menuId;
-    private Integer quantity;
-    private Integer unitPrice;
-    private List<CartValidateOptionItemResponse> optionItems;
-    private List<Long> excludedIngredientIds;
-
+  private Long menuId;
+  private Integer quantity;
+  private Integer unitPrice;
+  private List<CartValidateOptionItemResponse> optionItems;
+  private List<Long> excludedIngredientIds;
 }

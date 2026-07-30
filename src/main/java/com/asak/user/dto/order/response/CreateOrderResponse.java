@@ -1,4 +1,4 @@
-package com.asak.user.dto;
+package com.asak.user.dto.order.response;
 
 import com.asak.common.enums.OrderStatus;
 import lombok.Builder;

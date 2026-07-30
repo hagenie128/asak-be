@@ -1,4 +1,4 @@
-package com.asak.user.dto;
+package com.asak.user.dto.order.request;
 
 import com.asak.common.enums.OrderType;
 import java.util.List;
@@ -8,11 +8,11 @@ import lombok.Setter;
 
 // 프론트앤드에서 받아온 request를 받는 그릇 역할
 
-// {"orderType": "TAKE_OUT", 
+// {"orderType": "TAKE_OUT",
 // "items": [
-//       {"menuId": 364, 
-//       "quantity": 1, 
-//       "optionItems": [], 
+//       {"menuId": 364,
+//       "quantity": 1,
+//       "optionItems": [],
 //       "excludedIngredientIds": []}
 //     ]}
 

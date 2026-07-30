@@ -1,4 +1,4 @@
-package com.asak.user.dto.query;
+package com.asak.user.dto.order.query;
 
 import org.apache.ibatis.type.Alias;
 
@@ -11,8 +11,8 @@ import lombok.Setter;
 @Getter
 @Setter
 @NoArgsConstructor
-@Alias("menuQueryDTO")
-public class MenuQueryDTO {
+@Alias("menuQueryDto")
+public class MenuQueryDto {
 
     private Long menuId;
     private Integer price;
