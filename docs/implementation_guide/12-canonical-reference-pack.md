@@ -21,7 +21,7 @@
 | 항목 | 현재 확인값 | 구현 시 의미 |
 | --- | --- | --- |
 | 빌드 | Spring Boot `4.0.7`, Java `25`, Gradle | Product Bible의 4.1.0 표기보다 실제 `build.gradle`을 우선한다. 버전을 임의 변경하지 않는다. |
-| HTTP API | health, Kiosk 장바구니 검증·주문 생성, Admin 주문 조회·메뉴 조회 Controller mapping 존재 | 주문 생성은 저장/응답 조립이 미완료다. 결제·상태 변경·취소 등 mapping이 없는 Bruno 요청은 `SPEC_ONLY`로 유지한다. |
+| HTTP API | health, Kiosk 장바구니 검증·주문 생성, Admin 주문 조회·메뉴 조회·상태 변경 Controller mapping 존재 | 주문 생성은 저장/응답 조립이 미완료다. 결제·취소 등 mapping이 없는 Bruno 요청은 `SPEC_ONLY`로 유지한다. |
 | 공통 응답 | `ApiResponse<T>`에 `success`, `status`, `code`, `message`, `data` 필드 존재 | factory·예외 handler와 실제 Controller 적용은 남아 있다. |
 | 페이지 응답 | `PageResult`는 빈 골격 | 목록 API 전 page 0/1-base, size, totalElements/totalPages 모양을 먼저 확정한다. |
 | 주문 DTO | `CreateOrderRequest`, `OrderItemRequest`, `OptionItemRequest`, `CreateOrderResponse` 존재 | 요청 옵션은 `optionItems[]`를 사용한다. 주문 생성 DTO의 상태 필드는 현재 `status`이며, 저장·응답 조립은 아직 필요하다. |
@@ -117,12 +117,10 @@ GET /api/admin/orders/live
 ### 상태 변경 — API-008
 
 ```http
-PATCH /api/admin/orders/{orderId}/status
+PATCH /api/admin/orders/{orderId}/{status}
 ```
 
-```json
-{ "status": "COMPLETED" }
-```
+Path: `orderId`, `status` (`PREPARING` 또는 `COMPLETED`). Request body는 없다.
 
 허용 전이는 아래 두 개다.
 

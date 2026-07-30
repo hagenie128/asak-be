@@ -9,7 +9,7 @@
 | API-021 | `GET /api/admin/orders/live` | 현재 처리 대상 주문과 대기 수 조회 | 빈 목록 |
 | API-007 | `GET /api/admin/orders` | 페이지·상태·기간·주문유형 필터 목록 | 400 잘못된 query |
 | API-022 | `GET /api/admin/orders/{orderId}` | 주문·아이템·옵션·결제 상세 조립 | 404 `ORDER_NOT_FOUND` |
-| API-008 | `PATCH /api/admin/orders/{orderId}/status` | 허용 상태 전이와 동시 변경 충돌 처리 | 404, 409 상태 전이 충돌 |
+| API-008 | `PATCH /api/admin/orders/{orderId}/{status}` | path `status`로 허용 상태 전이와 동시 변경 충돌 처리 | 404, 409 상태 전이 충돌 |
 | API-024 | `PATCH /api/admin/orders/{orderId}/cancel` | 주문 취소·승인 결제 환불·시각 저장 | 409 `ORDER_CANCEL_NOT_ALLOWED` |
 
 `RECEIVED`, `PREPARING`에서만 취소할 수 있다. 승인 결제는 `REFUNDED`와 `refundedAt`을 기록하며 `approvedAt`은 보존한다.

@@ -14,7 +14,7 @@
 | Kiosk 결제 | API-006 | `POST /api/kiosk/payments` | SPEC_ONLY | 멱등성·상태 전이 |
 | Admin 주문 | API-021 | `GET /api/admin/orders/live` | SPEC_ONLY | 주문 조회 |
 | Admin 주문 | API-007/022 | `GET /api/admin/orders`, `/{orderId}` | SPEC_ONLY | pagination·상세 DTO |
-| Admin 주문 | API-008 | `PATCH /api/admin/orders/{orderId}/status` | SPEC_ONLY | 상태 전이 |
+| Admin 주문 | API-008 | `PATCH /api/admin/orders/{orderId}/{status}` | IMPLEMENTED | path `status` 상태 전이 |
 | Admin 주문 | API-024 | `PATCH /api/admin/orders/{orderId}/cancel` | SPEC_ONLY | 환불·매출 반영 |
 | Admin 운영 | API-009/010 | `PATCH` / `GET /api/admin/soldOut` | SPEC_ONLY | 품절 규칙 |
 | Admin 메뉴 | API-011/023 | `GET /api/admin/menus`, `/{menuId}` | SPEC_ONLY | 목록/상세 조회 |

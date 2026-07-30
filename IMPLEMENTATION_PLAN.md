@@ -74,7 +74,7 @@
 | API | Method | 경로 | 요구사항 |
 | --- | --- | --- | --- |
 | API-007 | GET | `/api/admin/orders` | LMIS-ORDER-001 |
-| API-008 | PATCH | `/api/admin/orders/{orderId}/status` | LMIS-ORDER-003 |
+| API-008 | PATCH | `/api/admin/orders/{orderId}/{status}` | LMIS-ORDER-003 |
 | API-009 / 010 | PATCH / GET | `/api/admin/soldOut` | LMIS-MENU-001 |
 | API-011 | GET | `/api/admin/menus` | LMIS-MENU-004 |
 | API-012 / 013 | POST / PATCH | `/api/admin/menus`, `/api/admin/menus/{menuId}` | LMIS-MENU-004 |

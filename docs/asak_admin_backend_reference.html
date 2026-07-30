@@ -364,7 +364,7 @@
   <p class="group-intro">Controller/Service 코드는 안 씁니다. 여기 5개는 전부 아직 매퍼도 없는 상태입니다.</p>
 
   <div class="hint-box">
-    <p class="hint-title">주문 상태 변경 — PATCH /api/admin/orders/{orderId}/status</p>
+    <p class="hint-title">주문 상태 변경 — PATCH /api/admin/orders/{orderId}/{status}</p>
     <ul class="hint-list">
       <li><span class="mono">RECEIVED→PREPARING→COMPLETED</span> 순서만 허용, 역행/건너뛰기 막아야 함</li>
       <li>전이 불가 시 <span class="mono">INVALID_ORDER_STATUS_TRANSITION</span> — <span class="mono">ErrorCode</span>에 이미 있음</li>

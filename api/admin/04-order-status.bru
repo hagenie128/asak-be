@@ -5,25 +5,20 @@ meta {
 }
 
 patch {
-  url: {{baseUrl}}/api/admin/orders/{{orderId}}/status
-  body: json
+  url: {{baseUrl}}/api/admin/orders/{{orderId}}/{{status}}
+  body: none
   auth: none
 }
 
-headers {
-  Content-Type: application/json
-}
-
-body:json {
-  {
-    "status": "COMPLETED"
-  }
+vars {
+  status: COMPLETED
 }
 
 docs {
   # API-008
-  PATCH /api/admin/orders/{orderId}/status
-  ORDER_API_CONTRACT: body.status
-  enum: RECEIVED | PREPARING | COMPLETED | CANCELED
-  SPEC_ONLY: 현재 상태 변경 Controller mapping 미구현
+  PATCH /api/admin/orders/{orderId}/{status}
+  ORDER_API_CONTRACT: path.status
+  enum: PREPARING | COMPLETED
+  Request body 없음
+  IMPLEMENTED: AdminOrderController @PatchMapping("/{orderId}/{status}")
 }
