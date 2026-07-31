@@ -136,8 +136,7 @@
     </insert>
 
     <!-- 주문 아이템에 대한 옵션 부분 저장 -->
-    <insert>
-    
+    <insert id="insertOrderItemOption">
         insert into order_item_option(
             order_item_id,
             opt_item_id,
@@ -153,7 +152,7 @@
     </insert>
 
     <!-- 주문 아이템에 따른 제외 재료 저장 -->
-    <insert>
+    <insert id="insertItemExclusion">
         insert into item_exclusion(
             order_item_id,
             ing_id
