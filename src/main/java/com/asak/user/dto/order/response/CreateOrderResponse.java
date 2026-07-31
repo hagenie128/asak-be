@@ -1,9 +1,9 @@
 package com.asak.user.dto.order.response;
 
 import com.asak.common.enums.OrderStatus;
+
 import lombok.Builder;
 import lombok.Getter;
-import lombok.Setter;
 
 // {
 //     "orderId":1,

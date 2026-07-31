@@ -10,6 +10,7 @@ import java.util.Map;
 import java.util.function.Function;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.asak.common.enums.OrderStatus;
 import com.asak.common.enums.OrderType;
@@ -23,12 +24,10 @@ import com.asak.user.dto.order.internal.ValidatedOrderResult;
 import com.asak.user.dto.order.query.MenuQueryDto;
 import com.asak.user.dto.order.query.OptionItemQueryDto;
 import com.asak.user.dto.order.query.OptionPolicyQueryDto;
-import com.asak.user.dto.order.request.CartValidateItemRequest;
 import com.asak.user.dto.order.request.CartValidateRequest;
 import com.asak.user.dto.order.request.CreateOrderRequest;
 import com.asak.user.dto.order.request.OptionItemRequest;
 import com.asak.user.dto.order.request.OrderItemCommand;
-import com.asak.user.dto.order.request.OrderItemRequest;
 import com.asak.user.dto.order.response.CartValidateItemResponse;
 import com.asak.user.dto.order.response.CartValidateOptionItemResponse;
 import com.asak.user.dto.order.response.CartValidateResponse;
@@ -36,7 +35,6 @@ import com.asak.user.dto.order.response.CreateOrderResponse;
 import com.asak.user.mapper.UserOrderMapper;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
@@ -46,8 +44,8 @@ public class UserOrderService {
         // 주문 생성 변수
         private static final String ORDER_NO_PREFIX = "ASAK";
         private static final ZoneId ORDER_ZONE_ID = ZoneId.of("Asia/Seoul");
-        private static final DateTimeFormatter ORDER_DATE_FORMATTER = DateTimeFormatter.ofPattern("yyyyMMdd");;
-        private static final int MAX_DAILY_ORDER_SEQUENCE = 999999;
+        private static final DateTimeFormatter ORDER_DATE_FORMATTER = DateTimeFormatter.ofPattern("yyMMdd");
+        private static final int MAX_DAILY_ORDER_SEQUENCE = 9999;
 
         private final UserOrderMapper orderMapper;
 
@@ -307,7 +305,7 @@ public class UserOrderService {
          * ① orderType이 EAT_IN 또는 TAKE_OUT인지 확인한다.
          * ② 위의 API-004/API-005 공통 검증과 서버 가격 계산을 수행한다.
          * ③ common_code에서 orderType에 해당하는 orderTypeId와 RECEIVED 상태의 statusId를 조회한다.
-         * ④ 명세 형식(ASAKyyyyMMddNNNNNN)의 중복되지 않는 orderNo를 생성한다.
+         * ④ 명세 형식(ASAKyyMMddNNNN)의 중복되지 않는 orderNo를 생성한다.
          * ⑤ orders에 orderNo, orderTypeId, statusId, totalAmount를 INSERT하고 orderId를 받는다.
          * ⑥ 검증된 각 아이템을 order_item에 INSERT하고 orderItemId를 받는다.
          * ⑦ 각 아이템의 선택 옵션과 당시 옵션 가격을 order_item_option에 INSERT한다.
@@ -370,7 +368,7 @@ public class UserOrderService {
                 }
 
                 // 5. 주문번호 생성
-                // [피드백] ASAK + yyyyMMdd + 일별 6자리 순번으로 조립한다.
+                // [피드백] ASAK + yyMMdd + 일별 4자리 순번으로 조립한다.
                 // 현재 구현은 기존 orders에서 마지막 번호를 읽는 방식이므로 order_no UNIQUE 제약과
                 // 동시 요청의 중복 키 충돌 재시도 처리가 최종적으로 필요하다.
                 String orderNo = generateOrderNo();
@@ -473,15 +471,15 @@ public class UserOrderService {
         }
 
         /**
-         * 기존 orders 테이블을 기준 ASAKyyyyMMddNNNNNN 주문번호 생성
+         * 기존 orders 테이블을 기준으로 ASAKyyMMddNNNN 주문번호 생성
          */
         private String generateOrderNo() {
 
-                // 1. 한국 시간 기준 오늘 날짜를 yyyyMMdd로 만든다.
+                // 1. 한국 시간 기준 오늘 날짜를 yyMMdd로 만든다.
                 LocalDate orderDate = LocalDate.now(ORDER_ZONE_ID);
                 String datePart = orderDate.format(ORDER_DATE_FORMATTER);
 
-                // 2. 고정 접두사 ASAK와 날짜를 조합한다. 예: ASAK20250301
+                // 2. 고정 접두사 ASAK와 날짜를 조합한다. 예: ASAK250301
                 String orderNoPrefix = ORDER_NO_PREFIX + datePart;
 
                 // 3. orders에서 같은 날짜 접두사를 가진 가장 마지막 주문번호를 조회한다.
@@ -492,15 +490,15 @@ public class UserOrderService {
                 int nextSequence = 1;
 
                 if (lastOrderNo != null) {
-                        // 저장된 주문번호가 정해진 18자리 형식을 벗어나면 잘못된 순번을 만들지 않고 중단한다.
-                        if (lastOrderNo.length() != orderNoPrefix.length() + 6
+                        // 저장된 주문번호가 정해진 14자리 형식을 벗어나면 잘못된 순번을 만들지 않고 중단한다.
+                        if (lastOrderNo.length() != orderNoPrefix.length() + 4
                                         || !lastOrderNo.startsWith(orderNoPrefix)) {
                                 throw new CustomException(
                                                 ErrorCode.ORDER_NUMBER_CREATE_FAILED);
                         }
 
                         try {
-                                // 5. 마지막 주문번호의 뒤 6자리를 숫자로 변환하고 1을 더한다.
+                                // 5. 마지막 주문번호의 뒤 4자리를 숫자로 변환하고 1을 더한다.
                                 String lastSequencePart = lastOrderNo.substring(
                                                 orderNoPrefix.length());
                                 nextSequence = Integer.parseInt(lastSequencePart) + 1;
@@ -510,15 +508,15 @@ public class UserOrderService {
                         }
                 }
 
-                // 6자리 순번의 최대값을 넘으면 같은 형식으로 더 이상 번호를 만들 수 없다.
+                // 4자리 순번의 최대값을 넘으면 같은 형식으로 더 이상 번호를 만들 수 없다.
                 if (nextSequence > MAX_DAILY_ORDER_SEQUENCE) {
                         throw new CustomException(
                                         ErrorCode.ORDER_DAILY_SEQUENCE_EXCEEDED);
                 }
 
-                // 6. 다음 순번을 6자리로 채우고 최종 주문번호를 반환한다.
+                // 6. 다음 순번을 4자리로 채우고 최종 주문번호를 반환한다.
                 return orderNoPrefix + String.format(
-                                "%06d",
+                                "%04d",
                                 nextSequence);
         }
 

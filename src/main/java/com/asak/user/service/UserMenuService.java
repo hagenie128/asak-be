@@ -8,7 +8,6 @@ import com.asak.user.dto.menu.CategoryResponse;
 import com.asak.user.dto.menu.MenuDetailResponse;
 import com.asak.user.dto.menu.MenuListItemResponse;
 import com.asak.user.dto.menu.OptionGroupResponse;
-import com.asak.user.dto.menu.OptionItemResponse;
 import com.asak.user.mapper.UserMenuMapper;
 
 import lombok.RequiredArgsConstructor;
@@ -39,7 +38,7 @@ public class UserMenuService {
         // group 담을 그릇 , groups반복할 객체
         for (OptionGroupResponse group : groups) {
             group.setItems(
-                    menuMapper.selectOptionItems(menuId,group.getOptionGroupId()));
+                    menuMapper.selectOptionItems(menuId, group.getOptionGroupId()));
         }
 
         response.setOptionGroups(groups);
