@@ -28,6 +28,19 @@ public enum ErrorCode {
   MENU_SOLD_OUT("MENU_SOLD_OUT", HttpStatus.CONFLICT, "메뉴가 품절되었습니다."),
   INVALID_ORDER_REQUEST("INVALID_ORDER_REQUEST",HttpStatus.BAD_REQUEST, "주문 요청이 올바르지 않습니다."),
   INVALID_ORDER_TYPE("INVALID_ORDER_TYPE",HttpStatus.BAD_REQUEST,"올바른 주문 유형이 아닙니다."),
+  ORDER_INITIAL_STATUS_NOT_FOUND("ORDER_INITIAL_STATUS_NOT_FOUND",HttpStatus.INTERNAL_SERVER_ERROR,"주문 초기 상태 설정을 찾을 수 없습니다."),
+  ORDER_NUMBER_CREATE_FAILED(
+      "ORDER_NUMBER_CREATE_FAILED", HttpStatus.INTERNAL_SERVER_ERROR, "주문번호를 생성할 수 없습니다."),
+  ORDER_DAILY_SEQUENCE_EXCEEDED(
+      "ORDER_DAILY_SEQUENCE_EXCEEDED", HttpStatus.INTERNAL_SERVER_ERROR, "일일 주문번호 생성 한도를 초과했습니다."),
+  ORDER_CREATE_FAILED(
+      "ORDER_CREATE_FAILED", HttpStatus.INTERNAL_SERVER_ERROR, "주문을 생성할 수 없습니다."),
+  ORDER_ITEM_CREATE_FAILED(
+      "ORDER_ITEM_CREATE_FAILED", HttpStatus.INTERNAL_SERVER_ERROR, "주문 내역의 아이템을 생성할 수 없습니다."),
+  ORDER_OPTION_CREATE_FAILED(
+      "ORDER_OPTION_CREATE_FAILED", HttpStatus.INTERNAL_SERVER_ERROR, "주문 내역의 아이템의 옵션을 생성할 수 없습니다."),
+  ORDER_EXCLUSION_CREATE_FAILED(
+      "ORDER_EXCLUSION_CREATE_FAILED", HttpStatus.INTERNAL_SERVER_ERROR, "주문 내역의 아이템의 제외 재료를 생성할 수 없습니다."),
 
   // Order lifecycle
   ORDER_PRICE_CHANGED("ORDER_PRICE_CHANGED", HttpStatus.CONFLICT, "주문 가격이 변경되었습니다."),

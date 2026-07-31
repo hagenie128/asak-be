@@ -55,11 +55,113 @@
     </select>
 
     <!-- 주문 유형 찾기 -->
-
     <select id="findOrderTypeId" resultType="java.lang.Long">
-    
+        select
+            cc.id
+
+        from common_code cc
+
+        join code_group cg
+        on cc.code_grp_id = cg.id
+
+        where cg.group_code = 'ORDER_TYPE'
+        and cc.code = #{code}
 
     </select>
 
+    <!-- 주문 상태 찾기 -->
+    <select id="findOrderStatusId" resultType="java.lang.Long">
+        select
+            cc.id
+
+        from common_code cc
+
+        join code_group cg
+        on cc.code_grp_id = cg.id
+
+        where cg.group_code = 'ORDER_STATUS'
+        and cc.code = #{code}
+    </select>
+
+    <!-- ASAKyyyyMMdd 범위에서 가장 마지막 6자리 순번을 가진 주문번호 조회 -->
+    <select id="findLastOrderNoByPrefix" resultType="java.lang.String">
+        select order_no
+        from orders
+        where order_no &gt;= concat(#{orderNoPrefix}, '000001')
+        and order_no &lt;= concat(#{orderNoPrefix}, '999999')
+        order by order_no desc
+        limit 1
+    </select>
+
+    <!-- 주문 전체의 공통 정보(주문 헤더)를 저장하고 생성된 PK를 orderId에 매핑 -->
+    <insert id="insertOrder"
+            parameterType="OrderInsertDto"
+            useGeneratedKeys="true"
+            keyProperty="orderId"
+            keyColumn="id">
+        insert into orders (
+            order_no,
+            order_type_id,
+            status_id,
+            total_price,
+            created_at
+        )
+        values (
+            #{orderNo},
+            #{orderTypeId},
+            #{statusId},
+            #{totalAmount},
+            now()
+        )
+    </insert>
+
+    <!-- 주문한 아이템에 대해서 저장 및 orderItemId 반환 -->
+    <insert id="insertOrderItem" 
+            parameterType="OrderItemInsertDto"
+            useGeneratedKeys="true"
+            keyProperty="orderItemId"
+            keyColumn="id">
+        insert into order_item(
+            order_id,
+            menu_id,
+            quantity,
+            price
+
+        )values(
+            #{orderId},
+            #{menuId},
+            #{quantity},
+            #{unitPrice}
+        )
+    </insert>
+
+    <!-- 주문 아이템에 대한 옵션 부분 저장 -->
+    <insert>
+    
+        insert into order_item_option(
+            order_item_id,
+            opt_item_id,
+            quantity,
+            price
+
+        )values(
+            #{orderItemId},
+            #{optionItemId},
+            #{quantity},
+            #{extraPrice}
+        )
+    </insert>
+
+    <!-- 주문 아이템에 따른 제외 재료 저장 -->
+    <insert>
+        insert into item_exclusion(
+            order_item_id,
+            ing_id
+        )values(
+            #{orderItemId},
+            #{ingredientId}
+        )
+    
+    </insert>
 
 </mapper>
