@@ -30,6 +30,7 @@ public class MenuListItemResponse {
   private String name;
   private Integer price;
   private String imageUrl;
+  private Double kcal;
   private Boolean isSoldOut;
   private Boolean isOrderable;
 }

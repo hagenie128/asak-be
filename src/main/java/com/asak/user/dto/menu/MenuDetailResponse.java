@@ -40,6 +40,7 @@ public class MenuDetailResponse {
   private String name;
   private Integer price;
   private String imageUrl;
+  private String description;
   private Boolean isSoldOut;
   private List<IngredientResponse> ingredients;
   private List<OptionGroupResponse> optionGroups;

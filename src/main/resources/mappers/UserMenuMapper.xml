@@ -17,14 +17,17 @@
     <!-- 메뉴 조회 -->
     <select id="selectMenuList" resultType="menuList">
         SELECT
-            id AS menuId,
-            cat_id AS categoryId,
-            name,
-            price,
-            image_url AS imageUrl,
-            sold_out AS isSoldOut
-        FROM menu
-        ORDER BY cat_id ASC, id ASC
+            m.id AS menuId,
+            m.cat_id AS categoryId,
+            m.name,
+            m.price,
+            mn.kcal, 
+            m.image_url AS imageUrl,
+            m.sold_out AS isSoldOut
+        FROM menu m
+        join menu_nutr mn
+        on mn.menu_id = m.id
+        ORDER BY m.cat_id ASC, m.id ASC
     </select>
 
     <!-- 메뉴 디테일 -->
@@ -34,6 +37,7 @@
             cat_id as categoryId,
             name,
             price,
+            description,
             image_url as imageUrl,
             sold_out as isSoldOut
         from menu
