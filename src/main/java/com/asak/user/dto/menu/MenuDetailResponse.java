@@ -44,5 +44,5 @@ public class MenuDetailResponse {
   private Boolean isSoldOut;
   private List<IngredientResponse> ingredients;
   private List<OptionGroupResponse> optionGroups;
-  private Nutrition nutrition;
+  private List<String> tags;
 }

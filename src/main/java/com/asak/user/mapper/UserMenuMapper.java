@@ -29,6 +29,6 @@ public interface UserMenuMapper {
 
     List<OptionItemResponse> selectOptionItems(@Param("menuId") Long menuId, @Param("policyId") Long policyId);
 
-    Nutrition selectNutrition(Long menuId);
+    List<String> selectTages(@Param("menuId") Long menuId);
 
 }

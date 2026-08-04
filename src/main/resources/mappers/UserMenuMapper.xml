@@ -44,6 +44,16 @@
         where id = #{ menuId }
     </select>
 
+    <!-- 메뉴 상세 태그 조회 -->
+    <select id="selectTages" resultType="string">
+        SELECT t.name
+        FROM menu_tag mt
+        JOIN tag t ON t.id = mt.tag_id
+        WHERE mt.menu_id = #{menuId}
+        AND t.active = true
+        ORDER BY t.id
+    </select>
+
     <!-- 재료 조회 -->
     <select id="selectIngredients" resultType="ingredient">
         select
@@ -139,14 +149,6 @@
         order by opi.sort_no
 
     </select>
-    <!-- 영양 정보 조회 -->
-    <select id="selectNutrition" resultType="Nutrition">
-        select
-            SUM(ing.kcal) AS kcal
-        from menu_ing mi
-        join ing
-            on mi.ing_id = ing.id
-        where mi.menu_id = #{menuId}
-    </select>
+
 
 </mapper>

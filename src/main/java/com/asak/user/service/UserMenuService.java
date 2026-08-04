@@ -43,7 +43,7 @@ public class UserMenuService {
 
         response.setOptionGroups(groups);
 
-        response.setNutrition(menuMapper.selectNutrition(menuId));
+        response.setTags(menuMapper.selectTages(menuId));
 
         return response;
     }
