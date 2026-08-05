@@ -90,18 +90,19 @@ public class AdminOrderController {
   public ApiResponse<Void> changeOrderStatus(@PathVariable(name = "orderId") Long orderId,
       @PathVariable(name = "status") String status) {
     OrderDetailResponse response = adminOrderService.getOrderDetail(orderId);
-    // TODO-001: response == null 이면 ORDER_NOT_FOUND 반환 (NPE 방지)
-    if (response.getOrderStatus().equals("COMPLETED") || response.getOrderStatus().equals("CANCELED")) {
-      // TODO-002: 상태변경 거절 시 ORDER_CANCEL_NOT_ALLOWED 대신 전이 충돌/불가 ErrorCode로 분리
-      return ApiResponse.error(ErrorCode.ORDER_CANCEL_NOT_ALLOWED);
+    if (response == null) {
+      return ApiResponse.error(ErrorCode.ORDER_NOT_FOUND);
     }
-    if (adminOrderService.changeOrderStatus(response, status) == 0)
-      // TODO-006: update 0건이면 전이 불가(0) vs 동시성 충돌(409) 구분 응답
-      return ApiResponse.error(ErrorCode.INVALID_ORDER_STATUS_TRANSITION);
-    return ApiResponse.success(
-        "ADMIN_ORDER_STATUS_CHANGE_SUCCESS",
-        "관리자 주문 상태 변경 성공",
-        null);
+
+    // Service가 규칙 위반 / 동시성 충돌을 구분해 돌려준다.
+    return switch (adminOrderService.changeOrderStatus(response, status)) {
+      case SUCCESS -> ApiResponse.success(
+          "ADMIN_ORDER_STATUS_CHANGE_SUCCESS",
+          "관리자 주문 상태 변경 성공",
+          null);
+      case INVALID_TRANSITION -> ApiResponse.error(ErrorCode.INVALID_ORDER_STATUS_TRANSITION);
+      case CONFLICT -> ApiResponse.error(ErrorCode.ORDER_STATUS_CONFLICT);
+    };
   }
 
   // | API-024 | `PATCH /api/admin/orders/{orderId}/cancel` | 주문 취소·승인 결제 환불·시각 저장
@@ -110,6 +111,9 @@ public class AdminOrderController {
   public ApiResponse<Void> cancelOrder(@PathVariable(name = "orderId") Long orderId) {
     OrderDetailResponse response = adminOrderService.getOrderDetail(orderId);
     // TODO-007: response == null 이면 ORDER_NOT_FOUND 반환 (NPE 방지)
+    if (response == null) {
+      return ApiResponse.error(ErrorCode.ORDER_NOT_FOUND);
+    }
     if (response.getOrderStatus().equals("COMPLETED") || response.getOrderStatus().equals("CANCELED")) {
       return ApiResponse.error(ErrorCode.ORDER_CANCEL_NOT_ALLOWED);
     }

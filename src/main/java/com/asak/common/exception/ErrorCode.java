@@ -47,6 +47,10 @@ public enum ErrorCode {
   ORDER_NOT_FOUND("ORDER_NOT_FOUND", HttpStatus.NOT_FOUND, "주문을 찾을 수 없습니다."),
   INVALID_ORDER_STATUS_TRANSITION(
       "INVALID_ORDER_STATUS_TRANSITION", HttpStatus.CONFLICT, "주문 상태 전환이 유효하지 않습니다."),
+  ORDER_STATUS_CONFLICT(
+      "ORDER_STATUS_CONFLICT",
+      HttpStatus.CONFLICT,
+      "주문 상태가 이미 변경되었습니다. 최신 상태를 다시 조회해 주세요."),
   ORDER_CANCEL_NOT_ALLOWED(
       "ORDER_CANCEL_NOT_ALLOWED", HttpStatus.CONFLICT, "주문을 취소할 수 없는 상태입니다."),
   ORDER_REFUND_NOT_ALLOWED(

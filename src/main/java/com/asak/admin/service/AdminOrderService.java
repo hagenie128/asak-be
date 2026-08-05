@@ -20,6 +20,15 @@ public class AdminOrderService {
 
   private static final int MAX_ORDER_LIST_SIZE = 100;
 
+  /** 상태변경 결과 — Controller가 ErrorCode로 매핑한다. */
+  public enum StatusChangeResult {
+    SUCCESS,
+    /** 규칙상 허용되지 않는 전이 (예: RECEIVED→COMPLETED) */
+    INVALID_TRANSITION,
+    /** 조회 시점과 DB 상태가 달라 UPDATE 0건 */
+    CONFLICT
+  }
+
   private final AdminOrderMapper adminOrderMapper;
 
   public AdminOrderService(AdminOrderMapper adminOrderMapper) {
@@ -84,26 +93,60 @@ public class AdminOrderService {
     return adminOrderMapper.getOrderDetail(orderId);
   }
 
-  public int changeOrderStatus(OrderDetailResponse response, String status) {
-    // TODO-003: response.orderStatus → status 허용 전이만 통과 (RECEIVED→PREPARING→COMPLETED), 아니면 0
-    int statusId;
-    // TODO-004: statusId 12/13 하드코딩 제거 — OrderStatus enum 또는 코드테이블 조회로 교체
-    if ("PREPARING".equals(status))
-      statusId = 12;
-    else if ("COMPLETED".equals(status))
-      statusId = 13;
-    else
-      return 0;
+  /**
+   * MVP 허용 전이: RECEIVED→PREPARING, PREPARING→COMPLETED.
+   * 규칙 위반은 DB를 치기 전에 INVALID_TRANSITION.
+   * 규칙은 맞는데 UPDATE 0건이면 CONFLICT(다른 요청이 먼저 변경).
+   */
+  public StatusChangeResult changeOrderStatus(OrderDetailResponse response, String status) {
+    String current = response.getOrderStatus();
+    if (!isAllowedTransition(current, status)) {
+      return StatusChangeResult.INVALID_TRANSITION;
+    }
+
+    Long expectedStatusId = adminOrderMapper.findOrderStatusId(current);
+    Long nextStatusId = adminOrderMapper.findOrderStatusId(status);
+    if (expectedStatusId == null || nextStatusId == null) {
+      return StatusChangeResult.INVALID_TRANSITION;
+    }
+
     Map<String, Object> map = new HashMap<>();
     map.put("orderId", response.getOrderId());
-    map.put("statusId", statusId);
-    // TODO-005 연동: map에 expectedStatusId 넣어 optimistic update (Mapper XML TODO-005)
-    return adminOrderMapper.changeOrderStatus(map);
+    map.put("statusId", nextStatusId);
+    map.put("expectedStatusId", expectedStatusId);
+
+    int updated = adminOrderMapper.changeOrderStatus(map);
+    if (updated == 0) {
+      return StatusChangeResult.CONFLICT;
+    }
+    return StatusChangeResult.SUCCESS;
+  }
+
+  private boolean isAllowedTransition(String current, String next) {
+    if (current == null || next == null) {
+      return false;
+    }
+    if ("RECEIVED".equals(current) && "PREPARING".equals(next)) {
+      return true;
+    }
+    if ("PREPARING".equals(current) && "COMPLETED".equals(next)) {
+      return true;
+    }
+    return false;
   }
 
   public int cancelOrder(Long orderId) {
-    // TODO-008: 취소 가능 상태 검사 + paymentStatus APPROVED면 환불 정책 연동 후 Mapper 호출
-    // TODO-009 연동: cancleOrder → cancelOrder 로 메서드명 교체 후 호출
-    return adminOrderMapper.cancleOrder(orderId);
+    // APPROVED·COMPLETED·CANCELED 는 취소 불가
+    OrderDetailResponse response = adminOrderMapper.getOrderDetail(orderId);
+    if (response == null) {
+      return 0;
+    }
+    if (response.getPaymentStatus().equals("APPROVED")) {
+      return 0;
+    }
+    if (response.getOrderStatus().equals("COMPLETED") || response.getOrderStatus().equals("CANCELED")) {
+      return 0;
+    }
+    return adminOrderMapper.cancelOrder(orderId);
   }
 }

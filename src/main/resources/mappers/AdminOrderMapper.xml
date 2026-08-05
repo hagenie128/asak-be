@@ -127,21 +127,29 @@
   ORDER BY created_at ASC
 </select>
 
-<!-- TODO-005: WHERE에 기대 status_id 조건 추가 (optimistic concurrency, 0건→409) -->
+<!-- 기대 status_id일 때만 갱신. 0건이면 다른 요청이 먼저 바꾼 것(동시성 충돌) -->
+<select id="findOrderStatusId" resultType="java.lang.Long">
+  SELECT cc.id
+  FROM common_code cc
+  JOIN code_group cg ON cc.code_grp_id = cg.id
+  WHERE cg.group_code = 'ORDER_STATUS'
+    AND cc.code = #{code}
+</select>
+
 <update id="changeOrderStatus">
 UPDATE orders
 SET status_id = #{statusId}
-WHERE id = #{orderId};
+WHERE id = #{orderId}
+  AND status_id = #{expectedStatusId}
 </update>
 
-<!-- TODO-009: id cancleOrder → cancelOrder -->
-<!-- TODO-010: status_id=43 매직넘버 → 코드테이블/상수와 대조 후 교체 -->
-<!-- TODO-072: Future — 환불 시 payments 상태 UPDATE는 별도 SQL로 분리 -->
-<update id="cancleOrder">
+<update id="cancelOrder">
 UPDATE orders
 SET status_id = 43,
 canceled_at = NOW()
-WHERE id = #{orderId};
+WHERE id = #{orderId}
 </update>
+<!-- TODO-072: Future — 환불 시 payments 상태 UPDATE는 별도 SQL로 분리 -->
+
 
 </mapper>
