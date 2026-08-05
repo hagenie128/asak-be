@@ -7,10 +7,14 @@ import org.apache.ibatis.type.Alias;
 
 // 재료
 
-// [{"ingredientId": 1,
-// ]"ingName": "로메인",
-// "role": "base",  재료 역할 (예: base, main, topping)
-// "unit": "g", 단위
+  // {
+  //   "ingredientId": 1,
+  //   "ingName": "로메인",
+  //   "role": "base",
+  //   "unit": "g",
+  //   "isDefault": true,
+  //   "canRemove": true
+  // }
 
 @Getter
 @Setter
@@ -22,4 +26,8 @@ public class IngredientResponse {
   private String ingName;
   private String role;
   private String unit;
+  // 해당 메뉴에 기본 포함되는 재료인지
+  private Boolean isDefault;
+  // 해당 메뉴에서 제거 가능한 재료인지
+  private Boolean canRemove;
 }

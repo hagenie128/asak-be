@@ -56,24 +56,22 @@
 
     <!-- 재료 조회 -->
     <select id="selectIngredients" resultType="ingredient">
-        select
-            i.id as ingredientId,
-            i.name as ingName,
-            role.code as role,
-            unit.name as unit
-        from menu_ing mi
-
-        join ing i 
-        on mi.ing_id = i.id
-
-        join common_code role
-        on mi.role_id = role.id
-
-        join common_code unit
-        on mi.unit_id = unit.id
-
-        where mi.menu_id = #{ menuId }
-        order by mi.sort_no 
+        SELECT
+            i.id AS ingredientId,
+            i.name AS ingName,
+            role.code AS role,
+            unit.name AS unit,
+            mi.is_default AS isDefault,
+            mi.can_remove AS canRemove
+        FROM menu_ing mi
+        JOIN ing i
+            ON mi.ing_id = i.id
+        JOIN common_code role
+            ON mi.role_id = role.id
+        LEFT JOIN common_code unit
+            ON mi.unit_id = unit.id
+        WHERE mi.menu_id = #{menuId}
+        ORDER BY mi.sort_no
     </select>
     
     <!-- 옵션 그룹 조회 -->
