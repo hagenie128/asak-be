@@ -15,4 +15,9 @@ public interface AdminMenuMapper {
   long countMenus(@Param("request") MenuListRequest request);
 
   MenuDetailResponse getMenuDetail(@Param("menuId") Long menuId);
+
+  // TODO-033: insertMenu(...)
+  // TODO-036: updateMenu(...)
+  // TODO-039: deleteMenu(...) 또는 updateMenuActive
+  // TODO-042: listIngredients(...) — 재료 검색
 }

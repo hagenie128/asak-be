@@ -23,5 +23,6 @@ public interface AdminOrderMapper {
 
   int changeOrderStatus(Map<String, Object> map);
 
+  // TODO-009: 메서드명 cancleOrder → cancelOrder (XML id 동기화)
   int cancleOrder(Long orderId);
 }

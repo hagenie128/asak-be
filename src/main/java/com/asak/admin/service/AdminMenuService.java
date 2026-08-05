@@ -32,19 +32,21 @@ public class AdminMenuService {
         imageFile,
         Paths.get(menuUploadDir));
 
-    // imageUrl 값을 menu.image_url 컬럼에 저장
+    // TODO-032: CreateMenuRequest 필드 채우기 (name, price, category, ingredients, optionGroups…)
+    // TODO-034: imageUrl + request 로 menu INSERT + ingredients/optionGroups 트랜잭션 저장
     // 예: /uploads/menu/UUID.png
   }
 
+  // TODO-037: updateMenu(menuId, UpdateMenuRequest) — Mapper updateMenu 호출
+  // TODO-040: deleteMenu(menuId) — soft delete 또는 isActive=false
+
   public PageResult<MenuListResponse> getMenus(MenuListRequest request) {
-    // 메뉴 목록 조회 로직 구현
     List<MenuListResponse> content = adminMenuMapper.getMenus(request);
     long totalElements = adminMenuMapper.countMenus(request);
     return new PageResult<>(content, request.getPage(), request.getSize(), totalElements);
   }
 
   public MenuDetailResponse getMenuDetail(Long menuId) {
-    // 메뉴 상세 조회 로직 구현
     return adminMenuMapper.getMenuDetail(menuId);
   }
 }

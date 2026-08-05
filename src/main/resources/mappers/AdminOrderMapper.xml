@@ -127,12 +127,16 @@
   ORDER BY created_at ASC
 </select>
 
+<!-- TODO-005: WHERE에 기대 status_id 조건 추가 (optimistic concurrency, 0건→409) -->
 <update id="changeOrderStatus">
 UPDATE orders
 SET status_id = #{statusId}
 WHERE id = #{orderId};
 </update>
 
+<!-- TODO-009: id cancleOrder → cancelOrder -->
+<!-- TODO-010: status_id=43 매직넘버 → 코드테이블/상수와 대조 후 교체 -->
+<!-- TODO-072: Future — 환불 시 payments 상태 UPDATE는 별도 SQL로 분리 -->
 <update id="cancleOrder">
 UPDATE orders
 SET status_id = 43,
