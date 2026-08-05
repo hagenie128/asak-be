@@ -5,13 +5,13 @@ meta {
 }
 
 patch {
-  url: {{baseUrl}}/api/admin/orders/{{orderId}}/{{status}}
+  url: {{baseUrl}}/api/admin/orders/{{orderId}}/{{targetStatus}}
   body: none
   auth: none
 }
 
 vars {
-  status: COMPLETED
+  targetStatus: COMPLETED
 }
 
 docs {
@@ -19,6 +19,6 @@ docs {
   PATCH /api/admin/orders/{orderId}/{status}
   ORDER_API_CONTRACT: path.status
   enum: PREPARING | COMPLETED
-  Request body 없음
-  IMPLEMENTED: AdminOrderController @PatchMapping("/{orderId}/{status}")
+  Request body none
+  IMPLEMENTED: AdminOrderController PatchMapping /{orderId}/{status}
 }

@@ -85,8 +85,9 @@ public class AdminOrderService {
   }
 
   public int changeOrderStatus(OrderDetailResponse response, String status) {
-
+    // TODO-003: response.orderStatus → status 허용 전이만 통과 (RECEIVED→PREPARING→COMPLETED), 아니면 0
     int statusId;
+    // TODO-004: statusId 12/13 하드코딩 제거 — OrderStatus enum 또는 코드테이블 조회로 교체
     if ("PREPARING".equals(status))
       statusId = 12;
     else if ("COMPLETED".equals(status))
@@ -96,10 +97,13 @@ public class AdminOrderService {
     Map<String, Object> map = new HashMap<>();
     map.put("orderId", response.getOrderId());
     map.put("statusId", statusId);
+    // TODO-005 연동: map에 expectedStatusId 넣어 optimistic update (Mapper XML TODO-005)
     return adminOrderMapper.changeOrderStatus(map);
   }
 
   public int cancelOrder(Long orderId) {
+    // TODO-008: 취소 가능 상태 검사 + paymentStatus APPROVED면 환불 정책 연동 후 Mapper 호출
+    // TODO-009 연동: cancleOrder → cancelOrder 로 메서드명 교체 후 호출
     return adminOrderMapper.cancleOrder(orderId);
   }
 }
