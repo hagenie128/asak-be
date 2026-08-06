@@ -136,7 +136,10 @@ public class AdminOrderService {
   }
 
   public int cancelOrder(Long orderId) {
-    // TODO-008: APPROVED 결제 취소 시 환불 연동 (현재 0 반환/거절만)
+    // TODO-008: APPROVED 결제 취소 정책 구체화.
+    // 1) APPROVED 결제 주문 취소 시 cancel과 refund를 분리할지 팀 규칙 확정
+    // 2) 환불 API/결제 상태 변경이 필요하면 별도 service/mapper/sql 연결
+    // 3) 현재 0 반환 대신 성공/실패/ErrorCode 기준을 Controller와 맞춘다
     // APPROVED·COMPLETED·CANCELED 는 취소 불가
     OrderDetailResponse response = adminOrderMapper.getOrderDetail(orderId);
     if (response == null) {
@@ -148,6 +151,12 @@ public class AdminOrderService {
     if (response.getOrderStatus().equals("COMPLETED") || response.getOrderStatus().equals("CANCELED")) {
       return 0;
     }
-    return adminOrderMapper.cancelOrder(orderId);
+    Map<String, Object> map = new HashMap<>();
+    map.put("canceledStatusId", adminOrderMapper.findOrderStatusId("CANCELED"));
+    if (map.get("canceledStatusId") == null) {
+      return 0;
+    }
+    map.put("orderId", response.getOrderId());
+    return adminOrderMapper.cancelOrder(map);
   }
 }

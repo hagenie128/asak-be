@@ -1,5 +1,18 @@
 package com.asak.admin.dto.request;
 
-// TODO-032: SoldOutPatchRequest — targetType, targetId, isSoldOut
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+
+/** 품절 변경 Request — PATCH /api/admin/soldOut (TODO-032) */
+@Getter
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class SoldOutPatchRequest {
+
+  private String targetType;
+  private Long targetId;
+  private Boolean isSoldOut;
 }

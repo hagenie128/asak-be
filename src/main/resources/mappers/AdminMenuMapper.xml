@@ -154,4 +154,11 @@
   <include refid="menuListWhere"/>
 </select>
 
+<select id="getCategories" resultType="com.asak.admin.dto.response.AdminCategoryResponse">
+  SELECT id AS categoryId, name AS categoryName, sort_no AS categorySortNo, active AS categoryActive
+  FROM category
+  WHERE active = 1
+  ORDER BY sort_no ASC
+</select>
+
 </mapper>
