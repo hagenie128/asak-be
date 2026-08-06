@@ -1,6 +1,6 @@
 package com.asak.admin.mapper;
 
-// TODO-025: selectPaymentMethods
-// TODO-026: updatePaymentMethod
+// TODO-041: selectPaymentMethods
+// TODO-042: updatePaymentMethod
 public interface AdminPaymentMethodMapper {
 }

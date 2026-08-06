@@ -136,6 +136,7 @@ public class AdminOrderService {
   }
 
   public int cancelOrder(Long orderId) {
+    // TODO-008: APPROVED 결제 취소 시 환불 연동 (현재 0 반환/거절만)
     // APPROVED·COMPLETED·CANCELED 는 취소 불가
     OrderDetailResponse response = adminOrderMapper.getOrderDetail(orderId);
     if (response == null) {

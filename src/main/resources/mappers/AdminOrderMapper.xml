@@ -143,6 +143,7 @@ WHERE id = #{orderId}
   AND status_id = #{expectedStatusId}
 </update>
 
+<!-- TODO-010: status_id=43 하드코딩 → 코드테이블/상수 조회 -->
 <update id="cancelOrder">
 UPDATE orders
 SET status_id = 43,
