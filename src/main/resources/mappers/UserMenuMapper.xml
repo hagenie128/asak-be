@@ -105,6 +105,9 @@
 
 
         where mop.menu_id = #{ menuId }
+        and groupType.code != 'REQUEST'
+
+        order by mop.sort_no asc
         
     
     </select>
