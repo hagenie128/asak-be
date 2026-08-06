@@ -5,7 +5,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-/** 결제수단 변경 Request — PATCH /api/admin/paymentMethods/{id} (TODO-040) */
+/** 결제수단 변경 Request — PATCH /api/admin/paymentMethods/{id} */
 @Getter
 @Builder
 @NoArgsConstructor

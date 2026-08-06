@@ -5,7 +5,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-/** 품절 변경 Request — PATCH /api/admin/soldOut (TODO-032) */
+/** 품절 변경 Request — PATCH /api/admin/soldOut */
 @Getter
 @Builder
 @NoArgsConstructor

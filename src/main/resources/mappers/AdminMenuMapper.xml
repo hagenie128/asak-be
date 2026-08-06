@@ -47,21 +47,26 @@
 </select>
 
 <select id="findMenuOptionGroupSummaries" resultType="com.asak.admin.dto.response.MenuOptionGroupSummaryResponse">
-  SELECT policy.option_group_id AS optionGroupId,
-         policy.name,
-         policy.is_required AS isRequired,
-         (
-           SELECT recommended_item.item_name
-           FROM JSON_TABLE(
-             policy.items,
-             '$[*]' COLUMNS (
-               item_name VARCHAR(120) PATH '$.name',
-               is_recommended TINYINT PATH '$.isRecommended'
-             )
-           ) AS recommended_item
-           WHERE recommended_item.is_recommended = 1
-           LIMIT 1
-         ) AS recommendedLabel
+  SELECT
+      policy.option_group_id AS optionGroupId,
+      policy.name,
+      policy.group_type AS groupType,
+      policy.select_type AS selectType,
+      policy.min_select AS minSelect,
+      policy.max_select AS maxSelect,
+      policy.is_required AS isRequired,
+      (
+        SELECT recommended_item.item_name
+        FROM JSON_TABLE(
+          policy.items,
+          '$[*]' COLUMNS (
+            item_name VARCHAR(120) PATH '$.name',
+            is_recommended TINYINT PATH '$.isRecommended'
+          )
+        ) AS recommended_item
+        WHERE recommended_item.is_recommended = 1
+        LIMIT 1
+      ) AS recommendedLabel
   FROM vw_menu_opt_policy_json policy
   WHERE policy.menu_id = #{menuId}
   ORDER BY policy.sort_order

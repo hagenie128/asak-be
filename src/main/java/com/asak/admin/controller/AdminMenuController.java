@@ -1,7 +1,5 @@
 package com.asak.admin.controller;
 
-import java.util.List;
-
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -60,20 +58,24 @@ public class AdminMenuController {
         "관리자 카테고리 목록 조회 성공",
         new PageResult<>(adminMenuService.getCategories(), 0, 20, adminMenuService.getCategories().size()));
   }
-  // TODO-019: POST /api/admin/menus 구현.
+  // TODO-017: 메뉴 등록 BE 1/3 — POST /api/admin/menus 구현.
   // 1) Request 형식 결정: multipart(FormData)인지 JSON인지 확정
   // 2) CreateMenuRequest + imageFile을 받아 adminMenuService.createMenu 호출
   // 3) ADMIN_MENU_UPSERT_SUCCESS + 요약 응답(menuId, categoryId, name, price, imageUrl, isSoldOut) 반환
-  // TODO-022: PATCH /api/admin/menus/{menuId} 구현.
+  // 4) 검증: 파일 포함/미포함 케이스와 성공 응답 shape를 Postman으로 확인
+  // TODO-023: 메뉴 수정 BE 1/3 — PATCH /api/admin/menus/{menuId} 구현.
   // 1) UpdateMenuRequest 바인딩
   // 2) adminMenuService.updateMenu(menuId, request) 호출
   // 3) 존재하지 않는 menuId는 MENU_NOT_FOUND 또는 팀 규칙 코드 반환
-  // TODO-028: DELETE /api/admin/menus/{menuId} 구현.
+  // 4) 검증: 수정 후 상세/목록 응답에 바뀐 값이 반영되는지 확인
+  // TODO-029: 메뉴 삭제 BE 1/3 — DELETE /api/admin/menus/{menuId} 구현.
   // 1) 삭제 정책(soft/hard) 확정
   // 2) adminMenuService.deleteMenu(menuId) 호출
   // 3) 목록 화면 refetch가 가능하도록 성공/실패 응답 규격 정리
-  // TODO-029: GET /ingredients 또는 별도 IngredientsController 구현.
+  // 4) 검증: 존재/미존재 menuId 삭제 응답과 재조회 결과 확인
+  // TODO-035: 재료 검색 BE 1/2 — GET /ingredients 또는 별도 IngredientsController 구현.
   // 1) endpoint 경로 결정
   // 2) 재료 검색/자동완성용 응답 shape 정의
   // 3) MenuEditPanel autocomplete/source에 연결
+  // 4) 검증: keyword 검색과 빈 결과 응답을 프론트 요구 shape로 확인
 }

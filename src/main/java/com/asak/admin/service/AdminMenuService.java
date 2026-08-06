@@ -34,7 +34,7 @@ public class AdminMenuService {
         Paths.get(menuUploadDir));
 
     // 재료·옵션·영양·태그 write는 후순위 슬라이스
-    // TODO-018: 저장 서비스 구현.
+    // TODO-018: 메뉴 등록 BE 2/3 — 저장 서비스 구현.
     // 1) FileUtil.saveMenuImage(...) 결과 imageUrl 확정
     // 2) CreateMenuRequest(categoryId, name, price, description) + imageUrl 로 Mapper.insertMenu 호출
     // 3) 생성 menuId/요약 응답(menuId, categoryId, name, price, imageUrl, isSoldOut) 연결
@@ -42,11 +42,11 @@ public class AdminMenuService {
     // 예: /uploads/menu/UUID.png
   }
 
-  // TODO-021: 수정 서비스 구현.
+  // TODO-024: 메뉴 수정 BE 2/3 — 수정 서비스 구현.
   // 1) menuId 존재 여부/수정 건수 기준 정리
   // 2) UpdateMenuRequest 기본 필드(categoryId, name, price, imageUrl, description)로 Mapper.updateMenu 호출
   // 3) 성공 후 프론트가 상세/목록을 갱신할 수 있는 응답 규격과 맞춘다
-  // TODO-027: 삭제 서비스 구현.
+  // TODO-030: 메뉴 삭제 BE 2/3 — 삭제 서비스 구현.
   // 1) soft delete/hard delete 정책 확정
   // 2) Mapper.deleteMenu 또는 대체 비활성화 호출
   // 3) 삭제 후 선택 메뉴/목록 refetch가 가능하도록 결과 반환 기준 정리

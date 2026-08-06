@@ -14,6 +14,10 @@ public class MenuOptionGroupSummaryResponse {
 
   private Long optionGroupId;
   private String name;
-  private boolean isRequired;
+  private String groupType;
+  private String selectType;
+  private Integer minSelect;
+  private Integer maxSelect;
+  private Boolean isRequired;
   private String recommendedLabel;
 }
