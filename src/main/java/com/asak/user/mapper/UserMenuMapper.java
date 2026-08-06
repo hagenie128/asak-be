@@ -8,7 +8,6 @@ import com.asak.user.dto.menu.CategoryResponse;
 import com.asak.user.dto.menu.IngredientResponse;
 import com.asak.user.dto.menu.MenuDetailResponse;
 import com.asak.user.dto.menu.MenuListItemResponse;
-import com.asak.user.dto.menu.Nutrition;
 import com.asak.user.dto.menu.OptionGroupResponse;
 import com.asak.user.dto.menu.OptionItemResponse;
 
