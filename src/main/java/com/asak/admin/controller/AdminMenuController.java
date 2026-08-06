@@ -54,8 +54,8 @@ public class AdminMenuController {
         menuDetail);
   }
 
-  // TODO-035: @PostMapping — CreateMenuRequest + image → adminMenuService.createMenu
-  // TODO-038: @PatchMapping("/{menuId}") — UpdateMenuRequest → adminMenuService.updateMenu
-  // TODO-041: @DeleteMapping("/{menuId}") — soft/hard delete → adminMenuService.deleteMenu
-  // TODO-042: GET /ingredients 또는 별도 IngredientsController — 메뉴 구성용 재료 목록
+  // TODO-018: @PostMapping — CreateMenuRequest + image → adminMenuService.createMenu
+  // TODO-021: @PatchMapping("/{menuId}") — UpdateMenuRequest → adminMenuService.updateMenu
+  // TODO-028: @DeleteMapping("/{menuId}") — soft/hard delete → adminMenuService.deleteMenu
+  // TODO-029: GET /ingredients 또는 별도 IngredientsController — 메뉴 구성용 재료 목록
 }

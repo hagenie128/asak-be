@@ -110,7 +110,6 @@ public class AdminOrderController {
   @PatchMapping("/{orderId}/cancel")
   public ApiResponse<Void> cancelOrder(@PathVariable(name = "orderId") Long orderId) {
     OrderDetailResponse response = adminOrderService.getOrderDetail(orderId);
-    // TODO-007: response == null 이면 ORDER_NOT_FOUND 반환 (NPE 방지)
     if (response == null) {
       return ApiResponse.error(ErrorCode.ORDER_NOT_FOUND);
     }
