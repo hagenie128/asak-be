@@ -76,6 +76,7 @@ public class AdminOrderController {
 
   @GetMapping("/live")
   public ApiResponse<LiveOrderListResponse> getLiveOrders() {
+    // Empty(0건)는 오류가 아님 — 200 + 빈 content. NOT_FOUND는 특정 orderId 조회 실패에만 사용.
     LiveOrderListResponse result = adminOrderService.getLiveOrders();
     return ApiResponse.success(
         "ADMIN_LIVE_ORDERS_SUCCESS",

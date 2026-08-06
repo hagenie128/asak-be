@@ -25,5 +25,5 @@ public interface AdminOrderMapper {
 
   int changeOrderStatus(Map<String, Object> map);
 
-  int cancelOrder(Long orderId);
+  int cancelOrder(Map<String, Object> map);
 }

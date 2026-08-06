@@ -19,7 +19,7 @@ public class MenuListRequest {
 
   @Min(1)
   @Max(100)
-  private int size = 20;
+  private int size = 12;
 
   private String sort = "name,asc";
 
