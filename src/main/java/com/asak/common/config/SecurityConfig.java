@@ -35,7 +35,8 @@ public class SecurityConfig {
         // 추후 관리자 JWT 인증을 사용할 예정이므로 세션은 사용하지 않음
         .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
 
-        // TODO-063: JwtAuthenticationFilter 등록 후 /api/admin/** authenticated, 그 외 permitAll
+        // TODO-063: JwtAuthenticationFilter 등록 후 /api/admin/** authenticated, 그 외
+        // permitAll
         // JWT 인증 구현 전까지 모든 API 임시 허용
         .authorizeHttpRequests(auth -> auth.anyRequest().permitAll())
 
@@ -50,13 +51,7 @@ public class SecurityConfig {
 
     CorsConfiguration config = new CorsConfiguration();
 
-    config.setAllowedOrigins(List.of(
-        "http://localhost:5173",
-        "http://localhost:5174",
-        "http://localhost:5175",
-        "http://localhost:5176",
-        "http://localhost:5177",
-        "http://localhost:5178"));
+    config.setAllowedOriginPatterns(List.of("*"));
 
     config.setAllowedMethods(List.of(
         "GET",
