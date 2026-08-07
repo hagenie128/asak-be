@@ -5,7 +5,7 @@ meta {
 }
 
 patch {
-  url: {{baseUrl}}/api/admin/payment-methods/{{methodId}}
+  url: {{baseUrl}}/api/admin/paymentMethods/{{methodId}}
   body: json
   auth: none
 }
@@ -16,12 +16,15 @@ headers {
 
 body:json {
   {
-    "isEnabled": true
+    "isActive": true,
+    "sortOrder": 1,
+    "receiptMessage": null
   }
 }
 
 docs {
   # API-016
-  PATCH /api/admin/payment-methods/{methodId}
-  활성 토글. CARD=카드·삼성페이
+  PATCH /api/admin/paymentMethods/{methodId}
+  body: isActive, sortOrder?, receiptMessage?
+  FE PaymentMethod draft 필드와 동일. (구 isEnabled 사용 금지)
 }
