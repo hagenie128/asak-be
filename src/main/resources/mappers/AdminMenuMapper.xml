@@ -160,10 +160,104 @@
 </select>
 
 <select id="getCategories" resultType="com.asak.admin.dto.response.AdminCategoryResponse">
-  SELECT id AS categoryId, name AS categoryName, sort_no AS categorySortNo, active AS categoryActive
+  SELECT id AS categoryId,
+         name AS categoryName,
+         sort_no AS sortOrder,
+         active AS active
   FROM category
   WHERE active = 1
   ORDER BY sort_no ASC
 </select>
 
+<insert id="insertMenu" parameterType="map" useGeneratedKeys="true" keyProperty="menuId" keyColumn="id">
+  INSERT INTO menu (cat_id, name, price, image_url, description)
+  VALUES (#{categoryId}, #{name}, #{price}, #{imageUrl}, #{description})
+</insert>
+
+<select id="findCommonCodeId" resultType="java.lang.Long">
+  SELECT cc.id
+  FROM common_code cc
+  JOIN code_group cg ON cg.id = cc.code_grp_id
+  WHERE cg.group_code = #{groupCode}
+    AND UPPER(cc.code) = UPPER(#{code})
+    AND cc.active = 1
+  LIMIT 1
+</select>
+
+<select id="findTagId" resultType="java.lang.Long">
+  SELECT t.id
+  FROM tag t
+  WHERE t.active = 1
+    AND (
+      (#{code} IS NOT NULL AND #{code} != '' AND UPPER(t.code) = UPPER(#{code}))
+      OR (#{name} IS NOT NULL AND #{name} != '' AND t.name = #{name})
+    )
+  LIMIT 1
+</select>
+
+<select id="findOptPolicyId" resultType="java.lang.Long">
+  SELECT id
+  FROM (
+    SELECT id, 1 AS priority
+    FROM opt_policy
+    WHERE id = #{optionGroupId}
+    UNION ALL
+    SELECT id, 2 AS priority
+    FROM opt_policy
+    WHERE opt_group_id = #{optionGroupId}
+  ) candidates
+  ORDER BY priority
+  LIMIT 1
+</select>
+
+<select id="findOptItemIdsByPolicyId" resultType="java.lang.Long">
+  SELECT opt_item_id
+  FROM opt_policy_item
+  WHERE policy_id = #{policyId}
+  ORDER BY opt_item_id
+</select>
+
+<insert id="insertMenuIngredient" parameterType="map">
+  INSERT INTO menu_ing (
+    menu_id, ing_id, role_id, quantity, unit_id, is_default, can_remove, sort_no
+  ) VALUES (
+    #{menuId}, #{ingredientId}, #{roleId}, #{quantity}, #{unitId},
+    #{isDefault}, #{canRemove}, #{sortNo}
+  )
+</insert>
+
+<insert id="insertMenuOptPolicy" parameterType="map">
+  INSERT INTO menu_opt_policy (menu_id, policy_id, sort_no, required)
+  VALUES (#{menuId}, #{policyId}, #{sortNo}, #{required})
+</insert>
+
+<insert id="upsertMenuOptOverride" parameterType="map">
+  INSERT INTO menu_opt_override (menu_id, opt_item_id, recommended)
+  VALUES (#{menuId}, #{optionItemId}, #{recommended})
+  ON DUPLICATE KEY UPDATE recommended = VALUES(recommended)
+</insert>
+
+<insert id="insertMenuNutrition" parameterType="map">
+  INSERT INTO menu_nutr (menu_id, kcal, carb_g, protein_g, fat_g, sodium_mg)
+  VALUES (#{menuId}, #{kcal}, #{carbG}, #{proteinG}, #{fatG}, #{sodiumMg})
+</insert>
+
+<insert id="insertMenuTag" parameterType="map">
+  INSERT INTO menu_tag (menu_id, tag_id)
+  VALUES (#{menuId}, #{tagId})
+</insert>
+
+<update id="updateMenu" parameterType="map">
+  UPDATE menu
+  SET cat_id = #{categoryId},
+      name = #{name},
+      price = #{price},
+      image_url = #{imageUrl},
+      description = #{description}
+  WHERE id = #{menuId}
+</update>
+
+<delete id="deleteMenu" parameterType="long">
+  DELETE FROM menu WHERE id = #{menuId}
+</delete>
 </mapper>

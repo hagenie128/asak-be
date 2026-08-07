@@ -3,17 +3,20 @@ package com.asak.admin.controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.asak.admin.dto.request.CreateMenuRequest;
 import com.asak.admin.dto.request.MenuListRequest;
+import com.asak.admin.dto.response.AdminCategoryResponse;
 import com.asak.admin.dto.response.MenuDetailResponse;
 import com.asak.admin.dto.response.MenuListResponse;
 import com.asak.admin.service.AdminMenuService;
 import com.asak.common.exception.ErrorCode;
 import com.asak.common.response.ApiResponse;
 import com.asak.common.response.PageResult;
-import com.asak.user.dto.menu.CategoryResponse;
 
 import jakarta.validation.Valid;
 
@@ -52,17 +55,24 @@ public class AdminMenuController {
   }
 
   @GetMapping("/categories")
-  public ApiResponse<PageResult<CategoryResponse>> getCategories() {
+  public ApiResponse<PageResult<AdminCategoryResponse>> getCategories() {
+    var categories = adminMenuService.getCategories();
+    int size = categories.size();
     return ApiResponse.success(
         "ADMIN_CATEGORY_LIST_SUCCESS",
         "관리자 카테고리 목록 조회 성공",
-        new PageResult<>(adminMenuService.getCategories(), 0, 20, adminMenuService.getCategories().size()));
+        new PageResult<>(categories, 0, Math.max(size, 1), size));
   }
-  // TODO-017: 메뉴 등록 BE 1/3 — POST /api/admin/menus 구현.
-  // 1) Request 형식 결정: multipart(FormData)인지 JSON인지 확정
-  // 2) CreateMenuRequest + imageFile을 받아 adminMenuService.createMenu 호출
-  // 3) ADMIN_MENU_UPSERT_SUCCESS + 요약 응답(menuId, categoryId, name, price, imageUrl, isSoldOut) 반환
-  // 4) 검증: 파일 포함/미포함 케이스와 성공 응답 shape를 Postman으로 확인
+
+  // TODO-017: POST /api/admin/menus — JSON body(CreateMenuRequest). 이미지 파일 업로드는 후순위.
+  @PostMapping
+  public ApiResponse<MenuDetailResponse> createMenu(@Valid @RequestBody CreateMenuRequest request) {
+    MenuDetailResponse menu = adminMenuService.createMenu(request);
+    return ApiResponse.success(
+        "ADMIN_MENU_UPSERT_SUCCESS",
+        "관리자 메뉴 등록 성공",
+        menu);
+  }
   // TODO-023: 메뉴 수정 BE 1/3 — PATCH /api/admin/menus/{menuId} 구현.
   // 1) UpdateMenuRequest 바인딩
   // 2) adminMenuService.updateMenu(menuId, request) 호출
