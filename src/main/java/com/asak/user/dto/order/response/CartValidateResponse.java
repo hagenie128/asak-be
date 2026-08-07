@@ -32,6 +32,6 @@ import org.apache.ibatis.type.Alias;
 @Alias("cartValidateResponse")
 public class CartValidateResponse {
 
-  private Integer totalAmount;
+  private Integer totalAmount; //주문건 총 totalAmount(각 메뉴별 가격 합)
   private List<CartValidateItemResponse> items;
 }

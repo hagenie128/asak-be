@@ -10,6 +10,7 @@ import org.apache.ibatis.type.Alias;
 
 //  "items": [
 //     {
+//       "clientCartItemId": "a1b2c3d4-...", 각각 장바구니에서의 개별 주문 id
 //       "menuId": 364,
 //       "quantity": 1,
 //       "optionItems": [
@@ -30,6 +31,7 @@ import org.apache.ibatis.type.Alias;
 @Alias("cartItem")
 public class CartValidateItemRequest implements OrderItemCommand {
 
+  private String clientCartItemId;
   private Long menuId;
   private Integer quantity;
   private List<OptionItemRequest> optionItems;

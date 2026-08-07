@@ -205,9 +205,17 @@ public class UserOrderService {
 
                 ValidatedOrderResult result = validateAndPriceItems(request.getItems());
 
-                List<CartValidateItemResponse> responseItems = result.items().stream()
-                                .map(this::toCartValidateItemResponse)
-                                .toList();
+                List<CartValidateItemResponse> responseItems = new ArrayList<>();
+
+                for(int i = 0; i<result.items().size(); i ++){
+                      responseItems.add(
+                        toCartValidateItemResponse(request.getItems()
+                                                        .get(i)
+                                                        .getClientCartItemId(),
+                                                        result.items().get(i))
+                      );  
+                }
+
 
                 CartValidateResponse response = new CartValidateResponse();
 
@@ -219,10 +227,12 @@ public class UserOrderService {
 
         // 공통 로직을 통해 -> api-004 장바구니로 변환
         private CartValidateItemResponse toCartValidateItemResponse(
+                        String clientCartItemId,
                         ValidatedOrderItem item) {
 
                 CartValidateItemResponse response = new CartValidateItemResponse();
 
+                response.setClientCartItemId(clientCartItemId);
                 response.setMenuId(item.menuId());
                 response.setQuantity(item.quantity());
                 response.setUnitPrice(item.unitPrice());

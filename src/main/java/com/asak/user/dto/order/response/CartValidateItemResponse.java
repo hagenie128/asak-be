@@ -10,16 +10,17 @@ import org.apache.ibatis.type.Alias;
 
 //     "items": [
 //       {
+//         "clientCartItemId": "a1b2c3d4-...", 각각 장바구니에서의 개별 주문 id
 //         "menuId": 364,
 //         "quantity": 1,
-//         "unitPrice": 8900,
+//         "unitPrice": 8900, 장바구니 메뉴별(옵션 추가한 totalPrice)
 //         "optionItems": [
 //           {
 //             "optionItemId": 269,
 //             "quantity": 1
 //           }
 //         ],
-//         "excludedIngredientIds": []
+//         "excludedIngredientIds": [],
 //       }
 //     ]
 
@@ -29,9 +30,10 @@ import org.apache.ibatis.type.Alias;
 @Alias("cartValidateItemResponse")
 public class CartValidateItemResponse {
 
+  private String clientCartItemId;
   private Long menuId;
   private Integer quantity;
-  private Integer unitPrice;
+  private Integer unitPrice; //장바구니 메뉴별(옵션 추가한 totalPrice)
   private List<CartValidateOptionItemResponse> optionItems;
   private List<Long> excludedIngredientIds;
 }
