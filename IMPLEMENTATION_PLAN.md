@@ -6,7 +6,7 @@
 ## 1. 정본과 작업 위치
 
 1. 백엔드 작업 저장소는 `ASAK-back`이며 원격 저장소는 `nayeon0828/ASAK-backend`다.
-2. Product Bible, Canonical, 화면 계약, DevCopilot API 명세를 함께 확인한다. 서로 충돌하면 최신 합의 문서와 실제 DB를 우선한다.
+2. Product Bible, 정본, 화면 계약, DevCopilot API 명세를 함께 확인한다. 서로 충돌하면 최신 합의 문서와 실제 DB를 우선한다.
 3. 이전 `/api/menus`, `/api/orders`, `/api/payments`, `/api/v1/**`는 레거시 계약이므로 새 Controller에 복사하지 않는다.
 
 ## 2. 구조와 DB 접근 원칙
