@@ -20,12 +20,71 @@ body:json {
     "name": "Bruno Sample Menu",
     "price": 8900,
     "imageUrl": "/assets/menu/sample.png",
-    "description": "Bruno contract sample menu"
+    "description": "Bruno contract sample menu",
+    "ingredients": [
+      {
+        "ingredientId": 143,
+        "role": "core",
+        "quantity": 0,
+        "unit": "G",
+        "isDefault": true,
+        "canRemove": false
+      },
+      {
+        "ingredientId": 223,
+        "role": "default",
+        "quantity": 50,
+        "unit": "G",
+        "isDefault": true,
+        "canRemove": true
+      }
+    ],
+    "optionGroups": [
+      {
+        "optionGroupId": {{optionGroupId}},
+        "isRequired": true,
+        "recommendedOptionItemId": {{recommendedOptionItemId}},
+        "items": [
+          { "optionItemId": 265, "isRecommended": false },
+          { "optionItemId": {{recommendedOptionItemId}}, "isRecommended": true }
+        ]
+      }
+    ],
+    "nutrition": {
+      "kcal": 320,
+      "carbG": 12,
+      "proteinG": 14,
+      "fatG": 18,
+      "sodiumMg": 410
+    },
+    "tags": [
+      { "code": "NEW", "name": "NEW" }
+    ]
   }
 }
 
 docs {
   # API-012
   POST /api/admin/menus
-  MENU_API_CONTRACT 기본 등록 필드만
+  Content-Type: application/json
+
+  Write:
+  - menu
+  - menu_ing
+  - menu_opt_policy
+  - menu_opt_override (추천 옵션)
+  - menu_nutr
+  - menu_tag
+
+  allergens 는 저장하지 않음. 재료 ing_allergen 조인으로 상세 조회 시 조립.
+
+  추천 옵션:
+  - recommendedOptionItemId 우선
+  - 없으면 items[].isRecommended == true 인 optionItemId 사용
+  - 저장 후 상세의 optionGroups[].recommendedLabel 로 확인
+
+  Local 기본값:
+  - optionGroupId 240 (드레싱 선택)
+  - recommendedOptionItemId 269 (크리미칠리)
+  - 정책 기본 추천(시저 265)과 다르게 두면 override 여부를 확인하기 쉽다
 }

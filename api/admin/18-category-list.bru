@@ -11,5 +11,8 @@ get {
 }
 
 docs {
-  GET /api/admin/categories
+  # API
+  GET /api/admin/menus/categories
+  data: PageResult content[] of AdminCategoryResponse
+  row: categoryId, categoryName, sortOrder, isActive
 }
