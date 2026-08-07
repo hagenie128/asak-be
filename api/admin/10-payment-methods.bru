@@ -5,14 +5,14 @@ meta {
 }
 
 get {
-  url: {{baseUrl}}/api/admin/payment-methods
+  url: {{baseUrl}}/api/admin/paymentMethods
   body: none
   auth: none
 }
 
 docs {
   # API-015
-  GET /api/admin/payment-methods
-  IMPLEMENTATION_PLAN / DevCopilot alignment 경로
-  (wiki rest-api-spec의 레거시 경로 사용 금지)
+  GET /api/admin/paymentMethods
+  BE AdminPaymentMethodController 와 동일 camel path
+  (FE 화면 라우트 /payment-methods 와 혼동하지 말 것)
 }
