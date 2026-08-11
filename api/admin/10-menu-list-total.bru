@@ -1,0 +1,18 @@
+meta {
+  name: Admin Menu List (no filter)
+  type: http
+  seq: 10
+}
+
+get {
+  url: {{baseUrl}}/api/admin/menus?page=0&size=12&sort=name,asc
+  body: none
+  auth: none
+}
+
+docs {
+  # API-011 (전체)
+  GET /api/admin/menus
+  categoryId / isSoldOut 없이 전체 페이지 조회
+  응답 code: ADMIN_MENU_LIST_SUCCESS
+}

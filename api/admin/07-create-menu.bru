@@ -67,6 +67,7 @@ docs {
   # API-012
   POST /api/admin/menus
   Content-Type: application/json
+  응답 code: ADMIN_MENU_UPSERT_SUCCESS
 
   Write:
   - menu
@@ -81,10 +82,8 @@ docs {
   추천 옵션:
   - recommendedOptionItemId 우선
   - 없으면 items[].isRecommended == true 인 optionItemId 사용
-  - 저장 후 상세의 optionGroups[].recommendedLabel 로 확인
 
   Local 기본값:
   - optionGroupId 240 (드레싱 선택)
-  - recommendedOptionItemId 269 (크리미칠리)
-  - 정책 기본 추천(시저 265)과 다르게 두면 override 여부를 확인하기 쉽다
+  - recommendedOptionItemId 269
 }

@@ -74,7 +74,14 @@ public enum ErrorCode {
         CATEGORY_NOT_FOUND("CATEGORY_NOT_FOUND", HttpStatus.NOT_FOUND, "카테고리를 찾을 수 없습니다."),
         MENU_IMAGE_SAVE_FAILED("MENU_IMAGE_SAVE_FAILED", HttpStatus.INTERNAL_SERVER_ERROR, "메뉴 이미지 저장에 실패했습니다."),
         MENU_INSERT_FAILED("MENU_INSERT_FAILED", HttpStatus.INTERNAL_SERVER_ERROR, "메뉴 등록에 실패했습니다."),
-        MENU_CREATE_INVALID("MENU_CREATE_INVALID", HttpStatus.BAD_REQUEST, "메뉴 등록 요청이 올바르지 않습니다.");
+        MENU_CREATE_INVALID("MENU_CREATE_INVALID", HttpStatus.BAD_REQUEST, "메뉴 등록 요청이 올바르지 않습니다."),
+        INGREDIENT_NOT_FOUND("INGREDIENT_NOT_FOUND", HttpStatus.NOT_FOUND, "재료 목록을 찾을 수 없습니다."),
+        MENU_UPDATE_FAILED("MENU_UPDATE_FAILED", HttpStatus.INTERNAL_SERVER_ERROR, "메뉴 수정에 실패했습니다."),
+        MENU_UPDATE_INVALID("MENU_UPDATE_INVALID", HttpStatus.BAD_REQUEST, "메뉴 수정 요청이 올바르지 않습니다."),
+        MENU_UPDATE_NOT_FOUND("MENU_UPDATE_NOT_FOUND", HttpStatus.NOT_FOUND, "메뉴를 찾을 수 없습니다."),
+        MENU_DELETE_FAILED("MENU_DELETE_FAILED", HttpStatus.INTERNAL_SERVER_ERROR, "메뉴 삭제에 실패했습니다."),
+        MENU_DELETE_INVALID("MENU_DELETE_INVALID", HttpStatus.BAD_REQUEST, "메뉴 삭제 요청이 올바르지 않습니다."),
+        MENU_DELETE_NOT_FOUND("MENU_DELETE_NOT_FOUND", HttpStatus.NOT_FOUND, "메뉴를 찾을 수 없습니다.");
 
         private final String code;
         private final HttpStatus status;

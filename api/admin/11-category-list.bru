@@ -1,7 +1,7 @@
 meta {
   name: Admin Category List
   type: http
-  seq: 19
+  seq: 11
 }
 
 get {
@@ -11,8 +11,9 @@ get {
 }
 
 docs {
-  # API
+  # Admin Categories
   GET /api/admin/menus/categories
+  응답 code: ADMIN_CATEGORY_LIST_SUCCESS
   data: PageResult content[] of AdminCategoryResponse
   row: categoryId, categoryName, sortOrder, isActive
 }

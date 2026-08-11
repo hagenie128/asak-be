@@ -1,7 +1,7 @@
 meta {
   name: Admin Update Sold Out
   type: http
-  seq: 9
+  seq: 14
 }
 
 patch {
@@ -32,4 +32,5 @@ docs {
   targetType: MENU | INGREDIENT | OPTION_ITEM
   DB catalog: vw_soldout_catalog
   저장 전 영향 메뉴 수 미리보기: view.sql [18] 인라인 (뷰 아님)
+  SPEC_ONLY: AdminSoldOutController 매핑 미구현 (TODO-040)
 }

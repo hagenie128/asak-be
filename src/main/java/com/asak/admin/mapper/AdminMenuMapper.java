@@ -5,10 +5,12 @@ import java.util.Map;
 
 import org.apache.ibatis.annotations.Param;
 
+import com.asak.admin.dto.request.CreateMenuRequest;
 import com.asak.admin.dto.request.MenuListRequest;
 import com.asak.admin.dto.response.AdminCategoryResponse;
 import com.asak.admin.dto.response.MenuDetailResponse;
 import com.asak.admin.dto.response.MenuListResponse;
+import com.asak.admin.dto.response.IngredientResponse;
 
 public interface AdminMenuMapper {
 
@@ -40,7 +42,20 @@ public interface AdminMenuMapper {
 
   int insertMenuTag(Map<String, Object> map);
 
-  // TODO-025: 메뉴 수정 BE 3/3 — PATCH 저장용 UPDATE Mapper 추가.
-  // TODO-031: 메뉴 삭제 BE 3/3 — DELETE 정책용 Mapper 추가.
-  // TODO-036: 재료 검색 BE 2/2 — 메뉴 편집 화면 재료 검색용 Mapper 추가.
+  int updateMenu(@Param("menuId") Long menuId, @Param("request") CreateMenuRequest request);
+
+  /** Soft delete: deleted_at 설정 (주문 FK 유지) */
+  int softDeleteMenu(@Param("menuId") Long menuId);
+
+  int deleteMenuIngredients(Long menuId);
+
+  int deleteMenuOptionGroups(Long menuId);
+
+  int deleteMenuOptOverrides(Long menuId);
+
+  int deleteMenuNutrition(Long menuId);
+
+  int deleteMenuTags(Long menuId);
+
+  List<IngredientResponse> getIngredients();
 }

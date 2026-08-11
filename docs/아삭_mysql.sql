@@ -52,6 +52,7 @@ CREATE TABLE `menu` (
     `name` VARCHAR(100) NOT NULL,
     `image_url` TEXT NULL,
     `updated_at` TIMESTAMP NOT NULL,
+    `deleted_at` TIMESTAMP NULL,
     `cat_id` BIGINT NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
@@ -77,9 +78,22 @@ CREATE TABLE `ing` (
     `name` VARCHAR(100) NOT NULL,
     `type_id` BIGINT NOT NULL,
     `sold_out` TINYINT(1) NOT NULL,
-    `kcal` DECIMAL(8,2) NULL,
+    `id` BIGINT NOT NULL PRIMARY KEY
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+
+CREATE TABLE `ing_nutr` (
     `id` BIGINT NOT NULL PRIMARY KEY,
-    `protein_g` DECIMAL(8,2) NULL
+    `ing_id` BIGINT NOT NULL,
+    `serving_g` DECIMAL(8,2) NULL,
+    `kcal` DECIMAL(8,2) NULL,
+    `carb_g` DECIMAL(8,2) NULL,
+    `sugar_g` DECIMAL(8,2) NULL,
+    `protein_g` DECIMAL(8,2) NULL,
+    `fat_g` DECIMAL(8,2) NULL,
+    `saturated_fat_g` DECIMAL(8,2) NULL,
+    `sodium_mg` DECIMAL(8,2) NULL,
+    `source_id` BIGINT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 
@@ -91,7 +105,10 @@ CREATE TABLE `menu_nutr` (
     `menu_id` BIGINT NOT NULL,
     `kcal` DECIMAL(8,2) NULL,
     `carb_g` DECIMAL(8,2) NULL,
-    `sodium_mg` DECIMAL(8,2) NULL
+    `sodium_mg` DECIMAL(8,2) NULL,
+    `serving_g` DECIMAL(8,2) NULL,
+    `sugar_g` DECIMAL(8,2) NULL,
+    `saturated_fat_g` DECIMAL(8,2) NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 
@@ -267,6 +284,12 @@ ALTER TABLE `common_code` ADD CONSTRAINT `fk_common_code_code_grp_id`
 
 ALTER TABLE `ing` ADD CONSTRAINT `fk_ing_type_id`
     FOREIGN KEY (`type_id`) REFERENCES `common_code` (`id`);
+
+ALTER TABLE `ing_nutr` ADD CONSTRAINT `fk_ing_nutr_ing_id`
+    FOREIGN KEY (`ing_id`) REFERENCES `ing` (`id`);
+
+ALTER TABLE `ing_nutr` ADD CONSTRAINT `fk_ing_nutr_source_id`
+    FOREIGN KEY (`source_id`) REFERENCES `common_code` (`id`);
 
 ALTER TABLE `ing_allergen` ADD CONSTRAINT `fk_ing_allergen_ing_id`
     FOREIGN KEY (`ing_id`) REFERENCES `ing` (`id`);

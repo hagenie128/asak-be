@@ -1,6 +1,6 @@
 # ASAK Bruno API Contract Collection
 
-> Status: CONTRACT / PARTIALLY_IMPLEMENTED (2026-07-28)
+> Status: CONTRACT / PARTIALLY_IMPLEMENTED (2026-08-11)
 > 경로·요청 본문 정본: `IMPLEMENTATION_PLAN.md` + Product Bible API Contract  
 > DB 읽기 모델: `docs/view.sql` · 위키 `db-view-definition.md`
 
@@ -10,13 +10,39 @@
 
 1. Bruno에서 이 `api` 폴더를 Collection으로 연다.
 2. `Local` 환경을 선택하고 `baseUrl`을 실행 중인 백엔드 주소로 맞춘다.
-3. `GET /api/health`, Kiosk 메뉴·장바구니 검증·주문 생성, Admin 주문·메뉴 조회에는
+3. `GET /api/health`, Kiosk 메뉴·장바구니 검증·주문 생성, Admin 주문·메뉴(조회·등록·수정·삭제·재료·카테고리)에는
    Controller 매핑이 있다. 다만 주문 생성은 저장/응답 조립이 아직 완료되지 않았으므로
    요청 body 검토용으로만 사용한다. 그 밖의 요청은 실행 전 Controller mapping을 확인한다.
 
 `Local` 환경에는 검토용 ID가 들어 있다. 실제 테스트 데이터의 메뉴·주문·결제수단 ID와
 다르면 해당 환경 변수만 바꾼다. 결제수단 기본값 `methodId: 10828`은 `CARD`이며 화면 이름은
 `카드·삼성페이`다.
+
+## 요청 파일 형식
+
+모든 HTTP 요청 `.bru`는 아래 순서를 따른다.
+
+1. `meta` — `name`, `type: http`, `seq` (파일명 숫자와 동일)
+2. method 블록 — `url`, `body`, `auth: none`
+3. `headers` / `body:json` / `vars:pre-request` (필요 시)
+4. `docs` — API 코드·경로·응답 code·주의사항
+5. `tests` — **health만** 유지
+
+파일명: `{seq}-{kebab-name}.bru`
+JSON body는 camelCase만 사용한다.
+
+## Admin 메뉴 순서 (05–12)
+
+| seq | 파일 | 메서드 |
+| --- | --- | --- |
+| 05 | menu-list | GET |
+| 06 | menu-detail | GET |
+| 07 | create-menu | POST |
+| 08 | update-menu | PATCH |
+| 09 | delete-menu | DELETE (자식 cascade) |
+| 10 | menu-list-total | GET |
+| 11 | category-list | GET |
+| 12 | ingredient-list | GET |
 
 ## 주의
 
@@ -28,6 +54,7 @@
   현재 주문 생성 DTO의 상태 필드는 `data.status`이며, 목록·상세의 상태 필드는
   `orderStatus`다. 외부 envelope의 HTTP 상태값 `status`와 혼동하지 않는다.
 - wiki `rest-api-spec.md`의 `/api/menus`, `/api/orders` 등은 **레거시**다. Bruno는 `/api/kiosk/**`, `/api/admin/**`만 쓴다.
+- 메뉴 삭제 시 `ing` 마스터는 지우지 않는다. `order_item`이 있으면 `MENU_DELETE_FAILED`다.
 
 ## API ↔ DB 뷰 매핑 (구현 시)
 
@@ -54,4 +81,4 @@
 - `ASAK-back/docs/view.sql`
 
 모든 응답 계약은 `{ success, status, code, message, data }` 형식을 따른다.  
-`code`는 API별 문자열이다. (예: `HEALTH_OK`, `MENU_LIST_SUCCESS`)
+`code`는 API별 문자열이다. (예: `HEALTH_OK`, `ADMIN_MENU_LIST_SUCCESS`)
