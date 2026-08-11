@@ -21,8 +21,63 @@
     
     </select>
 
-    <!--  -->
+    <!-- 동일 멱동성시, 해당하는 결제건 반환  -->
     <select id="getPaymentResult" resultType="payment">
+        select
+            p.id AS paymentId,
+            p.order_id AS orderId,
+            o.order_no AS orderNo,
+            payment_status.code AS paymentStatus,
+            p.amount AS approvedAmount,
+            p.paid_at AS approvedAt,
+            (
+                select COUNT(*)
+                from orders waiting_order
+                join common_code waiting_status
+                    ON waiting_status.id = waiting_order.status_id
+                where waiting_status.code IN ('RECEIVED', 'PREPARING')
+            ) AS waitingOrderCount
+        from payment p
+        join orders o
+            ON o.id = p.order_id
+        join common_code payment_status
+            ON payment_status.id = p.status_id
+        where p.id = #{paymentId}
+    </select>
+
+    <!-- 결제 대상 주문 조회 -->
+
+    <select id="findOrderForPayment" resultType="PaymentOrderContext">
+
+        select
+            order_status.code AS orderStatus,
+            o.total_price AS totalPrice
+        from orders o
+        join common_code order_status
+        on order_status.id = o.status_id
+        join code_group order_status_group
+        on order_status_group.id = order_status.code_grp_id
+    
+        where o.id = #{orderId}
+        and order_status_group.group_code = 'ORDER_STATUS'
+        FOR UPDATE
+    
+    </select>
+
+    <!-- 기존 승인 결제 확인(exists해당 있는지 없는지 결과값 도출) -->
+    <select id="existsApprovedPayment" resultType="boolean">
+        select exists (
+            select 1
+            FROM payment p
+            JOIN common_code payment_status
+                ON payment_status.id = p.status_id
+            JOIN code_group payment_status_group
+                ON payment_status_group.id = payment_status.code_grp_id
+            WHERE p.order_id = #{orderId}
+            AND payment_status.code = 'APPROVED'
+            AND payment_status_group.group_code = 'PAYMENT_STATUS'
+        )
+
     </select>
 
 </mapper>

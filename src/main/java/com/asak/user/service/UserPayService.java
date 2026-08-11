@@ -2,11 +2,14 @@ package com.asak.user.service;
 
 import org.springframework.stereotype.Service;
 
+import com.asak.common.enums.OrderStatus;
 import com.asak.common.exception.CustomException;
 import com.asak.common.exception.ErrorCode;
 import com.asak.user.dto.payment.ApprovePaymentRequest;
 import com.asak.user.dto.payment.ApprovePaymentResponse;
 import com.asak.user.dto.payment.query.PaymentIdempotencyCheck;
+import com.asak.user.dto.payment.query.PaymentMethodContext;
+import com.asak.user.dto.payment.query.PaymentOrderContext;
 import com.asak.user.mapper.UserPayMapper;
 
 import lombok.RequiredArgsConstructor;
@@ -54,9 +57,33 @@ public class UserPayService {
 
 
     }
+    // ------------ 주문 존재 및 상태 검증 ------------
+    private PaymentOrderContext validateOrderForPayment(Long orderId){
+        
+        PaymentOrderContext order = payMapper.findOrderForPayment(orderId);
+        
+        if(order == null){
+            throw new CustomException(ErrorCode.ORDER_NOT_FOUND);
+        }
+        
+        if(order.getOrderStatus() != OrderStatus.RECEIVED){
+            throw new CustomException(ErrorCode.ORDER_STATUS_CONFLICT);
+        }
+        
+        return order;
+        
+    }
+    
+    // ------------ 기존 승인 결제 검증(이미 결제했는지 확인) ------------
+     private void vaildataNoApprovePayment(Long orderId){
 
+        boolean alreadyApproved = payMapper.existsApprovedPayment(orderId);
 
+        if(alreadyApproved) {
+            throw new CustomException(ErrorCode.PAYMENT_ALREADY_APPROVED);
+        }
 
+     }
 
     //requestBody 정본
     //     {
@@ -101,7 +128,11 @@ public class UserPayService {
         }
 
         // 3. 주문 존재 및 주문 상태 확인
-        // 4. 해당 주문의 기존 APPROVED 결제 확인
+        PaymentOrderContext order = validateOrderForPayment(request.getOrderId());
+
+        // 4. 해당 주문의 기존 APPROVED(승인) 결제 확인
+        vaildataNoApprovePayment(request.getOrderId());
+
         // 5. 결제수단 존재·활성화 여부 확인
         // 6. orders.total_price를 승인 금액으로 결정
         // 7. payment 저장

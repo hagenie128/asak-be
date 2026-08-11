@@ -42,7 +42,7 @@ public class UserPayController {
     private final UserPayService payService;
 
 
-    @PostMapping("/orders")
+    @PostMapping("/payments")
     private ApiResponse<ApprovePaymentResponse> approvePayment(
         @RequestBody ApprovePaymentRequest request
     ){

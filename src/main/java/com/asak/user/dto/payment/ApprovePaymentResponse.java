@@ -1,6 +1,5 @@
 package com.asak.user.dto.payment;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 import org.apache.ibatis.type.Alias;
