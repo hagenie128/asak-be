@@ -1,0 +1,23 @@
+﻿meta {
+  name: Admin Delete Menu
+  type: http
+  seq: 9
+}
+
+delete {
+  url: {{baseUrl}}/api/admin/menus/{{menuId}}
+  body: none
+  auth: none
+}
+
+docs {
+  # Admin Menu Delete (soft delete)
+  DELETE /api/admin/menus/{menuId}
+  응답 code: ADMIN_MENU_DELETE_SUCCESS
+
+  menu.deleted_at = NOW() 설정. 행은 남긴다.
+  order_item.menu_id FK 유지 → 주문 이력·매출 조회 가능.
+  목록/상세/키오스크는 deleted_at IS NULL 만 노출.
+
+  자식(menu_ing, menu_nutr, menu_opt_*, menu_tag)은 삭제하지 않음.
+}

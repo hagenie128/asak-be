@@ -13,5 +13,6 @@ get {
 docs {
   # API-023
   GET /api/admin/menus/{menuId}
-  DB view: vw_menu_ing_json, vw_menu_opt_policy_json
+  응답 code: ADMIN_MENU_DETAIL_SUCCESS
+  DB: vw_menu_ing_json, vw_menu_opt_policy_json (+ menu_nutr, menu_tag)
 }

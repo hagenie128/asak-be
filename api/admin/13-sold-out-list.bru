@@ -1,7 +1,7 @@
 meta {
   name: Admin Sold Out List
   type: http
-  seq: 10
+  seq: 13
 }
 
 get {
@@ -16,4 +16,5 @@ docs {
   DB view: vw_soldout_catalog
   target_type: MENU | INGREDIENT | OPTION_ITEM
   영향 메뉴 수 미리보기는 view.sql [18] 인라인
+  SPEC_ONLY: AdminSoldOutController 매핑 미구현 (TODO-040)
 }

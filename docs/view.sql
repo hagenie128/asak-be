@@ -1,6 +1,6 @@
 -- ASAK runtime DB views (MySQL)
 -- Source of truth: live asak_db SHOW CREATE VIEW
--- Synced: 2026-08-07
+-- Synced: 2026-08-11
 -- Formatted for readability (same semantics as live DB).
 -- Do not edit DEFINER; apply with a privileged account as needed.
 
@@ -113,7 +113,8 @@ SELECT `m`.`id` AS `menu_id`,`m`.`cat_id` AS `category_id`,`m`.`name` AS `name`,
         AND (0 = `va`.`has_exhausted_required_group`)) AS `is_orderable`
 FROM ((`menu` `m`
        LEFT JOIN `menu_nutr` `mn` on((`mn`.`menu_id` = `m`.`id`)))
-      JOIN `vw_menu_availability` `va` on((`va`.`menu_id` = `m`.`id`)));
+      JOIN `vw_menu_availability` `va` on((`va`.`menu_id` = `m`.`id`)))
+WHERE (`m`.`deleted_at` IS NULL);
 
 -- -----------------------------------------------------------------------------
 -- vw_menu_opt_policy_json
@@ -137,24 +138,23 @@ FROM
           `mop`.`required` AS `is_required`,`oi`.`id` AS `option_item_id`,`oi`.`ing_id` AS `ingredient_id`,`oi`.`name` AS `item_name`,
           `oi`.`add_price` AS `extra_price`,`oi`.`list_price` AS `original_price`,`oi`.`amount` AS `serving_amount`,
           `cc_unit`.`code` AS `serving_unit`,`oi`.`icon_url` AS `icon_url`,`oi`.`color_hex` AS `color_hex`,
-          `oi`.`sold_out` AS `is_sold_out`,`i`.`kcal` AS `extra_kcal`,`i`.`protein_g` AS `protein_g`,
-          coalesce(`moo`.`recommended`, `opi`.`recommended`, 0) AS `is_recommended`,coalesce(`moo`.`is_default`,
-
-                                                                                      `opi`.`is_default`, 0) AS `is_default`,
+          `oi`.`sold_out` AS `is_sold_out`,`n`.`kcal` AS `extra_kcal`,`n`.`protein_g` AS `protein_g`,
+          coalesce(`moo`.`recommended`, `opi`.`recommended`, 0) AS `is_recommended`,
+          coalesce(`moo`.`is_default`, `opi`.`is_default`, 0) AS `is_default`,
           coalesce(`moo`.`sort_no`, `opi`.`sort_no`, 9999) AS `item_sort_no`
-   FROM ((((((((`menu_opt_policy` `mop`
-                JOIN `opt_policy` `op` on((`op`.`id` = `mop`.`policy_id`)))
-               JOIN `opt_group` `og` on((`og`.`id` = `op`.`opt_group_id`)))
-              LEFT JOIN `common_code` `cg_group` on((`cg_group`.`id` = `og`.`group_type_id`)))
-             JOIN `opt_policy_item` `opi` on((`opi`.`policy_id` = `op`.`id`)))
-            JOIN `opt_item` `oi` on((`oi`.`id` = `opi`.`opt_item_id`)))
-           LEFT JOIN `ing` `i` on((`i`.`id` = `oi`.`ing_id`)))
-          LEFT JOIN `menu_opt_override` `moo` on(((`moo`.`menu_id` = `mop`.`menu_id`)
-                                                  AND (`moo`.`opt_item_id` = `oi`.`id`))))
-         LEFT JOIN `common_code` `cc_unit` on((`cc_unit`.`id` = `oi`.`unit_id`)))
-   ORDER BY `mop`.`menu_id`,`mop`.`sort_no`,`op`.`opt_group_id`,coalesce(`moo`.`sort_no`,
-                                                                  `opi`.`sort_no`, 9999),
-            `oi`.`id`) `x`
+   FROM `menu_opt_policy` `mop`
+   JOIN `opt_policy` `op` ON `op`.`id` = `mop`.`policy_id`
+   JOIN `opt_group` `og` ON `og`.`id` = `op`.`opt_group_id`
+   LEFT JOIN `common_code` `cg_group` ON `cg_group`.`id` = `og`.`group_type_id`
+   JOIN `opt_policy_item` `opi` ON `opi`.`policy_id` = `op`.`id`
+   JOIN `opt_item` `oi` ON `oi`.`id` = `opi`.`opt_item_id`
+   LEFT JOIN `ing` `i` ON `i`.`id` = `oi`.`ing_id`
+   LEFT JOIN `ing_nutr` `n` ON `n`.`ing_id` = `i`.`id`
+   LEFT JOIN `menu_opt_override` `moo`
+     ON `moo`.`menu_id` = `mop`.`menu_id` AND `moo`.`opt_item_id` = `oi`.`id`
+   LEFT JOIN `common_code` `cc_unit` ON `cc_unit`.`id` = `oi`.`unit_id`
+   ORDER BY `mop`.`menu_id`,`mop`.`sort_no`,`op`.`opt_group_id`,
+            coalesce(`moo`.`sort_no`, `opi`.`sort_no`, 9999), `oi`.`id`) `x`
 GROUP BY `x`.`menu_id`,`x`.`option_group_id`,`x`.`name`,`x`.`policy_name`,`x`.`group_type`,`x`.`select_type`,
          `x`.`min_select`,`x`.`max_select`,`x`.`sort_order`,`x`.`is_required`;
 

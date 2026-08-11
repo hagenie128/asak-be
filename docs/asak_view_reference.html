@@ -530,7 +530,7 @@
             <span class="str">'servingAmount'</span>, oi.amount, <span class="str">'servingUnit'</span>, ut.code,
             <span class="str">'iconUrl'</span>, oi.icon_url, <span class="str">'colorHex'</span>, oi.color_hex,
             <span class="str">'isSoldOut'</span>, oi.sold_out,
-            <span class="str">'extraKcal'</span>, ing.kcal, <span class="str">'proteinG'</span>, ing.protein_g,
+            <span class="str">'extraKcal'</span>, n.kcal, <span class="str">'proteinG'</span>, n.protein_g,
             <span class="str">'isRecommended'</span>, <span class="kw">COALESCE</span>(mo.recommended, opi.recommended),
             <span class="str">'isDefault'</span>, <span class="kw">COALESCE</span>(mo.is_default, opi.is_default),
             <span class="str">'isActive'</span>, <span class="kw">COALESCE</span>(mo.active, opi.active)
@@ -543,6 +543,7 @@
 <span class="kw">JOIN</span> opt_policy_item opi <span class="kw">ON</span> opi.policy_id = op.id
 <span class="kw">JOIN</span> opt_item oi <span class="kw">ON</span> oi.id = opi.opt_item_id
 <span class="kw">LEFT JOIN</span> ing <span class="kw">ON</span> ing.id = oi.ing_id
+<span class="kw">LEFT JOIN</span> ing_nutr n <span class="kw">ON</span> n.ing_id = ing.id
 <span class="kw">LEFT JOIN</span> common_code ut <span class="kw">ON</span> ut.id = oi.unit_id
 <span class="kw">LEFT JOIN</span> menu_opt_override mo
     <span class="kw">ON</span> mo.menu_id = mop.menu_id <span class="kw">AND</span> mo.opt_item_id = opi.opt_item_id

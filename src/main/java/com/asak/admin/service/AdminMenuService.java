@@ -20,6 +20,7 @@ import com.asak.admin.dto.request.CreateMenuRequest;
 import com.asak.admin.dto.request.CreateMenuTagRequest;
 import com.asak.admin.dto.request.MenuListRequest;
 import com.asak.admin.dto.response.AdminCategoryResponse;
+import com.asak.admin.dto.response.IngredientResponse;
 import com.asak.admin.dto.response.MenuDetailResponse;
 import com.asak.admin.dto.response.MenuListResponse;
 import com.asak.admin.mapper.AdminMenuMapper;
@@ -43,9 +44,6 @@ public class AdminMenuService {
   @Value("${app.file.menu-upload-dir}")
   private String menuUploadDir;
 
-  // TODO-024: 메뉴 수정 BE 2/3 — 수정 서비스 구현.
-  // TODO-030: 메뉴 삭제 BE 2/3 — 삭제 서비스 구현.
-
   public PageResult<MenuListResponse> getMenus(MenuListRequest request) {
     List<MenuListResponse> content = adminMenuMapper.getMenus(request);
     long totalElements = adminMenuMapper.countMenus(request);
@@ -58,6 +56,16 @@ public class AdminMenuService {
 
   public List<AdminCategoryResponse> getCategories() {
     return adminMenuMapper.getCategories();
+  }
+
+  public PageResult<IngredientResponse> getIngredients() {
+    List<IngredientResponse> content = adminMenuMapper.getIngredients();
+    int size = content.size();
+    return new PageResult<>(content, 0, Math.max(size, 1), size);
+  }
+
+  public String saveMenuImage(MultipartFile imageFile) throws IOException {
+    return FileUtil.saveMenuImage(imageFile, Paths.get(menuUploadDir));
   }
 
   @Transactional
@@ -76,16 +84,73 @@ public class AdminMenuService {
     }
 
     Long menuId = ((Number) generatedId).longValue();
-    insertIngredients(menuId, request.getIngredients());
-    insertOptionGroups(menuId, request.getOptionGroups());
-    insertNutrition(menuId, request.getNutrition());
-    insertTags(menuId, request.getTags());
+    insertChildren(menuId, request);
 
     MenuDetailResponse created = adminMenuMapper.getMenuDetail(menuId);
     if (created == null) {
       throw new CustomException(ErrorCode.MENU_INSERT_FAILED);
     }
     return created;
+  }
+
+  /**
+   * 메뉴 수정. 본문은 항상 갱신하고, 자식 섹션은 null이 아니면 교체(delete+insert)한다.
+   * (요청 DTO vs 응답 DTO equals 비교는 타입이 달라 의미가 없어 제거)
+   */
+  @Transactional
+  public MenuDetailResponse updateMenu(Long menuId, CreateMenuRequest request) {
+    requireActiveMenu(menuId);
+
+    int updated = adminMenuMapper.updateMenu(menuId, request);
+    if (updated <= 0) {
+      throw new CustomException(ErrorCode.MENU_UPDATE_FAILED);
+    }
+
+    if (request.getIngredients() != null) {
+      adminMenuMapper.deleteMenuIngredients(menuId);
+      insertIngredients(menuId, request.getIngredients());
+    }
+    if (request.getOptionGroups() != null) {
+      adminMenuMapper.deleteMenuOptOverrides(menuId);
+      adminMenuMapper.deleteMenuOptionGroups(menuId);
+      insertOptionGroups(menuId, request.getOptionGroups());
+    }
+    if (request.getNutrition() != null) {
+      adminMenuMapper.deleteMenuNutrition(menuId);
+      insertNutrition(menuId, request.getNutrition());
+    }
+    if (request.getTags() != null) {
+      adminMenuMapper.deleteMenuTags(menuId);
+      insertTags(menuId, request.getTags());
+    }
+
+    return adminMenuMapper.getMenuDetail(menuId);
+  }
+
+  /**
+   * Soft delete: menu.deleted_at 만 설정. 주문 이력(order_item) FK 유지.
+   * 자식(menu_ing 등)은 복구/감사용으로 남긴다.
+   */
+  @Transactional
+  public void deleteMenu(Long menuId) {
+    requireActiveMenu(menuId);
+    int deleted = adminMenuMapper.softDeleteMenu(menuId);
+    if (deleted <= 0) {
+      throw new CustomException(ErrorCode.MENU_DELETE_FAILED);
+    }
+  }
+
+  private void requireActiveMenu(Long menuId) {
+    if (menuId == null || menuId <= 0 || getMenuDetail(menuId) == null) {
+      throw new CustomException(ErrorCode.MENU_NOT_FOUND);
+    }
+  }
+
+  private void insertChildren(Long menuId, CreateMenuRequest request) {
+    insertIngredients(menuId, request.getIngredients());
+    insertOptionGroups(menuId, request.getOptionGroups());
+    insertNutrition(menuId, request.getNutrition());
+    insertTags(menuId, request.getTags());
   }
 
   private void insertIngredients(Long menuId, List<CreateMenuIngredientRequest> ingredients) {
@@ -239,9 +304,5 @@ public class AdminMenuService {
       row.put("tagId", tagId);
       adminMenuMapper.insertMenuTag(row);
     }
-  }
-
-  public String saveMenuImage(MultipartFile imageFile) throws IOException {
-    return FileUtil.saveMenuImage(imageFile, Paths.get(menuUploadDir));
   }
 }

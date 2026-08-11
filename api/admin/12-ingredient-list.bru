@@ -1,0 +1,19 @@
+﻿meta {
+  name: Admin Ingredient List
+  type: http
+  seq: 12
+}
+
+get {
+  url: {{baseUrl}}/api/admin/menus/ingredients
+  body: none
+  auth: none
+}
+
+docs {
+  # Admin Ingredients
+  GET /api/admin/menus/ingredients
+  응답 code: ADMIN_MENU_INGREDIENTS_SUCCESS
+  data: PageResult of IngredientResponse
+  메뉴 편집 시 재료 선택용. ing 마스터 목록 (메뉴 삭제와 무관).
+}

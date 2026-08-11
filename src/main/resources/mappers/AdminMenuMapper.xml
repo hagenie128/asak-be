@@ -29,6 +29,7 @@
   FROM menu m
   JOIN category c ON c.id = m.cat_id
   WHERE m.id = #{menuId}
+    AND m.deleted_at IS NULL
 </select>
 
 <select id="findMenuIngredientSummaries" resultType="com.asak.admin.dto.response.MenuIngredientSummaryResponse">
@@ -73,10 +74,13 @@
 </select>
 
 <select id="findMenuNutrition" resultType="com.asak.admin.dto.response.MenuNutritionResponse">
-  SELECT kcal,
+  SELECT serving_g AS servingG,
+         kcal,
          carb_g AS carbG,
+         sugar_g AS sugarG,
          protein_g AS proteinG,
          fat_g AS fatG,
+         saturated_fat_g AS saturatedFatG,
          sodium_mg AS sodiumMg
   FROM menu_nutr
   WHERE menu_id = #{menuId}
@@ -217,6 +221,28 @@
   ORDER BY opt_item_id
 </select>
 
+<select id="getIngredients" resultType="com.asak.admin.dto.response.IngredientResponse">
+  SELECT
+    i.id AS id,
+    i.name AS name,
+    i.sold_out AS isSoldOut,
+    CASE WHEN i.type_id &lt;= 34 THEN cc.name END AS roleName,
+    CASE WHEN i.type_id &gt; 34 THEN cc.name END AS unitName,
+    n.serving_g AS servingG,
+    n.kcal AS kcal,
+    n.carb_g AS carbG,
+    n.sugar_g AS sugarG,
+    n.protein_g AS proteinG,
+    n.fat_g AS fatG,
+    n.saturated_fat_g AS saturatedFatG,
+    n.sodium_mg AS sodiumMg
+  FROM ing i
+  LEFT JOIN common_code cc ON i.type_id = cc.id
+  LEFT JOIN ing_nutr n ON n.ing_id = i.id
+  ORDER BY i.id
+</select>
+
+
 <insert id="insertMenuIngredient" parameterType="map">
   INSERT INTO menu_ing (
     menu_id, ing_id, role_id, quantity, unit_id, is_default, can_remove, sort_no
@@ -247,17 +273,40 @@
   VALUES (#{menuId}, #{tagId})
 </insert>
 
-<update id="updateMenu" parameterType="map">
+<update id="updateMenu">
   UPDATE menu
-  SET cat_id = #{categoryId},
-      name = #{name},
-      price = #{price},
-      image_url = #{imageUrl},
-      description = #{description}
+  SET cat_id = #{request.categoryId},
+      name = #{request.name},
+      price = #{request.price},
+      image_url = #{request.imageUrl},
+      description = #{request.description},
+      updated_at = CURRENT_TIMESTAMP
   WHERE id = #{menuId}
+    AND deleted_at IS NULL
 </update>
 
-<delete id="deleteMenu" parameterType="long">
-  DELETE FROM menu WHERE id = #{menuId}
+<update id="softDeleteMenu">
+  UPDATE menu
+  SET deleted_at = CURRENT_TIMESTAMP,
+      updated_at = CURRENT_TIMESTAMP
+  WHERE id = #{menuId}
+    AND deleted_at IS NULL
+</update>
+
+<delete id="deleteMenuIngredients" parameterType="long">
+  DELETE FROM menu_ing WHERE menu_id = #{menuId}
 </delete>
+<delete id="deleteMenuOptionGroups" parameterType="long">
+  DELETE FROM menu_opt_policy WHERE menu_id = #{menuId}
+</delete>
+<delete id="deleteMenuOptOverrides" parameterType="long">
+  DELETE FROM menu_opt_override WHERE menu_id = #{menuId}
+</delete>
+<delete id="deleteMenuNutrition" parameterType="long">
+  DELETE FROM menu_nutr WHERE menu_id = #{menuId}
+</delete>
+<delete id="deleteMenuTags" parameterType="long">
+  DELETE FROM menu_tag WHERE menu_id = #{menuId}
+</delete>
+
 </mapper>

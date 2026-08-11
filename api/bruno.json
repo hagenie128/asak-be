@@ -2,9 +2,12 @@
   "version": "1",
   "name": "ASAK API Contract",
   "type": "collection",
-  "ignore": ["node_modules", ".git"],
+  "ignore": [
+    "node_modules",
+    ".git"
+  ],
   "size": 0.009961128234863281,
-  "filesCount": 30,
+  "filesCount": 29,
   "presets": {
     "requestType": "http",
     "requestUrl": "http://localhost:8080/"
