@@ -70,6 +70,7 @@ public enum ErrorCode {
         PAYMENT_INSUFFICIENT_FUNDS("PAYMENT_INSUFFICIENT_FUNDS", HttpStatus.CONFLICT, "잔액이 부족합니다."),
         PAYMENT_NETWORK_ERROR("PAYMENT_NETWORK_ERROR", HttpStatus.CONFLICT, "결제 서버에 연결할 수 없습니다."),
         PAYMENT_TIMEOUT("PAYMENT_TIMEOUT", HttpStatus.CONFLICT, "결제 응답 시간이 초과되었습니다."),
+        IDEMPOTENCY_KEY_CONFLICT("IDEMPOTENCY_KEY_CONFLICT", HttpStatus.CONFLICT, "이미 다른 결제 요청에 사용된 멱등성 키입니다."),
         PAYMENT_DUPLICATE("PAYMENT_DUPLICATE", HttpStatus.CONFLICT, "이미 처리 중인 결제가 있습니다."),
         CATEGORY_NOT_FOUND("CATEGORY_NOT_FOUND", HttpStatus.NOT_FOUND, "카테고리를 찾을 수 없습니다."),
         MENU_IMAGE_SAVE_FAILED("MENU_IMAGE_SAVE_FAILED", HttpStatus.INTERNAL_SERVER_ERROR, "메뉴 이미지 저장에 실패했습니다."),

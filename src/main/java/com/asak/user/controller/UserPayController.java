@@ -1,8 +1,13 @@
 package com.asak.user.controller;
 
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.asak.common.response.ApiResponse;
+import com.asak.user.dto.payment.ApprovePaymentRequest;
+import com.asak.user.dto.payment.ApprovePaymentResponse;
 import com.asak.user.service.UserPayService;
 
 import lombok.RequiredArgsConstructor;
@@ -27,8 +32,29 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class UserPayController {
 
+    //     {
+    // "orderId": 1,
+    // "paymentMethodCode": "CARD",
+    // "idempotencyKey": "uuid"
+    // }
+
     //결제 서비스 연결
     private final UserPayService payService;
+
+
+    @PostMapping("/orders")
+    private ApiResponse<ApprovePaymentResponse> approvePayment(
+        @RequestBody ApprovePaymentRequest request
+    ){
+
+
+        ApprovePaymentResponse response = payService.createApprovePayment(request);
+
+        return ApiResponse.success(
+            "KIOSK_PAYMENT_APPROVED",
+            "결제가 승인되었습니다.",
+            response);
+    }
 
 
 }
