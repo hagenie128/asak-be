@@ -62,6 +62,8 @@ public enum ErrorCode {
                         "ORDER_AMOUNT_MISMATCH", HttpStatus.CONFLICT, "주문 금액이 일치하지 않습니다."),
 
         // Payment lifecycle
+        PAYMENT_CREATE_FAILED(
+                        "PAYMENT_CREATE_FAILED", HttpStatus.CONFLICT, "결제 생성이 실패했습니다."),
         PAYMENT_METHOD_DISABLED(
                         "PAYMENT_METHOD_DISABLED", HttpStatus.CONFLICT, "결제 방법이 비활성화되었습니다."),
         PAYMENT_ALREADY_APPROVED(

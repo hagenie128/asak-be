@@ -1,5 +1,7 @@
 package com.asak.user.dto.payment.query;
 
+import org.apache.ibatis.type.Alias;
+
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -8,9 +10,10 @@ import lombok.Setter;
 @Getter
 @Setter
 @NoArgsConstructor
+@Alias("PaymentMethodContext")
 public class PaymentMethodContext {
 
-    private Long methodId;
-    private boolean enable;
+    private Long methodId; //결제수단 종류
+    private boolean enable; //활성화 유무
 
 }

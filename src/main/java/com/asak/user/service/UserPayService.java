@@ -1,12 +1,15 @@
 package com.asak.user.service;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.asak.common.enums.OrderStatus;
+import com.asak.common.enums.PaymentMethod;
 import com.asak.common.exception.CustomException;
 import com.asak.common.exception.ErrorCode;
 import com.asak.user.dto.payment.ApprovePaymentRequest;
 import com.asak.user.dto.payment.ApprovePaymentResponse;
+import com.asak.user.dto.payment.command.PaymentInsertCommand;
 import com.asak.user.dto.payment.query.PaymentIdempotencyCheck;
 import com.asak.user.dto.payment.query.PaymentMethodContext;
 import com.asak.user.dto.payment.query.PaymentOrderContext;
@@ -16,6 +19,7 @@ import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
+@Transactional(readOnly = true)
 public class UserPayService {
 
     private final UserPayMapper payMapper;
@@ -38,7 +42,7 @@ public class UserPayService {
         // 3.이미 처리중인 결제가 있음
         if(request.getIdempotencyKey() == null ||
             request.getIdempotencyKey().isBlank()){
-            throw new CustomException(ErrorCode.PAYMENT_DUPLICATE);
+            throw new CustomException(ErrorCode.INVALID_ORDER_REQUEST);
         }
 
     }
@@ -75,15 +79,41 @@ public class UserPayService {
     }
     
     // ------------ 기존 승인 결제 검증(이미 결제했는지 확인) ------------
-     private void vaildataNoApprovePayment(Long orderId){
-
+    private void validateNoApprovePayment(Long orderId){
+        
         boolean alreadyApproved = payMapper.existsApprovedPayment(orderId);
-
+        
         if(alreadyApproved) {
             throw new CustomException(ErrorCode.PAYMENT_ALREADY_APPROVED);
         }
+        
+    }
+    
+    // ------------ 결제수단 존재·활성화 여부 확인 ------------
+    private PaymentMethodContext validateMethodForPayment(PaymentMethod paymentMethodCode) {
+        
+        PaymentMethodContext method = payMapper.findPaymentMethod(paymentMethodCode);
+        
+        if(method == null || !method.isEnable()){
+            throw new CustomException(ErrorCode.PAYMENT_METHOD_DISABLED);
+        }
+        
+        return method;
+    }
 
-     }
+    // ------------ getPaymentResult()가 null 일때 처리 ------------
+    private ApprovePaymentResponse getRequiredPaymentResult(Long paymentId){
+
+        ApprovePaymentResponse result = payMapper.getPaymentResult(paymentId);
+
+        if(result == null){
+            throw new CustomException(ErrorCode.PAYMENT_CREATE_FAILED);
+        }
+
+        return result;
+
+    }
+
 
     //requestBody 정본
     //     {
@@ -110,6 +140,7 @@ public class UserPayService {
 
 
     // ------------ 결제 승인 api-006 ------------
+    @Transactional
     public ApprovePaymentResponse createApprovePayment(ApprovePaymentRequest request){
 
         // 1. 요청 형식 검증(request 확인)
@@ -124,20 +155,42 @@ public class UserPayService {
             //같은 키가 다른 요청에 재사용 됐는지 검증(결과값 false가 나와야함)
             validateSameRequest(existing, request);
 
-            return payMapper.getPaymentResult(existing.getPaymentId());
+            return getRequiredPaymentResult(existing.getPaymentId());
         }
 
         // 3. 주문 존재 및 주문 상태 확인
         PaymentOrderContext order = validateOrderForPayment(request.getOrderId());
 
         // 4. 해당 주문의 기존 APPROVED(승인) 결제 확인
-        vaildataNoApprovePayment(request.getOrderId());
+        validateNoApprovePayment(request.getOrderId());
 
         // 5. 결제수단 존재·활성화 여부 확인
+
+        PaymentMethodContext paymethod = validateMethodForPayment(request.getPaymentMethodCode());
+
         // 6. orders.total_price를 승인 금액으로 결정
+
+        int approvedAmount = order.getTotalPrice();
+        
         // 7. payment 저장
+        PaymentInsertCommand command = new PaymentInsertCommand();
+
+        command.setOrderId(request.getOrderId());
+        command.setMethodId(paymethod.getMethodId());
+        command.setAmount(approvedAmount);
+        command.setIdempotencyKey(request.getIdempotencyKey());
+
+        int inserted = payMapper.insertPayment(command); //건수 -> 추가성공  0-> 실패
+
+        if(inserted != 1 || command.getPaymentId() == null){
+            throw new CustomException(ErrorCode.PAYMENT_CREATE_FAILED);
+        }
+
         // 8. paymentId로 결과 조회 후 반환
-        return null;
+        return getRequiredPaymentResult(command.getPaymentId());
     }
+
+
+
 
 }

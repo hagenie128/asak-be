@@ -16,7 +16,7 @@ import lombok.Setter;
 public class PaymentOrderContext {
 
     private OrderStatus orderStatus;
-    private int total_price;
+    private int totalPrice;
 
 
 }

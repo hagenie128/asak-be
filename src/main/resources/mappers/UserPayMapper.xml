@@ -80,4 +80,57 @@
 
     </select>
 
+    <!-- 결제수단 존재·활성화 여부 확인 -->
+
+    <select id="findPaymentMethod" resultType="PaymentMethodContext">
+
+        select
+            method_code.id as methodId,
+            method_config.active as enable
+
+        from common_code method_code
+        join code_group method_group
+        on method_code.code_grp_id = method_group.id
+        join pay_method_cfg method_config
+        on method_code.id = method_config.method_id
+
+        where method_group.group_code = 'PAYMENT_METHOD'
+        and method_code.code = #{paymentMethodCode}
+    
+    
+    </select>
+
+    <!-- 승인건 결제 추가 -->
+    <insert id="insertPayment" 
+            useGeneratedKeys = "true"
+            keyProperty="paymentId"
+            keyColumn="id">
+
+    insert into payment (
+        order_id,
+        method_id,
+        status_id,
+        amount,
+        paid_at,
+        idempotency_key
+    )
+    values(
+        #{orderId},
+        #{methodId},
+        (
+            select payment_status.id
+            from common_code payment_status
+            join code_group payment_status_group
+            on payment_status.code_grp_id = payment_status_group.id
+            where payment_status_group.group_code = 'PAYMENT_STATUS'
+            and payment_status.code = 'APPROVED'
+        ),
+        #{amount},
+        now(),
+        #{idempotencyKey}
+    )
+    
+    </insert>
+
+
 </mapper>
