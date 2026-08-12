@@ -1,0 +1,136 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.asak.user.mapper.UserPayMapper">
+
+    <!-- IdempotencyKey 멱등성 조회  -->
+    <select id="findByIdempotencyKey" resultType="IdempotencyCheckDTO">
+        select
+            p.id as paymentId,
+            p.order_id as orderId,
+            method_code.code as paymentMethodCode,
+            payStatus_code.code as paymentStatus
+        from payment p
+
+        join common_code method_code 
+        on method_code.id = p.method_id
+        join common_code payStatus_code 
+        on payStatus_code.id = p.status_id
+
+        where p.idempotency_key = #{idempotencyKey}
+    
+    </select>
+
+    <!-- 동일 멱동성시, 해당하는 결제건 반환  -->
+    <select id="getPaymentResult" resultType="payment">
+        select
+            p.id AS paymentId,
+            p.order_id AS orderId,
+            o.order_no AS orderNo,
+            payment_status.code AS paymentStatus,
+            p.amount AS approvedAmount,
+            p.paid_at AS approvedAt,
+            (
+                select COUNT(*)
+                from orders waiting_order
+                join common_code waiting_status
+                    ON waiting_status.id = waiting_order.status_id
+                where waiting_status.code IN ('RECEIVED', 'PREPARING')
+            ) AS waitingOrderCount
+        from payment p
+        join orders o
+            ON o.id = p.order_id
+        join common_code payment_status
+            ON payment_status.id = p.status_id
+        where p.id = #{paymentId}
+    </select>
+
+    <!-- 결제 대상 주문 조회 -->
+
+    <select id="findOrderForPayment" resultType="PaymentOrderContext">
+
+        select
+            order_status.code AS orderStatus,
+            o.total_price AS totalPrice
+        from orders o
+        join common_code order_status
+        on order_status.id = o.status_id
+        join code_group order_status_group
+        on order_status_group.id = order_status.code_grp_id
+    
+        where o.id = #{orderId}
+        and order_status_group.group_code = 'ORDER_STATUS'
+        FOR UPDATE
+    
+    </select>
+
+    <!-- 기존 승인 결제 확인(exists해당 있는지 없는지 결과값 도출) -->
+    <select id="existsApprovedPayment" resultType="boolean">
+        select exists (
+            select 1
+            FROM payment p
+            JOIN common_code payment_status
+                ON payment_status.id = p.status_id
+            JOIN code_group payment_status_group
+                ON payment_status_group.id = payment_status.code_grp_id
+            WHERE p.order_id = #{orderId}
+            AND payment_status.code = 'APPROVED'
+            AND payment_status_group.group_code = 'PAYMENT_STATUS'
+        )
+
+    </select>
+
+    <!-- 결제수단 존재·활성화 여부 확인 -->
+
+    <select id="findPaymentMethod" resultType="PaymentMethodContext">
+
+        select
+            method_code.id as methodId,
+            method_config.active as enable
+
+        from common_code method_code
+        join code_group method_group
+        on method_code.code_grp_id = method_group.id
+        join pay_method_cfg method_config
+        on method_code.id = method_config.method_id
+
+        where method_group.group_code = 'PAYMENT_METHOD'
+        and method_code.code = #{paymentMethodCode}
+    
+    
+    </select>
+
+    <!-- 승인건 결제 추가 -->
+    <insert id="insertPayment" 
+            useGeneratedKeys = "true"
+            keyProperty="paymentId"
+            keyColumn="id">
+
+    insert into payment (
+        order_id,
+        method_id,
+        status_id,
+        amount,
+        paid_at,
+        idempotency_key
+    )
+    values(
+        #{orderId},
+        #{methodId},
+        (
+            select payment_status.id
+            from common_code payment_status
+            join code_group payment_status_group
+            on payment_status.code_grp_id = payment_status_group.id
+            where payment_status_group.group_code = 'PAYMENT_STATUS'
+            and payment_status.code = 'APPROVED'
+        ),
+        #{amount},
+        now(),
+        #{idempotencyKey}
+    )
+    
+    </insert>
+
+
+</mapper>
