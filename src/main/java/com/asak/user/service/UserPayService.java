@@ -1,5 +1,7 @@
 package com.asak.user.service;
 
+import java.util.List;
+
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -9,6 +11,8 @@ import com.asak.common.exception.CustomException;
 import com.asak.common.exception.ErrorCode;
 import com.asak.user.dto.payment.ApprovePaymentRequest;
 import com.asak.user.dto.payment.ApprovePaymentResponse;
+import com.asak.user.dto.payment.PaymentMethodListResponse;
+import com.asak.user.dto.payment.PaymentMethodResponse;
 import com.asak.user.dto.payment.command.PaymentInsertCommand;
 import com.asak.user.dto.payment.query.PaymentIdempotencyCheck;
 import com.asak.user.dto.payment.query.PaymentMethodContext;
@@ -23,6 +27,21 @@ import lombok.RequiredArgsConstructor;
 public class UserPayService {
 
     private final UserPayMapper payMapper;
+
+
+     // --------------- api-014 결제 수단 조회 ------------------------
+    public PaymentMethodListResponse getPaymentMethod() {
+
+        List<PaymentMethodResponse> methodList = payMapper.findPaymentMethods();
+
+        PaymentMethodListResponse response = new PaymentMethodListResponse();
+
+        response.setMethods(methodList);
+
+        return response;
+
+    }
+
 
     // ------------ 결제 승인 검증 메서드 ------------
     private void validateRequest(ApprovePaymentRequest request){
@@ -189,6 +208,8 @@ public class UserPayService {
         // 8. paymentId로 결과 조회 후 반환
         return getRequiredPaymentResult(command.getPaymentId());
     }
+
+
 
 
 
