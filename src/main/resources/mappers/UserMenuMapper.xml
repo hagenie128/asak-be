@@ -128,7 +128,7 @@
         opi.recommended as isRecommended,
         opi.is_default as isDefault,
         oi.sold_out as isSoldOut,
-        oin.kcal  as kcal
+        ing.kcal  as kcal
 
         from opt_policy op
         join opt_policy_item opi
@@ -142,9 +142,6 @@
 
         join ing
         on oi.ing_id = ing.id
-
-        join ing_nutr oin
-        on oin.ing_id = ing.id
 
         join menu_opt_policy mop
         on op.id = mop.policy_id
