@@ -100,7 +100,7 @@ ORDER BY `mi`.`menu_id`,`mi`.`sort_no`;
 -- -----------------------------------------------------------------------------
 CREATE OR REPLACE VIEW `vw_menu_list` AS
 SELECT `m`.`id` AS `menu_id`,`m`.`cat_id` AS `category_id`,`m`.`name` AS `name`,`m`.`price` AS `price`,
-       `m`.`image_url` AS `image_url`,`mn`.`kcal` AS `base_kcal`,`m`.`sold_out` AS `is_sold_out`,
+       `ma`.`url` AS `image_url`,`mn`.`kcal` AS `base_kcal`,`m`.`sold_out` AS `is_sold_out`,
        ((0 <> `va`.`has_core_sold_out`)
         OR (0 <> `va`.`base_ing_exhausted`)
         OR (0 <> `va`.`base_opt_exhausted`)
@@ -114,6 +114,8 @@ SELECT `m`.`id` AS `menu_id`,`m`.`cat_id` AS `category_id`,`m`.`name` AS `name`,
 FROM ((`menu` `m`
        LEFT JOIN `menu_nutr` `mn` on((`mn`.`menu_id` = `m`.`id`)))
       JOIN `vw_menu_availability` `va` on((`va`.`menu_id` = `m`.`id`)))
+     LEFT JOIN `media_asset` `ma` on(((`ma`.`id` = `m`.`image_asset_id`)
+        AND (`ma`.`deleted_at` IS NULL)))
 WHERE (`m`.`deleted_at` IS NULL);
 
 -- -----------------------------------------------------------------------------

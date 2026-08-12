@@ -19,6 +19,7 @@ public class UpdateMenuRequest {
   private Long categoryId;
   private String name;
   private Integer price;
+  private Long mediaAssetId;
   private String imageUrl;
   private String description;
 }

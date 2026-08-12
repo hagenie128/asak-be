@@ -25,9 +25,12 @@
 
 <select id="getMenuDetail" resultMap="menuDetailMap">
   SELECT m.id AS menu_id, m.cat_id AS category_id, c.name AS category_name,
-         m.name, m.price, m.image_url, m.description, m.sold_out
+         m.name, m.price, ma.url AS image_url, m.description, m.sold_out
   FROM menu m
   JOIN category c ON c.id = m.cat_id
+  LEFT JOIN media_asset ma
+    ON ma.id = m.image_asset_id
+   AND ma.deleted_at IS NULL
   WHERE m.id = #{menuId}
     AND m.deleted_at IS NULL
 </select>
@@ -174,8 +177,8 @@
 </select>
 
 <insert id="insertMenu" parameterType="map" useGeneratedKeys="true" keyProperty="menuId" keyColumn="id">
-  INSERT INTO menu (cat_id, name, price, image_url, description)
-  VALUES (#{categoryId}, #{name}, #{price}, #{imageUrl}, #{description})
+  INSERT INTO menu (cat_id, name, price, image_asset_id, description)
+  VALUES (#{categoryId}, #{name}, #{price}, #{mediaAssetId}, #{description})
 </insert>
 
 <select id="findCommonCodeId" resultType="java.lang.Long">
@@ -196,6 +199,22 @@
       (#{code} IS NOT NULL AND #{code} != '' AND UPPER(t.code) = UPPER(#{code}))
       OR (#{name} IS NOT NULL AND #{name} != '' AND t.name = #{name})
     )
+  LIMIT 1
+</select>
+
+<select id="findActiveMediaAssetId" resultType="java.lang.Long">
+  SELECT id
+  FROM media_asset
+  WHERE id = #{mediaAssetId}
+    AND deleted_at IS NULL
+</select>
+
+<select id="findActiveMediaAssetIdByUrl" resultType="java.lang.Long">
+  SELECT id
+  FROM media_asset
+  WHERE url = #{url}
+    AND deleted_at IS NULL
+  ORDER BY id
   LIMIT 1
 </select>
 
@@ -278,7 +297,7 @@
   SET cat_id = #{request.categoryId, jdbcType=INTEGER},
       name = #{request.name},
       price = #{request.price, jdbcType=INTEGER},
-      image_url = #{request.imageUrl, jdbcType=VARCHAR},
+      image_asset_id = #{mediaAssetId, jdbcType=BIGINT},
       description = #{request.description, jdbcType=VARCHAR}
   WHERE id = #{menuId}
     AND deleted_at IS NULL

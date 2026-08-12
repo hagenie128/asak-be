@@ -22,6 +22,11 @@ public class CreateMenuRequest {
   private Long categoryId;
   private String name;
   private Integer price;
+  /** menu.image_asset_id. 새 클라이언트는 이 값을 우선 전송한다. */
+  private Long mediaAssetId;
+  /**
+   * 이전 관리자 화면과의 호환용 URL. 서비스에서 활성 media_asset을 조회해 mediaAssetId로 변환한다.
+   */
   private String imageUrl;
   private String description;
   private List<CreateMenuIngredientRequest> ingredients;

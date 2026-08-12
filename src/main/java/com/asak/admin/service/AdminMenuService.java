@@ -74,7 +74,7 @@ public class AdminMenuService {
     map.put("categoryId", request.getCategoryId());
     map.put("name", request.getName());
     map.put("price", request.getPrice());
-    map.put("imageUrl", request.getImageUrl());
+    map.put("mediaAssetId", resolveMediaAssetId(request.getMediaAssetId(), request.getImageUrl()));
     map.put("description", request.getDescription());
 
     int inserted = adminMenuMapper.insertMenu(map);
@@ -104,6 +104,7 @@ public class AdminMenuService {
     Map<String, Object> map = new HashMap<>();
     map.put("menuId", menuId);
     map.put("request", request);
+    map.put("mediaAssetId", resolveMediaAssetId(request.getMediaAssetId(), request.getImageUrl()));
     int updated = adminMenuMapper.updateMenu(map);
     if (updated <= 0) {
       throw new CustomException(ErrorCode.MENU_UPDATE_FAILED);
@@ -147,6 +148,29 @@ public class AdminMenuService {
     if (menuId == null || menuId <= 0 || getMenuDetail(menuId) == null) {
       throw new CustomException(ErrorCode.MENU_NOT_FOUND);
     }
+  }
+
+  /**
+   * menu는 파일 URL을 저장하지 않고 media_asset의 PK만 저장한다. 기존 화면이 imageUrl만 보내는
+   * 동안에는 활성 asset을 URL로 찾아 연결한다.
+   */
+  private Long resolveMediaAssetId(Long mediaAssetId, String imageUrl) {
+    if (mediaAssetId != null) {
+      if (mediaAssetId <= 0 || adminMenuMapper.findActiveMediaAssetId(mediaAssetId) == null) {
+        throw new CustomException(ErrorCode.MENU_CREATE_INVALID);
+      }
+      return mediaAssetId;
+    }
+
+    if (imageUrl == null || imageUrl.isBlank()) {
+      return null;
+    }
+
+    Long resolvedMediaAssetId = adminMenuMapper.findActiveMediaAssetIdByUrl(imageUrl.trim());
+    if (resolvedMediaAssetId == null) {
+      throw new CustomException(ErrorCode.MENU_CREATE_INVALID);
+    }
+    return resolvedMediaAssetId;
   }
 
   private void insertChildren(Long menuId, CreateMenuRequest request) {

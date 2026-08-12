@@ -28,6 +28,10 @@ public interface AdminMenuMapper {
 
   Long findTagId(@Param("code") String code, @Param("name") String name);
 
+  Long findActiveMediaAssetId(@Param("mediaAssetId") Long mediaAssetId);
+
+  Long findActiveMediaAssetIdByUrl(@Param("url") String url);
+
   Long findOptPolicyId(@Param("optionGroupId") Long optionGroupId);
 
   List<Long> findOptItemIdsByPolicyId(@Param("policyId") Long policyId);

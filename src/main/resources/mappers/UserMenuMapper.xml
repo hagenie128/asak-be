@@ -21,29 +21,35 @@
             m.cat_id AS categoryId,
             m.name,
             m.price,
-            mn.kcal, 
-            m.image_url AS imageUrl,
+            mn.kcal,
+            ma.url AS imageUrl,
             m.sold_out AS isSoldOut
         FROM menu m
         join menu_nutr mn
         on mn.menu_id = m.id
+        LEFT JOIN media_asset ma
+        ON ma.id = m.image_asset_id
+        AND ma.deleted_at IS NULL
         WHERE m.deleted_at IS NULL
         ORDER BY m.cat_id ASC, m.id ASC
     </select>
 
     <!-- 메뉴 디테일 -->
     <select id="selectMenuDetail" resultType="menuDetail">
-        select
-            id as menuId,
-            cat_id as categoryId,
-            name,
-            price,
-            description,
-            image_url as imageUrl,
-            sold_out as isSoldOut
-        from menu
-        where id = #{ menuId }
-          and deleted_at IS NULL
+        SELECT
+            m.id AS menuId,
+            m.cat_id AS categoryId,
+            m.name,
+            m.price,
+            m.description,
+            ma.url AS imageUrl,
+            m.sold_out AS isSoldOut
+        FROM menu m
+        LEFT JOIN media_asset ma
+        ON ma.id = m.image_asset_id
+        AND ma.deleted_at IS NULL
+        WHERE m.id = #{ menuId }
+          AND m.deleted_at IS NULL
     </select>
 
     <!-- 메뉴 상세 태그 조회 -->
