@@ -273,14 +273,13 @@
   VALUES (#{menuId}, #{tagId})
 </insert>
 
-<update id="updateMenu">
+<update id="updateMenu" parameterType="map">
   UPDATE menu
-  SET cat_id = #{request.categoryId},
+  SET cat_id = #{request.categoryId, jdbcType=INTEGER},
       name = #{request.name},
-      price = #{request.price},
-      image_url = #{request.imageUrl},
-      description = #{request.description},
-      updated_at = CURRENT_TIMESTAMP
+      price = #{request.price, jdbcType=INTEGER},
+      image_url = #{request.imageUrl, jdbcType=VARCHAR},
+      description = #{request.description, jdbcType=VARCHAR}
   WHERE id = #{menuId}
     AND deleted_at IS NULL
 </update>

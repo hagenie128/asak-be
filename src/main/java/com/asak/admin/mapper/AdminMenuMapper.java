@@ -42,7 +42,7 @@ public interface AdminMenuMapper {
 
   int insertMenuTag(Map<String, Object> map);
 
-  int updateMenu(@Param("menuId") Long menuId, @Param("request") CreateMenuRequest request);
+  int updateMenu(Map<String, Object> map);
 
   /** Soft delete: deleted_at 설정 (주문 FK 유지) */
   int softDeleteMenu(@Param("menuId") Long menuId);

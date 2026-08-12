@@ -101,7 +101,10 @@ public class AdminMenuService {
   public MenuDetailResponse updateMenu(Long menuId, CreateMenuRequest request) {
     requireActiveMenu(menuId);
 
-    int updated = adminMenuMapper.updateMenu(menuId, request);
+    Map<String, Object> map = new HashMap<>();
+    map.put("menuId", menuId);
+    map.put("request", request);
+    int updated = adminMenuMapper.updateMenu(map);
     if (updated <= 0) {
       throw new CustomException(ErrorCode.MENU_UPDATE_FAILED);
     }
@@ -164,7 +167,8 @@ public class AdminMenuService {
         throw new CustomException(ErrorCode.MENU_CREATE_INVALID);
       }
 
-      Long roleId = resolveRoleId(ingredient.getRole());
+      String roleCode = normalizeRoleCode(ingredient.getRole());
+      Long roleId = resolveRoleId(roleCode);
       Long unitId = null;
       if (ingredient.getUnit() != null && !ingredient.getUnit().isBlank()) {
         unitId = adminMenuMapper.findCommonCodeId(GROUP_UNIT_TYPE, ingredient.getUnit().trim());
@@ -180,7 +184,9 @@ public class AdminMenuService {
       row.put("quantity", ingredient.getQuantity() != null ? ingredient.getQuantity() : 0d);
       row.put("unitId", unitId);
       row.put("isDefault", ingredient.getIsDefault() == null || ingredient.getIsDefault());
-      row.put("canRemove", ingredient.getCanRemove() == null || ingredient.getCanRemove());
+      // 클라이언트가 true를 보내더라도 핵심 재료(CORE)는 제외 불가로 저장한다.
+      row.put("canRemove", !"CORE".equals(roleCode)
+          && (ingredient.getCanRemove() == null || ingredient.getCanRemove()));
       row.put("sortNo", sortNo++);
       adminMenuMapper.insertMenuIngredient(row);
     }
