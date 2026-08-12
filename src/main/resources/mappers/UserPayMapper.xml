@@ -3,6 +3,27 @@
 "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.asak.user.mapper.UserPayMapper">
 
+    <!-- 결제 수단 조회 -->
+
+    <select id="findPaymentMethods" resultType="PaymentMethodDTO"> 
+        select
+            method_code.id as methodId,
+            method_code.code as methodCode,
+            method_config.name as methodName,
+            method_config.active as isEnabled,
+            method_config.sort_no as sortOrder
+
+        from common_code method_code
+        join code_group method_group
+        on method_code.code_grp_id = method_group.id
+        join pay_method_cfg method_config
+        on method_config.method_id = method_code.id 
+
+        where method_group.group_code = 'PAYMENT_METHOD'
+        order by method_config.sort_no asc
+    
+    </select>
+
     <!-- IdempotencyKey 멱등성 조회  -->
     <select id="findByIdempotencyKey" resultType="IdempotencyCheckDTO">
         select
