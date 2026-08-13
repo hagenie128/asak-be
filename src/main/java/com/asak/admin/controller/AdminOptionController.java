@@ -14,27 +14,27 @@ import com.asak.common.response.ApiResponse;
 @RestController
 @RequestMapping("/api/admin/opts")
 public class AdminOptionController {
-    private final AdminOptionService adminOptionService;
+  private final AdminOptionService adminOptionService;
 
-    public AdminOptionController(AdminOptionService adminOptionService) {
-        this.adminOptionService = adminOptionService;
-    }
+  public AdminOptionController(AdminOptionService adminOptionService) {
+    this.adminOptionService = adminOptionService;
+  }
 
-    @GetMapping("/groups")
-    public ApiResponse<List<OptionGroupSummaryResponse>> getOptionGroups() {
-        List<OptionGroupSummaryResponse> optionGroups = adminOptionService.getOptionGroups();
-        return ApiResponse.success(
-                "ADMIN_OPTION_GROUP_LIST_SUCCESS",
-                "관리자 옵션 그룹 목록 조회 성공",
-                optionGroups);
-    }
+  @GetMapping("/groups")
+  public ApiResponse<List<OptionGroupSummaryResponse>> getOptionGroups() {
+    List<OptionGroupSummaryResponse> optionGroups = adminOptionService.getOptionGroups();
+    return ApiResponse.success(
+        "ADMIN_OPTION_GROUP_LIST_SUCCESS",
+        "관리자 옵션 그룹 목록 조회 성공",
+        optionGroups);
+  }
 
-    @GetMapping("/{optionGroupId}")
-    public ApiResponse<OptionGroupSummaryResponse> getOptionGroupDetail(@PathVariable Long optionGroupId) {
-        OptionGroupSummaryResponse optionGroup = adminOptionService.getOptionGroupDetail(optionGroupId);
-        return ApiResponse.success(
-                "ADMIN_OPTION_GROUP_DETAIL_SUCCESS",
-                "관리자 옵션 그룹 상세 조회 성공",
-                optionGroup);
-    }
+  @GetMapping("/{optionGroupId}")
+  public ApiResponse<OptionGroupSummaryResponse> getOptionGroupDetail(@PathVariable Long optionGroupId) {
+    OptionGroupSummaryResponse optionGroup = adminOptionService.getOptionGroupDetail(optionGroupId);
+    return ApiResponse.success(
+        "ADMIN_OPTION_GROUP_DETAIL_SUCCESS",
+        "관리자 옵션 그룹 상세 조회 성공",
+        optionGroup);
+  }
 }
