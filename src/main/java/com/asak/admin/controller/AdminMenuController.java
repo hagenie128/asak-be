@@ -78,8 +78,9 @@ public class AdminMenuController {
         menuDetail);
   }
 
-  // TODO-017: POST /api/admin/menus — JSON body(CreateMenuRequest). 이미지 파일 업로드는
-  // 후순위.
+  // TODO-017: POST /api/admin/menus — JSON body(CreateMenuRequest)만 처리한다. 이미지 파일 업로드는 후순위다.
+  // 저장 전 categoryId·optionGroupIds·ingredientIds의 실제 존재/활성 여부를 Service에서 검증하고,
+  // 생성 성공 뒤 GET 상세와 목록에 같은 menuId가 보이는지 API·DB 기준으로 확인한다.
   @PostMapping
   public ApiResponse<MenuDetailResponse> createMenu(@Valid @RequestBody CreateMenuRequest request) {
     if (request.getCategoryId() == null || request.getCategoryId() <= 0) {

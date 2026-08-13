@@ -136,10 +136,10 @@ public class AdminOrderService {
   }
 
   public int cancelOrder(Long orderId) {
-    // TODO-008: APPROVED 결제 취소 정책 구체화.
-    // 1) APPROVED 결제 주문 취소 시 cancel과 refund를 분리할지 팀 규칙 확정
-    // 2) 환불 API/결제 상태 변경이 필요하면 별도 service/mapper/sql 연결
-    // 3) 현재 0 반환 대신 성공/실패/ErrorCode 기준을 Controller와 맞춘다
+    // TODO-008: APPROVED 결제 취소 정책을 구체화한다.
+    // 1) 미승인 주문 cancel과 승인 결제 refund를 분리하고, TODO-071 환불 endpoint가 승인 결제만 담당하도록 상태표를 확정한다.
+    // 2) 결제 상태·주문 상태·외부 결제 취소가 필요하면 TODO-072의 별도 mapper/sql을 하나의 트랜잭션 경계로 연결한다.
+    // 3) 현재 0 반환을 성공으로 감추지 않고, 행 수 0·허용하지 않는 상태·동시 변경을 Controller ErrorCode와 맞춘다.
     // APPROVED·COMPLETED·CANCELED 는 취소 불가
     OrderDetailResponse response = adminOrderMapper.getOrderDetail(orderId);
     if (response == null) {

@@ -35,9 +35,10 @@ public class SecurityConfig {
         // 추후 관리자 JWT 인증을 사용할 예정이므로 세션은 사용하지 않음
         .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
 
-        // TODO-063: JwtAuthenticationFilter 등록 후 /api/admin/** authenticated, 그 외
-        // permitAll
-        // JWT 인증 구현 전까지 모든 API 임시 허용
+        // TODO-063: TODO-061 provider와 TODO-062 filter 검증 뒤 /api/admin/login은 permitAll,
+        // 그 외 /api/admin/**는 authenticated로 전환한다. kiosk/user 공개 범위는 별도 명시한다.
+        // 401(미인증)·403(권한 없음) JSON 응답을 GlobalExceptionHandler/API envelope와 맞추고 CORS preflight는 막지 않는다.
+        // JWT 인증 구현 전까지 모든 API를 임시 허용한다.
         .authorizeHttpRequests(auth -> auth.anyRequest().permitAll())
 
         .formLogin(form -> form.disable())
@@ -84,7 +85,8 @@ public class SecurityConfig {
   }
 
   /**
-   * TODO-060 연동: 관리자 로그인 시 AuthenticationManager 사용.
+   * TODO-060 연동: 관리자 로그인 시 AuthenticationManager를 사용한다.
+   * UserDetailsService/PasswordEncoder와 실제 관리자 계정 공급자가 등록된 뒤 정상·실패 인증을 확인한다.
    */
   @Bean
   public AuthenticationManager authenticationManager(

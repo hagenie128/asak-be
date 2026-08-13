@@ -2,10 +2,10 @@ package com.asak.admin.service;
 
 import org.springframework.stereotype.Service;
 
-// TODO-041: 품절 2/4 — 서비스 구현.
-// 1) 카탈로그 조회 메서드(getSoldOutCatalog) 추가
-// 2) PATCH 저장 메서드(patchSoldOut) 추가 — targetType/targetId/isSoldOut 처리
-// 3) 잘못된 target / 0건 업데이트 / 롤백 기준을 Controller 응답 코드와 맞춘다
+// TODO-041: 품절 2/4 — Service/Mapper/DTO 구현.
+// 1) 카탈로그 조회(getSoldOutCatalog)와 PATCH 대상(patchSoldOut)을 추가하고 targetType별 대상 조회를 분리한다.
+// 2) targetType/targetId/isSoldOut 검증, 중복 target 병합/거절, 없는 target·0건 update 규칙을 ErrorCode와 맞춘다.
+// 3) changes가 여러 건이면 전체 롤백/부분 성공 중 하나를 정하고 transaction으로 보장한 뒤 TODO-040/042/043과 연결한다.
 @Service
 public class AdminSoldOutService {
 }

@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<!-- TODO-051: sales summary/monthly/daily + dashboard SELECT (view 활용) -->
+<!-- TODO-051: sales summary/monthly/daily + dashboard SELECT를 구현한다.
+  날짜 parameter와 주문 상태·시간대 기준은 AdminStatsController/Service와 동일하게 유지하고,
+  DTO camelCase에 맞는 column alias/resultMap을 사용한다. view 사용 시 실제 정의·빈 기간·성능을 검증한다. -->
 <mapper namespace="com.asak.admin.mapper.AdminStatsMapper">
 </mapper>
