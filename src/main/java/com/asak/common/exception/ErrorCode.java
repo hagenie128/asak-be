@@ -84,7 +84,9 @@ public enum ErrorCode {
         MENU_UPDATE_NOT_FOUND("MENU_UPDATE_NOT_FOUND", HttpStatus.NOT_FOUND, "메뉴를 찾을 수 없습니다."),
         MENU_DELETE_FAILED("MENU_DELETE_FAILED", HttpStatus.INTERNAL_SERVER_ERROR, "메뉴 삭제에 실패했습니다."),
         MENU_DELETE_INVALID("MENU_DELETE_INVALID", HttpStatus.BAD_REQUEST, "메뉴 삭제 요청이 올바르지 않습니다."),
-        MENU_DELETE_NOT_FOUND("MENU_DELETE_NOT_FOUND", HttpStatus.NOT_FOUND, "메뉴를 찾을 수 없습니다.");
+        MENU_DELETE_NOT_FOUND("MENU_DELETE_NOT_FOUND", HttpStatus.NOT_FOUND, "메뉴를 찾을 수 없습니다."),
+        MENU_OPTION_GROUP_NOT_FOUND("MENU_OPTION_GROUP_NOT_FOUND", HttpStatus.NOT_FOUND, "옵션 그룹을 찾을 수 없습니다."),
+        MENU_INGREDIENT_NOT_FOUND("MENU_INGREDIENT_NOT_FOUND", HttpStatus.NOT_FOUND, "재료를 찾을 수 없습니다.");
 
         private final String code;
         private final HttpStatus status;

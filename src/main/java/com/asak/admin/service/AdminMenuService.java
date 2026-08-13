@@ -36,9 +36,11 @@ public class AdminMenuService {
   private static final String GROUP_UNIT_TYPE = "UNIT_TYPE";
 
   private final AdminMenuMapper adminMenuMapper;
+  private final AdminOptionService adminOptionService;
 
-  public AdminMenuService(AdminMenuMapper adminMenuMapper) {
+  public AdminMenuService(AdminMenuMapper adminMenuMapper, AdminOptionService adminOptionService) {
     this.adminMenuMapper = adminMenuMapper;
+    this.adminOptionService = adminOptionService;
   }
 
   @Value("${app.file.menu-upload-dir}")
@@ -82,8 +84,9 @@ public class AdminMenuService {
     if (inserted <= 0 || generatedId == null) {
       throw new CustomException(ErrorCode.MENU_INSERT_FAILED);
     }
-
+    
     Long menuId = ((Number) generatedId).longValue();
+    adminOptionService.insertOptionGroups(menuId, request.getOptionGroups());
     insertChildren(menuId, request);
 
     MenuDetailResponse created = adminMenuMapper.getMenuDetail(menuId);
@@ -114,10 +117,10 @@ public class AdminMenuService {
       adminMenuMapper.deleteMenuIngredients(menuId);
       insertIngredients(menuId, request.getIngredients());
     }
-    if (request.getOptionGroups() != null) {
+    if (!adminOptionService.existsOptionGroup(request.getOptionGroups().stream().map(CreateMenuOptionGroupRequest::getOptionGroupId).toList())) {
       adminMenuMapper.deleteMenuOptOverrides(menuId);
       adminMenuMapper.deleteMenuOptionGroups(menuId);
-      insertOptionGroups(menuId, request.getOptionGroups());
+      adminOptionService.replaceMenuOptionGroups(menuId, request.getOptionGroups());
     }
     if (request.getNutrition() != null) {
       adminMenuMapper.deleteMenuNutrition(menuId);
@@ -334,5 +337,17 @@ public class AdminMenuService {
       row.put("tagId", tagId);
       adminMenuMapper.insertMenuTag(row);
     }
+  }
+
+  public boolean getOptionGroupDetail(Long optionGroupId) {
+    return adminMenuMapper.getOptionGroupDetail(optionGroupId) != null;
+  }
+
+  public boolean getIngredientDetail(Long ingredientId) {
+    return adminMenuMapper.getIngredientDetail(ingredientId) != null;
+  }
+
+  public boolean getCategoryById(Long categoryId) {
+    return adminMenuMapper.getCategoryById(categoryId) != null;
   }
 }

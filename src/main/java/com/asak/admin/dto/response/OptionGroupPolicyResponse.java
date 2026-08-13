@@ -11,7 +11,7 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class MenuOptPolicyResponse {
+public class OptionGroupPolicyResponse {
   private Long optionGroupId;
   private String name;
   private String groupType;

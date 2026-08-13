@@ -62,4 +62,10 @@ public interface AdminMenuMapper {
   int deleteMenuTags(Long menuId);
 
   List<IngredientResponse> getIngredients();
+
+  Object getCategoryById(Long categoryId);
+
+  Object getIngredientDetail(Long ingredientId);
+
+  Object getOptionGroupDetail(Long optionGroupId);
 }

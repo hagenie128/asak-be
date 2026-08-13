@@ -78,14 +78,34 @@ public class AdminMenuController {
         menuDetail);
   }
 
-  // TODO-017: POST /api/admin/menus — JSON body(CreateMenuRequest)만 처리한다. 이미지 파일 업로드는 후순위다.
+  // TODO-017: POST /api/admin/menus — JSON body(CreateMenuRequest)만 처리한다. 이미지 파일
+  // 업로드는 후순위다.
   // 저장 전 categoryId·optionGroupIds·ingredientIds의 실제 존재/활성 여부를 Service에서 검증하고,
   // 생성 성공 뒤 GET 상세와 목록에 같은 menuId가 보이는지 API·DB 기준으로 확인한다.
   @PostMapping
   public ApiResponse<MenuDetailResponse> createMenu(@Valid @RequestBody CreateMenuRequest request) {
-    if (request.getCategoryId() == null || request.getCategoryId() <= 0) {
-      return ApiResponse.error(
-          ErrorCode.MENU_CREATE_INVALID);
+    if (request.getCategoryId() != null && request.getCategoryId() > 0) {
+      if (!adminMenuService.getCategoryById(request.getCategoryId())) {
+        return ApiResponse.error(
+            ErrorCode.CATEGORY_NOT_FOUND);
+      }
+    }
+    if (request.getOptionGroups() != null && request.getOptionGroups().size() > 0) {
+      for (var group : request.getOptionGroups()) {
+        if (group.getOptionGroupId() == null || !adminMenuService.getOptionGroupDetail(group.getOptionGroupId())) {
+          return ApiResponse.error(
+              ErrorCode.MENU_OPTION_GROUP_NOT_FOUND);
+        }
+      }
+    }
+    if (request.getIngredients() != null && request.getIngredients().size() > 0) {
+      for (var ingredient : request.getIngredients()) {
+        if (ingredient.getIngredientId() == null
+            || !adminMenuService.getIngredientDetail(ingredient.getIngredientId())) {
+          return ApiResponse.error(
+              ErrorCode.MENU_INGREDIENT_NOT_FOUND);
+        }
+      }
     }
     MenuDetailResponse menu = adminMenuService.createMenu(request);
     return ApiResponse.success(

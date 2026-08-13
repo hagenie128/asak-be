@@ -23,7 +23,7 @@ public class MenuDetailResponse {
   private String description;
   private boolean isSoldOut;
   private List<MenuIngredientSummaryResponse> ingredients;
-  private List<MenuOptionGroupSummaryResponse> optionGroups;
+  private List<OptionGroupSummaryResponse> optionGroups;
   private MenuNutritionResponse nutrition;
   private List<String> allergens;
   private List<String> tags;

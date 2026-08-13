@@ -10,7 +10,7 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class MenuOptionGroupSummaryResponse {
+public class OptionGroupSummaryResponse {
 
   private Long optionGroupId;
   private String name;
