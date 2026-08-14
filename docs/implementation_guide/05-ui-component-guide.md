@@ -29,5 +29,5 @@
 
 ## 정본 링크
 
-- [DTO·Mapper 규칙](../../../ASAK/docs/product_bible/06_Engineering_Bible/docs/03-backend/DTO_AND_MAPPER_RULES.md)
-- [서비스·트랜잭션 규칙](../../../ASAK/docs/product_bible/06_Engineering_Bible/docs/03-backend/SERVICE_TRANSACTION_RULES.md)
+- [DTO·Mapper 규칙](../../../ASAK/docs/product_bible/06_Engineering_Bible/03-backend/DTO_AND_MAPPER_RULES.md)
+- [서비스·트랜잭션 규칙](../../../ASAK/docs/product_bible/06_Engineering_Bible/03-backend/SERVICE_TRANSACTION_RULES.md)

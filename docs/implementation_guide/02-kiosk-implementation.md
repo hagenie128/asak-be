@@ -54,7 +54,7 @@
 ## 정본 링크
 
 - [백엔드 정본 참조 팩](12-canonical-reference-pack.md)
-- [메뉴 API 계약](../../../ASAK/docs/product_bible/03_Menu_Inventory_SoldOut/docs/09-features/menu/MENU_API_CONTRACT.md)
-- [주문 아키텍처](../../../ASAK/docs/product_bible/02_Order_Cart_Payment/docs/09-features/order/ORDER_ARCHITECTURE.md)
-- [주문 생성 구현 기준](../../../ASAK/docs/product_bible/11_Backend_Implementation/docs/12-backend-implementation/03-order/ORDER_CREATE_IMPLEMENTATION.md)
-- [결제 구현 기준](../../../ASAK/docs/product_bible/11_Backend_Implementation/docs/12-backend-implementation/04-payment/PAYMENT_IMPLEMENTATION.md)
+- [메뉴 API 계약](../../../ASAK/docs/product_bible/03_Menu_Inventory_SoldOut/menu/MENU_API_CONTRACT.md)
+- [주문 아키텍처](../../../ASAK/docs/product_bible/02_Order_Cart_Payment/order/ORDER_ARCHITECTURE.md)
+- [주문 생성 구현 기준](../../../ASAK/docs/product_bible/11_Backend_Implementation/03-order/ORDER_CREATE_IMPLEMENTATION.md)
+- [결제 구현 기준](../../../ASAK/docs/product_bible/11_Backend_Implementation/04-payment/PAYMENT_IMPLEMENTATION.md)

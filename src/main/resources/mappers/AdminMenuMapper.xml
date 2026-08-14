@@ -15,7 +15,7 @@
                column="menu_id" select="findMenuNutrition"/>
   <collection property="ingredients" ofType="com.asak.admin.dto.response.MenuIngredientSummaryResponse"
               column="menu_id" select="findMenuIngredientSummaries"/>
-  <collection property="optionGroups" ofType="com.asak.admin.dto.response.MenuOptionGroupSummaryResponse"
+  <collection property="optionGroups" ofType="com.asak.admin.dto.response.OptionGroupSummaryResponse"
               column="menu_id" select="findMenuOptionGroupSummaries"/>
   <collection property="allergens" ofType="java.lang.String"
               column="menu_id" select="findMenuAllergens"/>
@@ -50,7 +50,7 @@
            ingredient_id
 </select>
 
-<select id="findMenuOptionGroupSummaries" resultType="com.asak.admin.dto.response.MenuOptionGroupSummaryResponse">
+<select id="findMenuOptionGroupSummaries" resultType="com.asak.admin.dto.response.OptionGroupSummaryResponse">
   SELECT
       policy.option_group_id AS optionGroupId,
       policy.name,
@@ -176,6 +176,39 @@
   ORDER BY sort_no ASC
 </select>
 
+<select id="getCategoryById" resultType="com.asak.admin.dto.response.AdminCategoryResponse">
+  SELECT id AS categoryId,
+         name AS categoryName,
+         sort_no AS sortOrder,
+         active AS active
+  FROM category
+  WHERE id = #{categoryId}
+    AND active = 1
+  LIMIT 1
+</select>
+
+<select id="getIngredientDetail" resultType="com.asak.admin.dto.response.IngredientResponse">
+  SELECT
+    i.id AS id,
+    i.name AS name,
+    i.sold_out AS isSoldOut,
+    CASE WHEN i.type_id &lt;= 34 THEN cc.name END AS roleName,
+    CASE WHEN i.type_id &gt; 34 THEN cc.name END AS unitName,
+    n.serving_g AS servingG,
+    n.kcal AS kcal,
+    n.carb_g AS carbG,
+    n.sugar_g AS sugarG,
+    n.protein_g AS proteinG,
+    n.fat_g AS fatG,
+    n.saturated_fat_g AS saturatedFatG,
+    n.sodium_mg AS sodiumMg
+  FROM ing i
+  LEFT JOIN common_code cc ON i.type_id = cc.id
+  LEFT JOIN ing_nutr n ON n.ing_id = i.id
+  WHERE i.id = #{ingredientId}
+  LIMIT 1
+</select>
+
 <insert id="insertMenu" parameterType="map" useGeneratedKeys="true" keyProperty="menuId" keyColumn="id">
   INSERT INTO menu (cat_id, name, price, image_asset_id, description)
   VALUES (#{categoryId}, #{name}, #{price}, #{mediaAssetId}, #{description})
@@ -186,8 +219,12 @@
   FROM common_code cc
   JOIN code_group cg ON cg.id = cc.code_grp_id
   WHERE cg.group_code = #{groupCode}
-    AND UPPER(cc.code) = UPPER(#{code})
     AND cc.active = 1
+    AND (
+      UPPER(cc.code) = UPPER(#{code})
+      OR UPPER(cc.name) = UPPER(#{code})
+    )
+  ORDER BY CASE WHEN UPPER(cc.code) = UPPER(#{code}) THEN 0 ELSE 1 END
   LIMIT 1
 </select>
 
@@ -216,28 +253,6 @@
     AND deleted_at IS NULL
   ORDER BY id
   LIMIT 1
-</select>
-
-<select id="findOptPolicyId" resultType="java.lang.Long">
-  SELECT id
-  FROM (
-    SELECT id, 1 AS priority
-    FROM opt_policy
-    WHERE id = #{optionGroupId}
-    UNION ALL
-    SELECT id, 2 AS priority
-    FROM opt_policy
-    WHERE opt_group_id = #{optionGroupId}
-  ) candidates
-  ORDER BY priority
-  LIMIT 1
-</select>
-
-<select id="findOptItemIdsByPolicyId" resultType="java.lang.Long">
-  SELECT opt_item_id
-  FROM opt_policy_item
-  WHERE policy_id = #{policyId}
-  ORDER BY opt_item_id
 </select>
 
 <select id="getIngredients" resultType="com.asak.admin.dto.response.IngredientResponse">
@@ -271,17 +286,6 @@
   )
 </insert>
 
-<insert id="insertMenuOptPolicy" parameterType="map">
-  INSERT INTO menu_opt_policy (menu_id, policy_id, sort_no, required)
-  VALUES (#{menuId}, #{policyId}, #{sortNo}, #{required})
-</insert>
-
-<insert id="upsertMenuOptOverride" parameterType="map">
-  INSERT INTO menu_opt_override (menu_id, opt_item_id, recommended)
-  VALUES (#{menuId}, #{optionItemId}, #{recommended})
-  ON DUPLICATE KEY UPDATE recommended = VALUES(recommended)
-</insert>
-
 <insert id="insertMenuNutrition" parameterType="map">
   INSERT INTO menu_nutr (menu_id, kcal, carb_g, protein_g, fat_g, sodium_mg)
   VALUES (#{menuId}, #{kcal}, #{carbG}, #{proteinG}, #{fatG}, #{sodiumMg})
@@ -313,12 +317,6 @@
 
 <delete id="deleteMenuIngredients" parameterType="long">
   DELETE FROM menu_ing WHERE menu_id = #{menuId}
-</delete>
-<delete id="deleteMenuOptionGroups" parameterType="long">
-  DELETE FROM menu_opt_policy WHERE menu_id = #{menuId}
-</delete>
-<delete id="deleteMenuOptOverrides" parameterType="long">
-  DELETE FROM menu_opt_override WHERE menu_id = #{menuId}
 </delete>
 <delete id="deleteMenuNutrition" parameterType="long">
   DELETE FROM menu_nutr WHERE menu_id = #{menuId}

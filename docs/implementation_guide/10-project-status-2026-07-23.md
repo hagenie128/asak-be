@@ -56,5 +56,5 @@
 - [ASAK-back 구현 계획](../../IMPLEMENTATION_PLAN.md)
 - [Bruno 컬렉션 상태](../../api/README.md)
 - [DevCopilot API 정리 기준](../../../ASAK/docs/governance/devcopilot-api-alignment-2026-07-23.md)
-- [백엔드 로드맵](../../../ASAK/docs/product_bible/11_Backend_Implementation/docs/12-backend-implementation/00-plan/BACKEND_IMPLEMENTATION_ROADMAP.md)
-- [예외 구현 기준](../../../ASAK/docs/product_bible/11_Backend_Implementation/docs/12-backend-implementation/01-common/EXCEPTION_IMPLEMENTATION.md)
+- [백엔드 로드맵](../../../ASAK/docs/product_bible/11_Backend_Implementation/00-plan/BACKEND_IMPLEMENTATION_ROADMAP.md)
+- [예외 구현 기준](../../../ASAK/docs/product_bible/11_Backend_Implementation/01-common/EXCEPTION_IMPLEMENTATION.md)

@@ -47,5 +47,5 @@
 - [ASAK-back 구현 계획](../../IMPLEMENTATION_PLAN.md)
 - [정본 계약 결정](../../../ASAK/docs/governance/canonical-contract-decisions-2026-07-16.md)
 - [Product Bible 백엔드 구현 허브](../../../ASAK/docs/product_bible/11_Backend_Implementation/README.md)
-- [정본 우선순위](../../../ASAK/docs/product_bible/01_Foundation/docs/00-product-bible/CANONICAL_SOURCE.md)
+- [정본 우선순위](../../../ASAK/docs/product_bible/01_Foundation/CANONICAL_SOURCE.md)
 - [Bruno API 컬렉션](../../api/README.md)

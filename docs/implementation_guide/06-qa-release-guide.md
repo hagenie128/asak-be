@@ -40,6 +40,6 @@
 
 ## 정본 링크
 
-- [API smoke checklist](../../../ASAK/docs/product_bible/11_Backend_Implementation/docs/12-backend-implementation/08-testing/API_SMOKE_CHECKLIST.md)
-- [백엔드 테스트 계획](../../../ASAK/docs/product_bible/11_Backend_Implementation/docs/12-backend-implementation/08-testing/BACKEND_TEST_PLAN.md)
-- [API 계약 테스트](../../../ASAK/docs/product_bible/09_QA_Bible/docs/10-qa/03-api-backend/API_CONTRACT_TESTS.md)
+- [API smoke checklist](../../../ASAK/docs/product_bible/11_Backend_Implementation/08-testing/API_SMOKE_CHECKLIST.md)
+- [백엔드 테스트 계획](../../../ASAK/docs/product_bible/11_Backend_Implementation/08-testing/BACKEND_TEST_PLAN.md)
+- [API 계약 테스트](../../../ASAK/docs/product_bible/09_QA_Bible/03-api-backend/API_CONTRACT_TESTS.md)
