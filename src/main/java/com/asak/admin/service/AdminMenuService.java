@@ -13,8 +13,6 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.asak.admin.dto.request.CreateMenuIngredientRequest;
-import com.asak.admin.dto.request.CreateMenuOptionGroupRequest;
-import com.asak.admin.dto.request.CreateMenuOptionItemRequest;
 import com.asak.admin.dto.request.CreateMenuNutritionRequest;
 import com.asak.admin.dto.request.CreateMenuRequest;
 import com.asak.admin.dto.request.CreateMenuTagRequest;
@@ -84,9 +82,8 @@ public class AdminMenuService {
     if (inserted <= 0 || generatedId == null) {
       throw new CustomException(ErrorCode.MENU_INSERT_FAILED);
     }
-    
+
     Long menuId = ((Number) generatedId).longValue();
-    adminOptionService.insertOptionGroups(menuId, request.getOptionGroups());
     insertChildren(menuId, request);
 
     MenuDetailResponse created = adminMenuMapper.getMenuDetail(menuId);
@@ -117,9 +114,7 @@ public class AdminMenuService {
       adminMenuMapper.deleteMenuIngredients(menuId);
       insertIngredients(menuId, request.getIngredients());
     }
-    if (!adminOptionService.existsOptionGroup(request.getOptionGroups().stream().map(CreateMenuOptionGroupRequest::getOptionGroupId).toList())) {
-      adminMenuMapper.deleteMenuOptOverrides(menuId);
-      adminMenuMapper.deleteMenuOptionGroups(menuId);
+    if (request.getOptionGroups() != null) {
       adminOptionService.replaceMenuOptionGroups(menuId, request.getOptionGroups());
     }
     if (request.getNutrition() != null) {
@@ -178,7 +173,7 @@ public class AdminMenuService {
 
   private void insertChildren(Long menuId, CreateMenuRequest request) {
     insertIngredients(menuId, request.getIngredients());
-    insertOptionGroups(menuId, request.getOptionGroups());
+    adminOptionService.insertOptionGroups(menuId, request.getOptionGroups());
     insertNutrition(menuId, request.getNutrition());
     insertTags(menuId, request.getTags());
   }
@@ -239,67 +234,6 @@ public class AdminMenuService {
     return upper;
   }
 
-  private void insertOptionGroups(Long menuId, List<CreateMenuOptionGroupRequest> optionGroups) {
-    if (optionGroups == null || optionGroups.isEmpty()) {
-      return;
-    }
-
-    int sortNo = 1;
-    for (CreateMenuOptionGroupRequest group : optionGroups) {
-      if (group.getOptionGroupId() == null) {
-        throw new CustomException(ErrorCode.MENU_CREATE_INVALID);
-      }
-      Long policyId = adminMenuMapper.findOptPolicyId(group.getOptionGroupId());
-      if (policyId == null) {
-        throw new CustomException(ErrorCode.MENU_CREATE_INVALID);
-      }
-      Map<String, Object> row = new HashMap<>();
-      row.put("menuId", menuId);
-      row.put("policyId", policyId);
-      row.put("sortNo", sortNo++);
-      row.put("required", Boolean.TRUE.equals(group.getIsRequired()) ? 1 : 0);
-      adminMenuMapper.insertMenuOptPolicy(row);
-
-      Long recommendedOptionItemId = resolveRecommendedOptionItemId(group);
-      if (recommendedOptionItemId != null) {
-        insertRecommendedOverrides(menuId, policyId, recommendedOptionItemId);
-      }
-    }
-  }
-
-  private Long resolveRecommendedOptionItemId(CreateMenuOptionGroupRequest group) {
-    if (group.getRecommendedOptionItemId() != null) {
-      return group.getRecommendedOptionItemId();
-    }
-    if (group.getItems() == null) {
-      return null;
-    }
-    return group.getItems().stream()
-        .filter(item -> Boolean.TRUE.equals(item.getIsRecommended()))
-        .map(CreateMenuOptionItemRequest::getOptionItemId)
-        .filter(id -> id != null)
-        .findFirst()
-        .orElse(null);
-  }
-
-  private void insertRecommendedOverrides(Long menuId, Long policyId, Long recommendedOptionItemId) {
-    List<Long> optionItemIds = adminMenuMapper.findOptItemIdsByPolicyId(policyId);
-    if (optionItemIds == null || optionItemIds.isEmpty()) {
-      throw new CustomException(ErrorCode.MENU_CREATE_INVALID);
-    }
-    if (!optionItemIds.contains(recommendedOptionItemId)) {
-      throw new CustomException(ErrorCode.MENU_CREATE_INVALID);
-    }
-
-    for (Long optionItemId : optionItemIds) {
-      Map<String, Object> override = new HashMap<>();
-      override.put("menuId", menuId);
-      override.put("optionItemId", optionItemId);
-      override.put("recommended", optionItemId.equals(recommendedOptionItemId) ? 1 : 0);
-      adminMenuMapper.upsertMenuOptOverride(override);
-    }
-  }
-
   private void insertNutrition(Long menuId, CreateMenuNutritionRequest nutrition) {
     if (nutrition == null) {
       return;
@@ -337,10 +271,6 @@ public class AdminMenuService {
       row.put("tagId", tagId);
       adminMenuMapper.insertMenuTag(row);
     }
-  }
-
-  public boolean getOptionGroupDetail(Long optionGroupId) {
-    return adminMenuMapper.getOptionGroupDetail(optionGroupId) != null;
   }
 
   public boolean getIngredientDetail(Long ingredientId) {

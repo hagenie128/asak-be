@@ -32,15 +32,7 @@ public interface AdminMenuMapper {
 
   Long findActiveMediaAssetIdByUrl(@Param("url") String url);
 
-  Long findOptPolicyId(@Param("optionGroupId") Long optionGroupId);
-
-  List<Long> findOptItemIdsByPolicyId(@Param("policyId") Long policyId);
-
   int insertMenuIngredient(Map<String, Object> map);
-
-  int insertMenuOptPolicy(Map<String, Object> map);
-
-  int upsertMenuOptOverride(Map<String, Object> map);
 
   int insertMenuNutrition(Map<String, Object> map);
 
@@ -53,10 +45,6 @@ public interface AdminMenuMapper {
 
   int deleteMenuIngredients(Long menuId);
 
-  int deleteMenuOptionGroups(Long menuId);
-
-  int deleteMenuOptOverrides(Long menuId);
-
   int deleteMenuNutrition(Long menuId);
 
   int deleteMenuTags(Long menuId);
@@ -66,6 +54,4 @@ public interface AdminMenuMapper {
   Object getCategoryById(Long categoryId);
 
   Object getIngredientDetail(Long ingredientId);
-
-  Object getOptionGroupDetail(Long optionGroupId);
 }

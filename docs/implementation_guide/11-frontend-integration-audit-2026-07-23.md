@@ -55,6 +55,6 @@ Kiosk `EmptyState`, `ErrorMessage`, 수량 제한 toast 문구는 현재 화면�
 - `ASAK-Kiosk/src/adapters/orderAdapter.js`, `constants/status.js`, `types/order.js`, `types/payment.js`, `utils/quantityLimits.js`, `pages/kiosk/PaymentPage.jsx`
 - [정본 API 정리](../../../ASAK/docs/governance/devcopilot-api-alignment-2026-07-23.md)
 - [정본 계약 결정](../../../ASAK/docs/governance/canonical-contract-decisions-2026-07-16.md)
-- [주문 아키텍처](../../../ASAK/docs/product_bible/02_Order_Cart_Payment/docs/09-features/order/ORDER_ARCHITECTURE.md)
+- [주문 아키텍처](../../../ASAK/docs/product_bible/02_Order_Cart_Payment/order/ORDER_ARCHITECTURE.md)
 - [Admin mock 필드 사전](../../../ASAK-Admin/public/mocks/README.md)
 - [ASAK-back 구현 계획](../../IMPLEMENTATION_PLAN.md)

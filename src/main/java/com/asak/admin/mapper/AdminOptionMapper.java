@@ -3,20 +3,25 @@ package com.asak.admin.mapper;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.ibatis.annotations.Param;
+
+import com.asak.admin.dto.response.OptionGroupSummaryResponse;
+
 public interface AdminOptionMapper {
-    List<AdminOptionGroupResponse> getOptionGroups(); // 신규: 목록 조회
 
-    AdminOptionGroupResponse getOptionGroupDetail(Long optionGroupId); // 기존 existence-check(Object)를 DTO로 승격
+  List<OptionGroupSummaryResponse> getOptionGroups();
 
-    Long findOptPolicyId(Long optionGroupId);
+  OptionGroupSummaryResponse getOptionGroupDetail(@Param("optionGroupId") Long optionGroupId);
 
-    List<Long> findOptItemIdsByPolicyId(Long policyId);
+  Long findOptPolicyId(@Param("optionGroupId") Long optionGroupId);
 
-    int insertMenuOptPolicy(Map<String, Object> map);
+  List<Long> findOptItemIdsByPolicyId(@Param("policyId") Long policyId);
 
-    int upsertMenuOptOverride(Map<String, Object> map);
+  int insertMenuOptPolicy(Map<String, Object> map);
 
-    int deleteMenuOptOverrides(Long menuId);
+  int upsertMenuOptOverride(Map<String, Object> map);
 
-    int deleteMenuOptionGroups(Long menuId);
+  int deleteMenuOptOverrides(@Param("menuId") Long menuId);
+
+  int deleteMenuOptionGroups(@Param("menuId") Long menuId);
 }

@@ -10,9 +10,13 @@
 
 1. Bruno에서 이 `api` 폴더를 Collection으로 연다.
 2. `Local` 환경을 선택하고 `baseUrl`을 실행 중인 백엔드 주소로 맞춘다.
-3. `GET /api/health`, Kiosk 메뉴·장바구니 검증·주문 생성, Admin 주문·메뉴(조회·등록·수정·삭제·재료·카테고리)에는
-   Controller 매핑이 있다. 다만 주문 생성은 저장/응답 조립이 아직 완료되지 않았으므로
-   요청 body 검토용으로만 사용한다. 그 밖의 요청은 실행 전 Controller mapping을 확인한다.
+3. Controller 매핑이 있는 요청:
+   - 공통: `GET /api/health`
+   - 키오스크: API-001~006, API-014 (카테고리·메뉴·장바구니 검증·주문·결제수단·결제 승인)
+   - 관리자: API-007/008/011~013/021~024 (주문·메뉴) + 메뉴 삭제·카테고리·재료 보조 endpoint
+   주문 생성은 헤더·품목·옵션·제외 재료 저장과 응답 조립까지 구현되어 있다.
+   품절(API-009/010)·결제수단 설정(API-015/016)·매출(API-017~019)·대시보드(API-020)는 아직 비어 있다.
+   현재 작업 트리의 옵션 그룹 구현은 빌드 미검증일 수 있으므로 요청 전 Controller mapping을 다시 확인한다.
 
 `Local` 환경에는 검토용 ID가 들어 있다. 실제 테스트 데이터의 메뉴·주문·결제수단 ID와
 다르면 해당 환경 변수만 바꾼다. 결제수단 기본값 `methodId: 10828`은 `CARD`이며 화면 이름은
@@ -33,16 +37,18 @@ JSON body는 camelCase만 사용한다.
 
 ## Admin 메뉴 순서 (05–12)
 
-| seq | 파일 | 메서드 |
-| --- | --- | --- |
-| 05 | menu-list | GET |
-| 06 | menu-detail | GET |
-| 07 | create-menu | POST |
-| 08 | update-menu | PATCH |
-| 09 | delete-menu | DELETE (자식 cascade) |
-| 10 | menu-list-total | GET |
-| 11 | category-list | GET |
-| 12 | ingredient-list | GET |
+| seq | 파일 | API | 메서드 |
+| --- | --- | --- | --- |
+| 05 | menu-list | API-011 | GET |
+| 06 | menu-detail | API-023 | GET |
+| 07 | create-menu | API-012 | POST |
+| 08 | update-menu | API-013 | PATCH |
+| 09 | delete-menu | — (보조) | DELETE (자식 cascade) |
+| 10 | menu-list-total | API-011 | GET |
+| 11 | category-list | — (보조) | GET |
+| 12 | ingredient-list | — (보조) | GET |
+
+번호 정본: `../IMPLEMENTATION_PLAN.md` §4 · 루트 `../README.md` API 표.
 
 ## 주의
 

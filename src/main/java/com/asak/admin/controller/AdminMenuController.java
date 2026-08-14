@@ -16,6 +16,7 @@ import com.asak.admin.dto.response.AdminCategoryResponse;
 import com.asak.admin.dto.response.MenuDetailResponse;
 import com.asak.admin.dto.response.MenuListResponse;
 import com.asak.admin.service.AdminMenuService;
+import com.asak.admin.service.AdminOptionService;
 import com.asak.common.exception.CustomException;
 import com.asak.common.exception.ErrorCode;
 import com.asak.common.response.ApiResponse;
@@ -29,9 +30,11 @@ import jakarta.validation.Valid;
 public class AdminMenuController {
 
   private final AdminMenuService adminMenuService;
+  private final AdminOptionService adminOptionService;
 
-  public AdminMenuController(AdminMenuService adminMenuService) {
+  public AdminMenuController(AdminMenuService adminMenuService, AdminOptionService adminOptionService) {
     this.adminMenuService = adminMenuService;
+    this.adminOptionService = adminOptionService;
   }
 
   // {{baseUrl}}/api/admin/menus?categoryId={{categoryId}}&keyword=&isSoldOut=false&tagId=&page=0&size=20&sort=name,asc
@@ -92,7 +95,7 @@ public class AdminMenuController {
     }
     if (request.getOptionGroups() != null && request.getOptionGroups().size() > 0) {
       for (var group : request.getOptionGroups()) {
-        if (group.getOptionGroupId() == null || !adminMenuService.getOptionGroupDetail(group.getOptionGroupId())) {
+        if (group.getOptionGroupId() == null || !adminOptionService.existsOptionGroup(group.getOptionGroupId())) {
           return ApiResponse.error(
               ErrorCode.MENU_OPTION_GROUP_NOT_FOUND);
         }

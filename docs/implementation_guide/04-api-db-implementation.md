@@ -28,8 +28,8 @@
 이 항목은 새 정책이 아니라 다음 정본을 구현 단계에 맞춰 연결한 것이다.
 
 - [DevCopilot API 정리 기준](../../../ASAK/docs/governance/devcopilot-api-alignment-2026-07-23.md): 이 저장소에 적용할 `{ success, status, code, message, data }` 계약과 현재 API 목록
-- [예외 구현 기준](../../../ASAK/docs/product_bible/11_Backend_Implementation/docs/12-backend-implementation/01-common/EXCEPTION_IMPLEMENTATION.md): `ErrorCode`, `BusinessException`, `GlobalExceptionHandler`의 구현 골격
-- [검증·예외 규칙](../../../ASAK/docs/product_bible/06_Engineering_Bible/docs/03-backend/VALIDATION_AND_EXCEPTION_RULES.md): Bean Validation/Service 검증/DB 제약의 역할과 400·404·409 기준
+- [예외 구현 기준](../../../ASAK/docs/product_bible/11_Backend_Implementation/01-common/EXCEPTION_IMPLEMENTATION.md): `ErrorCode`, `BusinessException`, `GlobalExceptionHandler`의 구현 골격
+- [검증·예외 규칙](../../../ASAK/docs/product_bible/06_Engineering_Bible/03-backend/VALIDATION_AND_EXCEPTION_RULES.md): Bean Validation/Service 검증/DB 제약의 역할과 400·404·409 기준
 
 현재 `ApiResponse`, `GlobalExceptionHandler`, `ErrorCode`는 소스에 클래스 또는 필드 골격만 있으므로, 관리자 API를 만들기 전에 위 세 문서를 기준으로 공통 기반을 먼저 완성한다. `API_DESIGN_RULES.md`의 3필드 예시는 2026-07-23 정렬 문서의 5필드 계약과 다르므로, 구현 시에는 후자를 적용하고 차이를 남긴다.
 
@@ -73,7 +73,7 @@
 ## 정본 링크
 
 - [API 계약 Bruno 안내](../../api/README.md)
-- [메뉴 API 계약](../../../ASAK/docs/product_bible/03_Menu_Inventory_SoldOut/docs/09-features/menu/MENU_API_CONTRACT.md)
-- [주문 API 계약](../../../ASAK/docs/product_bible/02_Order_Cart_Payment/docs/09-features/order/ORDER_API_CONTRACT.md)
-- [결제 API 계약](../../../ASAK/docs/product_bible/02_Order_Cart_Payment/docs/09-features/payment/PAYMENT_API_CONTRACT.md)
+- [메뉴 API 계약](../../../ASAK/docs/product_bible/03_Menu_Inventory_SoldOut/menu/MENU_API_CONTRACT.md)
+- [주문 API 계약](../../../ASAK/docs/product_bible/02_Order_Cart_Payment/order/ORDER_API_CONTRACT.md)
+- [결제 API 계약](../../../ASAK/docs/product_bible/02_Order_Cart_Payment/payment/PAYMENT_API_CONTRACT.md)
 - [정본 계약 결정](../../../ASAK/docs/governance/canonical-contract-decisions-2026-07-16.md)

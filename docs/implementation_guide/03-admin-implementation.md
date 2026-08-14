@@ -53,7 +53,7 @@ Admin mock의 메뉴 목록에는 `isActive`가 있지만 이는 화면 mock 필
 ## 정본 링크
 
 - [백엔드 정본 참조 팩](12-canonical-reference-pack.md)
-- [관리자 주문 구현 기준](../../../ASAK/docs/product_bible/11_Backend_Implementation/docs/12-backend-implementation/05-admin/ADMIN_ORDER_IMPLEMENTATION.md)
-- [품절 구현 기준](../../../ASAK/docs/product_bible/11_Backend_Implementation/docs/12-backend-implementation/05-admin/SOLD_OUT_IMPLEMENTATION.md)
-- [매출 구현 기준](../../../ASAK/docs/product_bible/11_Backend_Implementation/docs/12-backend-implementation/06-sales/SALES_IMPLEMENTATION.md)
+- [관리자 주문 구현 기준](../../../ASAK/docs/product_bible/11_Backend_Implementation/05-admin/ADMIN_ORDER_IMPLEMENTATION.md)
+- [품절 구현 기준](../../../ASAK/docs/product_bible/11_Backend_Implementation/05-admin/SOLD_OUT_IMPLEMENTATION.md)
+- [매출 구현 기준](../../../ASAK/docs/product_bible/11_Backend_Implementation/06-sales/SALES_IMPLEMENTATION.md)
 - [Admin mock 필드 사전](../../../ASAK-Admin/public/mocks/README.md)
