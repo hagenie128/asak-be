@@ -10,7 +10,10 @@
             method_code.id as methodId,
             method_code.code as methodCode,
             method_config.name as methodName,
-            method_config.active as isEnabled,
+            method_config.image_asset_id as imageAssetId,
+            media_asset.url as imageUrl,
+            method_config.description as description,
+            method_config.active as active,
             method_config.sort_no as sortOrder
 
         from common_code method_code
@@ -18,6 +21,8 @@
         on method_code.code_grp_id = method_group.id
         join pay_method_cfg method_config
         on method_config.method_id = method_code.id 
+        join media_asset media_asset
+        on method_config.image_asset_id = media_asset.id
 
         where method_group.group_code = 'PAYMENT_METHOD'
         order by method_config.sort_no asc
