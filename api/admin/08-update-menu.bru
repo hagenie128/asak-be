@@ -19,7 +19,6 @@ body:json {
     "categoryId": {{categoryId}},
     "name": "Bruno Sample Menu Updated",
     "price": 9200,
-    "imageUrl": "/assets/menu/sample.png",
     "description": "Bruno contract sample menu (PATCH)",
     "ingredients": [
       {
@@ -73,5 +72,6 @@ docs {
   부분 갱신:
   - ingredients / optionGroups / nutrition / tags 가 null 이 아니면
     해당 자식 테이블을 삭제 후 재삽입한다.
-  - optionGroups 갱신 시 menu_opt_override 도 함께 선삭제한다.
+  - optionGroups 는 AdminOptionService.replaceMenuOptionGroups 만 사용한다.
+  - imageUrl 은 media_asset.url 에 있을 때만. 없으면 생략. mediaAssetId 우선.
 }

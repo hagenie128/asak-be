@@ -13,8 +13,7 @@ get {
 docs {
   # API-014
   GET /api/kiosk/payment-methods
-  PAYMENT_API_CONTRACT.md
-  DB: pay_method_cfg + common_code (뷰 아님 — view.sql [17] 인라인)
-  필드: methodCode, methodName, isEnabled, sortOrder
-  CARD에 삼성페이 포함. KAKAO_PAY/NAVER_PAY는 isEnabled=false여도 목록 노출
+  응답 code: KIOSK_PAYMENT_METHOD_LIST_SUCCESS
+  data.methods[]: methodId, methodCode, methodName, imageAssetId, imageUrl, description, active, sortOrder
+  DB pay_method_cfg.active 를 API active 로 그대로 노출. 구 계약명 isEnabled 폐기.
 }

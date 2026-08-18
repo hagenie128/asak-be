@@ -12,8 +12,10 @@ get {
 
 docs {
   # Health
-  IMPLEMENTATION_PLAN §6 공통 smoke. 현재 유일하게 Controller 매핑됨.
+  GET /api/health
   응답 code: HEALTH_OK
+  data: { service: "ASAK-backend" }
+  성공 assert는 이 요청만 유지한다.
 }
 
 tests {

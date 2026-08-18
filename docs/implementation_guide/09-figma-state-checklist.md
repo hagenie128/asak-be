@@ -11,7 +11,7 @@
 | Not found | 404 + target code | 존재하지 않는 menuId/orderId |
 | Conflict | 409 + 재시도/복구 정보 | 품절, 가격 변경, 상태 전이, 중복 결제 |
 | Server error | 500 + 안전한 code/message | DB/예상 밖 오류, 민감 정보 미노출 |
-| Disabled | 결제수단/메뉴 상태 data | `isEnabled: false`, `isSoldOut: true` |
+| Disabled | 결제수단/메뉴 상태 data | `active: false`, `isSoldOut: true` |
 
 ## 화면별 우선 확인
 

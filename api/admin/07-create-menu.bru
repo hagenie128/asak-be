@@ -19,7 +19,6 @@ body:json {
     "categoryId": {{categoryId}},
     "name": "Bruno Sample Menu",
     "price": 8900,
-    "imageUrl": "/assets/menu/sample.png",
     "description": "Bruno contract sample menu",
     "ingredients": [
       {
@@ -82,6 +81,16 @@ docs {
   추천 옵션:
   - recommendedOptionItemId 우선
   - 없으면 items[].isRecommended == true 인 optionItemId 사용
+
+  이미지:
+  - mediaAssetId 우선
+  - imageUrl 은 media_asset.url 에 있을 때만 허용. 없으면 생략
+
+  검증:
+  - categoryId 는 getCategoryById (active=1)
+  - optionGroupId 는 AdminOptionService.existsOptionGroup (opt_group 또는 opt_policy)
+  - ingredientId 는 getIngredientDetail
+  - unit 은 UNIT_TYPE 코드 (G). 표시명(그램) 금지
 
   Local 기본값:
   - optionGroupId 240 (드레싱 선택)

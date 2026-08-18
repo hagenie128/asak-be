@@ -13,5 +13,6 @@ get {
 docs {
   # API-001
   GET /api/kiosk/categories
-  DB: category (sort_order, active)
+  응답 code: OK (ApiResponse.success(data) 기본값)
+  data: [{ categoryId, categoryName, sortOrder, isActive }]
 }

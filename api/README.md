@@ -1,26 +1,43 @@
 # ASAK Bruno API Contract Collection
 
-> Status: CONTRACT / PARTIALLY_IMPLEMENTED (2026-08-11)
-> 경로·요청 본문 정본: `IMPLEMENTATION_PLAN.md` + Product Bible API Contract  
-> DB 읽기 모델: `docs/view.sql` · 위키 `db-view-definition.md`
+> Status: PARTIALLY_IMPLEMENTED (2026-08-18)
+> 경로·요청 본문 정본: 현재 Controller · DTO (`ASAK-back/src`)
+> 비교용 계약: `IMPLEMENTATION_PLAN.md` · Product Bible API Contract
 
-이 컬렉션은 백엔드 구현 전·중 API 계약을 Bruno에서 검토·호출하기 위한 요청 모음이다.
+Bruno `api` 폴더는 실행 중인 백엔드와 맞춰 호출하기 위한 요청 모음이다.
+구현된 endpoint는 Controller 메서드가 있는 것만 해당한다. `SPEC_ONLY`는 클래스 `@RequestMapping`만 있고 메서드가 없다 (호출 시 404).
 
 ## 사용 방법
 
 1. Bruno에서 이 `api` 폴더를 Collection으로 연다.
 2. `Local` 환경을 선택하고 `baseUrl`을 실행 중인 백엔드 주소로 맞춘다.
-3. Controller 매핑이 있는 요청:
-   - 공통: `GET /api/health`
-   - 키오스크: API-001~006, API-014 (카테고리·메뉴·장바구니 검증·주문·결제수단·결제 승인)
-   - 관리자: API-007/008/011~013/021~024 (주문·메뉴) + 메뉴 삭제·카테고리·재료 보조 endpoint
-   주문 생성은 헤더·품목·옵션·제외 재료 저장과 응답 조립까지 구현되어 있다.
-   품절(API-009/010)·결제수단 설정(API-015/016)·매출(API-017~019)·대시보드(API-020)는 아직 비어 있다.
-   현재 작업 트리의 옵션 그룹은 `GET /api/admin/opts/groups`, `GET /api/admin/opts/{optionGroupId}`가 Controller에 있다.
+3. `Local` 환경의 ID(`menuId`, `orderId` 등)는 실제 데이터와 다르면 환경 변수만 바꾼다.
 
-`Local` 환경에는 검토용 ID가 들어 있다. 실제 테스트 데이터의 메뉴·주문·결제수단 ID와
-다르면 해당 환경 변수만 바꾼다. 결제수단 기본값 `methodId: 10828`은 `CARD`이며 화면 이름은
-`카드·삼성페이`다.
+`methodId: 10828`은 키오스크 결제수단 `CARD`(화면 이름 `카드·삼성페이`)다.
+
+## 구현 상태 (Controller 기준)
+
+| 구분 | path | 상태 |
+| --- | --- | --- |
+| Health | `GET /api/health` | 구현. code `HEALTH_OK` |
+| 키오스크 카테고리 | `GET /api/kiosk/categories` | 구현. code `OK` |
+| 키오스크 메뉴 목록 | `GET /api/kiosk/menuList` | 구현. code `OK`. categoryId query 없음 |
+| 키오스크 메뉴 상세 | `GET /api/kiosk/menuDetail/{menuId}` | 구현. code `OK` |
+| 장바구니 검증 | `POST /api/kiosk/cart/validate` | 구현. code `OK` |
+| 주문 생성 | `POST /api/kiosk/orders` | 구현. code `OK`. data.status = OrderStatus |
+| 결제수단 목록 | `GET /api/kiosk/payment-methods` | 구현. code `KIOSK_PAYMENT_METHOD_LIST_SUCCESS` |
+| 결제 승인 | `POST /api/kiosk/payments` | 구현. code `KIOSK_PAYMENT_APPROVED` |
+| 관리자 주문 목록 | `GET /api/admin/orders` | 구현. code `ADMIN_ORDER_LIST_SUCCESS` |
+| 관리자 주문 상세 | `GET /api/admin/orders/{orderId}` | 구현. code `ADMIN_ORDER_DETAIL_SUCCESS` |
+| Live 주문 | `GET /api/admin/orders/live` | 구현. code `ADMIN_LIVE_ORDERS_SUCCESS` |
+| 주문 상태 변경 | `PATCH /api/admin/orders/{orderId}/{status}` | 구현. code `ADMIN_ORDER_STATUS_CHANGE_SUCCESS` |
+| 주문 취소 | `PATCH /api/admin/orders/{orderId}/cancel` | 구현. code `ADMIN_ORDER_CANCEL_SUCCESS` |
+| 관리자 메뉴 | `/api/admin/menus` CRUD·카테고리·재료 | 구현 |
+| 옵션 그룹 | `GET /api/admin/opts/groups`, `GET /api/admin/opts/{optionGroupId}` | 구현 |
+| 품절 | `/api/admin/soldOut` | SPEC_ONLY (TODO-040) |
+| 관리자 결제수단 | `/api/admin/paymentMethods` | SPEC_ONLY (TODO-044) |
+| 매출·대시보드 | `/api/admin/sales/**`, `/api/admin/dashboard` | SPEC_ONLY (TODO-048~056) |
+| 관리자 로그인 | `POST /api/admin/login` | SPEC_ONLY (TODO-060) |
 
 ## 요청 파일 형식
 
@@ -35,47 +52,68 @@
 파일명: `{seq}-{kebab-name}.bru`
 JSON body는 camelCase만 사용한다.
 
-## Admin 메뉴 순서 (05–12)
+## 파일 목록
 
-| seq | 파일 | API | 메서드 |
-| --- | --- | --- | --- |
-| 05 | menu-list | API-011 | GET |
-| 06 | menu-detail | API-023 | GET |
-| 07 | create-menu | API-012 | POST |
-| 08 | update-menu | API-013 | PATCH |
-| 09 | delete-menu | — (보조) | DELETE (자식 cascade) |
-| 10 | menu-list-total | API-011 | GET |
-| 11 | category-list | — (보조) | GET |
-| 12 | ingredient-list | — (보조) | GET |
+### health
 
-번호 정본: `../IMPLEMENTATION_PLAN.md` §4 · 루트 `../README.md` API 표.
+| seq | 파일 | 메서드 |
+| --- | --- | --- |
+| 1 | health-check | GET /api/health |
+
+### kiosk
+
+| seq | 파일 | 메서드 |
+| --- | --- | --- |
+| 00 | categories | GET /api/kiosk/categories |
+| 01 | menu-list | GET /api/kiosk/menuList |
+| 02 | menu-detail | GET /api/kiosk/menuDetail/{menuId} |
+| 03 | cart-validate | POST /api/kiosk/cart/validate |
+| 04 | create-order | POST /api/kiosk/orders |
+| 05 | payment-methods | GET /api/kiosk/payment-methods |
+| 06 | start-payment | POST /api/kiosk/payments |
+
+### admin
+
+| seq | 파일 | 메서드 |
+| --- | --- | --- |
+| 01 | live-orders | GET /api/admin/orders/live |
+| 02 | order-list | GET /api/admin/orders |
+| 03 | order-detail | GET /api/admin/orders/{orderId} |
+| 04 | order-status | PATCH /api/admin/orders/{orderId}/{status} |
+| 05 | menu-list | GET /api/admin/menus |
+| 06 | menu-detail | GET /api/admin/menus/{menuId} |
+| 07 | create-menu | POST /api/admin/menus |
+| 08 | update-menu | PATCH /api/admin/menus/{menuId} |
+| 09 | delete-menu | DELETE /api/admin/menus/{menuId} |
+| 10 | menu-list-total | GET /api/admin/menus (필터 없음) |
+| 11 | category-list | GET /api/admin/menus/categories |
+| 12 | ingredient-list | GET /api/admin/menus/ingredients |
+| 13 | sold-out-list | GET /api/admin/soldOut (SPEC_ONLY) |
+| 14 | update-sold-out | PATCH /api/admin/soldOut (SPEC_ONLY) |
+| 15 | payment-methods | GET /api/admin/paymentMethods (SPEC_ONLY) |
+| 16 | update-payment-method | PATCH /api/admin/paymentMethods/{methodId} (SPEC_ONLY) |
+| 17 | dashboard | GET /api/admin/dashboard (SPEC_ONLY) |
+| 18 | sales-summary | GET /api/admin/sales/summary (SPEC_ONLY) |
+| 19 | sales-monthly | GET /api/admin/sales/monthly (SPEC_ONLY) |
+| 20 | sales-daily | GET /api/admin/sales/daily (SPEC_ONLY) |
+| 21 | cancel-order | PATCH /api/admin/orders/{orderId}/cancel |
+| 22 | option-group-list | GET /api/admin/opts/groups |
+| 23 | option-group-detail | GET /api/admin/opts/{optionGroupId} |
+| 24 | login | POST /api/admin/login (SPEC_ONLY) |
 
 ## 주의
 
-- 성공 응답 assert는 **health**에만 둔다. 나머지 API는 구현 완료 후 실제 계약 코드에 맞춰 추가한다.
-- `KAKAO_PAY`, `NAVER_PAY`는 목록에 보이지만 `isEnabled: false`다. 결제 승인은 기본 `CARD`를 사용한다.
-- 주문/장바구니 요청의 옵션은 `items[].optionItems[]`이며, 각 항목은
-  `optionItemId`, `quantity`를 가진다. 재료 제외는 `excludedIngredientIds`다.
-- 금액 응답은 `totalAmount`, 장바구니 항목 금액은 `unitAmount`를 사용한다.
-  현재 주문 생성 DTO의 상태 필드는 `data.status`이며, 목록·상세의 상태 필드는
-  `orderStatus`다. 외부 envelope의 HTTP 상태값 `status`와 혼동하지 않는다.
+- 성공 응답 assert는 **health**에만 둔다.
+- `KAKAO_PAY`, `NAVER_PAY`는 키오스크 목록에 보이지만 `active: false`다. 결제 승인은 기본 `CARD`를 사용한다. 구 계약명 `isEnabled`는 폐기.
+- 주문/장바구니 요청의 옵션은 `items[].optionItems[]`이며, 각 항목은 `optionItemId`, `quantity`를 가진다. 재료 제외는 `excludedIngredientIds`다.
+- 금액 응답은 `totalAmount`. 장바구니 항목 단가는 현재 DTO가 `unitPrice`다.
+- 주문 생성 DTO의 상태 필드는 `data.status`다. 관리자 목록·상세·Live는 `orderStatus`다. envelope의 HTTP `status`와 혼동하지 않는다.
+- 키오스크 카테고리·메뉴·장바구니·주문 생성은 `ApiResponse.success(data)`라서 code가 `OK`다. 결제·관리자 API는 API별 문자열 code를 쓴다.
+- 메뉴 등록 `unit`은 `G`/`ML` 같은 UNIT_TYPE 코드다. 표시명(그램)은 쓰지 않는다.
+- 메뉴 `imageUrl`은 `media_asset`에 있는 URL만 허용한다. 없으면 생략하고 `mediaAssetId`를 우선한다.
+- 재료 목록 행 식별자는 `id`다 (`ingredientId` 아님).
+- 메뉴 삭제는 soft delete (`deleted_at`). `ing` 마스터는 지우지 않는다.
 - wiki `rest-api-spec.md` 정본 path는 `/api/kiosk/**`, `/api/admin/**`이다. 구 `/api/menus` 표는 폐기.
-- 메뉴 삭제 시 `ing` 마스터는 지우지 않는다. `order_item`이 있으면 `MENU_DELETE_FAILED`다.
-
-## API ↔ DB 뷰 매핑 (구현 시)
-
-| API | 주요 뷰 / 읽기 모델 |
-| --- | --- |
-| 메뉴 목록 | `vw_menu_list` (+ `vw_menu_availability`) |
-| 메뉴 상세 | `vw_menu_ing_json`, `vw_menu_opt_policy_json` (+ [15] allergens 헤더) |
-| 결제 승인 | `vw_payment_result` |
-| 결제수단 목록 | 인라인 (`view.sql` [17] · `pay_method_cfg`) |
-| 품절 관리 | `vw_soldout_catalog` · 영향 메뉴 수는 인라인 ([18]) |
-| 주문 목록 | `vw_order_list_summary` |
-| 주문 상세 | `vw_order_summary`, `vw_order_item_full` |
-| Live 보드 | `vw_order_live`, `vw_order_item_base_dressing`, `vw_order_item_tag` |
-| 대시보드 | `vw_order_status_summary`, `vw_sales_daily`, `vw_top_menu_daily` |
-| 매출 | `vw_sales_daily`, `vw_sales_hourly`, `vw_top_menu_*` |
 
 ## 기준 문서
 
@@ -83,8 +121,7 @@ JSON body는 camelCase만 사용한다.
 - `ASAK/docs/governance/canonical-contract-decisions-2026-07-16.md`
 - `ASAK/docs/governance/devcopilot-api-alignment-2026-07-23.md`
 - `ASAK/docs/product_bible/**/*API*.md`
-- `ASAK/docs/wiki/db-view-definition.md`
-- `ASAK-back/docs/view.sql`
+- `ASAK/docs/wiki/rest-api-spec.md`
 
-모든 응답 계약은 `{ success, status, code, message, data }` 형식을 따른다.  
-`code`는 API별 문자열이다. (예: `HEALTH_OK`, `ADMIN_MENU_LIST_SUCCESS`)
+모든 응답 계약은 `{ success, status, code, message, data }` 형식을 따른다.
+`code`는 API별 문자열이다. (예: `HEALTH_OK`, `ADMIN_MENU_LIST_SUCCESS`, 키오스크 일부는 `OK`)

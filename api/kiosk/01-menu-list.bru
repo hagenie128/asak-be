@@ -5,15 +5,16 @@ meta {
 }
 
 get {
-  url: {{baseUrl}}/api/kiosk/menuList?categoryId={{categoryId}}
+  url: {{baseUrl}}/api/kiosk/menuList
   body: none
   auth: none
 }
 
 docs {
   # API-002
-  GET /api/kiosk/menuList?categoryId=
-  MENU_API_CONTRACT.md
-  DB view: vw_menu_list (+ vw_menu_availability)
-  응답 필드: categoryId, isSoldOut, hasSoldOutIngredient, isOrderable, baseKcal
+  GET /api/kiosk/menuList
+  UserMenuController 는 categoryId query 를 받지 않는다. 전체 목록 + categories 를 함께 반환.
+  응답 code: OK (ApiResponse.success(data) 기본값)
+  data: { categories, menus[] }
+  menus[]: menuId, categoryId, name, price, imageUrl, kcal, isSoldOut, isOrderable
 }

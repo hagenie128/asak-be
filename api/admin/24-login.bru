@@ -1,0 +1,29 @@
+meta {
+  name: Admin Login
+  type: http
+  seq: 24
+}
+
+post {
+  url: {{baseUrl}}/api/admin/login
+  body: json
+  auth: none
+}
+
+headers {
+  Content-Type: application/json
+}
+
+body:json {
+  {
+    "username": "admin",
+    "password": "replace-me"
+  }
+}
+
+docs {
+  # Admin Login
+  POST /api/admin/login
+  SPEC_ONLY: AdminAuthController 클래스 매핑만 있음. 메서드 없음 (TODO-060).
+  예정 body: username, password
+}

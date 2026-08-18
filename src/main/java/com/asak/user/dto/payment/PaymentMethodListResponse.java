@@ -17,7 +17,7 @@ import lombok.Setter;
 //         "imageAssetId": 352,
 //         "imageUrl": "/api/assets/101",
 //         "description": "신용·체크카드",
-//         "isEnabled": true,
+//         "active": true,
 //         "sortOrder": 1
 //       },
 //       {
@@ -27,7 +27,7 @@ import lombok.Setter;
 //         "imageAssetId": 353,
 //         "imageUrl": "/api/assets/101",
 //         "description": "모바일 간편결제",
-//         "isEnabled": true,
+//         "active": true,
 //         "sortOrder": 2
 //       },
 //       {
@@ -37,7 +37,7 @@ import lombok.Setter;
 //         "imageAssetId": 354,
 //         "imageUrl": "/api/assets/101",
 //         "description": "모바일 간편결제",
-//         "isEnabled": true,
+//         "active": true,
 //         "sortOrder": 3
 //       },
 //       {
@@ -47,7 +47,7 @@ import lombok.Setter;
 //         "imageAssetId": 355,
 //         "imageUrl": "/api/assets/101",
 //         "description": "모바일 간편결제",
-//         "isEnabled": true,
+//         "active": true,
 //         "sortOrder": 4
 //       }
 //     ]
