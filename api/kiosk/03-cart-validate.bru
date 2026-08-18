@@ -32,8 +32,8 @@ body:json {
 docs {
   # API-004
   POST /api/kiosk/cart/validate
-  CART_API_AND_DATA_CONTRACT.md
+  응답 code: OK (ApiResponse.success(data) 기본값)
   요청 옵션: items[].optionItems[].{optionItemId, quantity}
   요청 재료 제외: items[].excludedIngredientIds
-  응답 금액: totalAmount, items[].unitAmount
+  응답: totalAmount, items[].{clientCartItemId, menuId, quantity, unitPrice, optionItems, excludedIngredientIds}
 }

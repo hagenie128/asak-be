@@ -13,9 +13,7 @@ patch {
 docs {
   # API-024
   PATCH /api/admin/orders/{orderId}/cancel
-  RECEIVED/PREPARING만 가능 → CANCELED
-  승인 결제는 REFUNDED + refundedAt
-  불가 시 409 ORDER_CANCEL_NOT_ALLOWED
+  RECEIVED/PREPARING 이고 결제가 APPROVED 가 아닐 때만 CANCELED
+  APPROVED 결제는 취소하지 않고 409 ORDER_CANCEL_NOT_ALLOWED
   응답 code: ADMIN_ORDER_CANCEL_SUCCESS
-  IMPLEMENTED: AdminOrderController PatchMapping /{orderId}/cancel
 }

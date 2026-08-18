@@ -16,7 +16,7 @@ import lombok.Setter;
 //         "imageAssetId": 352,
 //          imageUrl": "/api/assets/101",
 //         "description": "신용·체크카드",
-//         "isEnabled": true,
+//         "active": true,
 //         "sortOrder": 1
 //       }
 

@@ -13,6 +13,8 @@ get {
 docs {
   # API-021
   GET /api/admin/orders/live
-  DB view: vw_order_live (+ base_dressing/tag)
-  status IN (RECEIVED, PREPARING), createdAt ASC
+  응답 code: ADMIN_LIVE_ORDERS_SUCCESS
+  data: { content[], totalElements }
+  content[].orderStatus IN (RECEIVED, PREPARING), createdAt ASC
+  0건은 200 + 빈 content
 }

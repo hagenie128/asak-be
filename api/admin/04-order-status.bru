@@ -17,8 +17,8 @@ vars:pre-request {
 docs {
   # API-008
   PATCH /api/admin/orders/{orderId}/{status}
-  ORDER_API_CONTRACT: path.status
-  enum: PREPARING | COMPLETED
-  Request body none
-  IMPLEMENTED: AdminOrderController PatchMapping /{orderId}/{status}
+  응답 code: ADMIN_ORDER_STATUS_CHANGE_SUCCESS
+  허용 전이: RECEIVED → PREPARING, PREPARING → COMPLETED
+  body 없음
+  없으면 ORDER_NOT_FOUND. 잘못된 전이는 INVALID_ORDER_STATUS_TRANSITION. 동시성 CONFLICT 는 ORDER_STATUS_CONFLICT.
 }

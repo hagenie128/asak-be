@@ -13,6 +13,7 @@ get {
 docs {
   # API-022
   GET /api/admin/orders/{orderId}
-  DB view: vw_order_summary, vw_order_item_full
-  items[].optionItems / excludedIngredients (JSON)
+  응답 code: ADMIN_ORDER_DETAIL_SUCCESS
+  없으면 ORDER_NOT_FOUND
+  data: orderId, orderNo, orderType, orderStatus, paymentStatus, paymentMethod, totalAmount, createdAt, items[]
 }

@@ -1,0 +1,20 @@
+meta {
+  name: Admin Option Group Detail
+  type: http
+  seq: 23
+}
+
+get {
+  url: {{baseUrl}}/api/admin/opts/{{optionGroupId}}
+  body: none
+  auth: none
+}
+
+docs {
+  # Admin Option Group Detail
+  GET /api/admin/opts/{optionGroupId}
+  응답 code: ADMIN_OPTION_GROUP_DETAIL_SUCCESS
+  data: OptionGroupSummaryResponse (목록과 동일. items 없음)
+  없으면 MENU_OPTION_GROUP_NOT_FOUND
+  조회는 getOptionGroupDetail. 메뉴 등록 검증 existsOptionGroup 만 opt_policy.id 도 허용.
+}

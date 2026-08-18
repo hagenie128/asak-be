@@ -33,9 +33,9 @@ body:json {
 docs {
   # API-005
   POST /api/kiosk/orders
-  ORDER_API_CONTRACT.md · IMPLEMENTATION_PLAN
-  요청 옵션: items[].optionItems[].{optionItemId, quantity}
-  현재 DTO 응답: totalAmount (orders.total_price 매핑), status.
-  클라이언트가 금액 보내지 않음. 현재 저장/응답 조립은 미완료이므로 성공 응답 assert를 두지 않음.
+  응답 code: OK (ApiResponse.success(data) 기본값)
+  data: { orderId, orderNo, totalAmount, status }
+  CreateOrderResponse.status 는 OrderStatus (RECEIVED 등). 목록/상세의 orderStatus 와 필드명이 다름.
+  클라이언트가 금액을 보내지 않음. 서버가 재계산한다.
   orderType: EAT_IN | TAKE_OUT
 }

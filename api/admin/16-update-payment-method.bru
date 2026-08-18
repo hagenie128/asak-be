@@ -16,7 +16,7 @@ headers {
 
 body:json {
   {
-    "isActive": true,
+    "active": true,
     "sortOrder": 1,
     "receiptMessage": null
   }
@@ -25,6 +25,7 @@ body:json {
 docs {
   # API-016
   PATCH /api/admin/paymentMethods/{methodId}
-  body: isActive, sortOrder?, receiptMessage?
-  FE PaymentMethod draft 필드와 동일. (구 isEnabled 사용 금지)
+  body: active, sortOrder?, receiptMessage?
+  키오스크 API-014 와 동일하게 active 사용. 구 isEnabled / isActive 폐기.
+  SPEC_ONLY: AdminPaymentMethodController 클래스 매핑만 있음. 메서드 없음 (TODO-044).
 }

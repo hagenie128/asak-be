@@ -5,7 +5,7 @@ meta {
 }
 
 get {
-  url: {{baseUrl}}/api/admin/orders
+  url: {{baseUrl}}/api/admin/orders?page=0&size=20
   body: none
   auth: none
 }
@@ -13,6 +13,9 @@ get {
 docs {
   # API-007
   GET /api/admin/orders
-  DB view: vw_order_list_summary
-  응답 금액 필드: totalAmount
+  query: page, size, orderStatus, paymentStatus, orderType, dateFrom, dateTo, keyword
+  기본 page=0 size=20
+  dateFrom / dateTo 는 LocalDate. 빈 문자열을 넣으면 400 이므로 미사용 시 생략.
+  응답 code: ADMIN_ORDER_LIST_SUCCESS
+  행: orderId, orderNo, orderType, orderStatus, paymentStatus, totalAmount, createdAt, itemCount, menuSummary
 }

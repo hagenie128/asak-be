@@ -52,21 +52,21 @@ public class UserPayController {
     //         "methodId": 10828,
     //         "methodCode": "CARD",
     //         "methodName": "카드·삼성페이",
-    //         "isEnabled": true,
+    //         "active": true,
     //         "sortOrder": 1
     //       },
     //       {
     //         "methodId": 10829,
     //         "methodCode": "KAKAO_PAY",
     //         "methodName": "카카오페이",
-    //         "isEnabled": false,
+    //         "active": false,
     //         "sortOrder": 2
     //       },
     //       {
     //         "methodId": 10830,
     //         "methodCode": "NAVER_PAY",
     //         "methodName": "네이버페이",
-    //         "isEnabled": false,
+    //         "active": false,
     //         "sortOrder": 3
     //       }
     //     ]

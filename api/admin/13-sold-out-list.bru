@@ -13,8 +13,5 @@ get {
 docs {
   # API-010
   GET /api/admin/soldOut
-  DB view: vw_soldout_catalog
-  target_type: MENU | INGREDIENT | OPTION_ITEM
-  영향 메뉴 수 미리보기는 view.sql [18] 인라인
-  SPEC_ONLY: AdminSoldOutController 매핑 미구현 (TODO-040)
+  SPEC_ONLY: AdminSoldOutController 클래스 매핑만 있음. GET/PATCH 메서드 없음 (TODO-040).
 }

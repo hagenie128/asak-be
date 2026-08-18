@@ -1,0 +1,20 @@
+meta {
+  name: Admin Option Group List
+  type: http
+  seq: 22
+}
+
+get {
+  url: {{baseUrl}}/api/admin/opts/groups
+  body: none
+  auth: none
+}
+
+docs {
+  # Admin Option Groups
+  GET /api/admin/opts/groups
+  응답 code: ADMIN_OPTION_GROUP_LIST_SUCCESS
+  data: OptionGroupSummaryResponse[]
+  필드: optionGroupId, name, groupType, selectType, minSelect, maxSelect, isRequired, recommendedLabel
+  카탈로그는 opt_group 기준. 메뉴 등록 검증 existsOptionGroup 은 opt_group.id 또는 opt_policy.id 모두 허용.
+}
