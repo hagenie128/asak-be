@@ -8,5 +8,4 @@ package com.asak.admin.mapper;
 // 1) methodId 기준 활성/정렬/영수증 문구 수정 SQL 추가
 // 2) 변경 건수(0/1) 반환
 // 3) Service/Controller가 저장 성공 여부 판단에 사용
-public interface AdminPaymentMethodMapper {
-}
+public interface AdminPaymentMethodMapper {}

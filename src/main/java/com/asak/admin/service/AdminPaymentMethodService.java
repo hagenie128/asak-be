@@ -7,5 +7,4 @@ import org.springframework.stereotype.Service;
 // 2) 활성/정렬/영수증문구 validation, 존재하지 않는 id, 0건 update, 정렬 충돌 규칙을 Controller ErrorCode와 맞춘다.
 // 3) 순서 변경이 여러 행을 바꾸면 transaction 범위와 동시 변경 정책을 정한 뒤 TODO-044 Controller와 TODO-046 프런트를 연결한다.
 @Service
-public class AdminPaymentMethodService {
-}
+public class AdminPaymentMethodService {}

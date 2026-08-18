@@ -6,5 +6,4 @@ import org.springframework.stereotype.Service;
 // Controller의 날짜 query를 검증된 값으로 받고, 집계 기준(주문 상태·시간대·0값)을 네 endpoint에서 일관되게 적용한다.
 // view를 사용하면 실제 DB 정의와 성능을 확인하고, frontend TODO-055/058 연결 전 빈 기간 응답을 API로 검증한다.
 @Service
-public class AdminStatsService {
-}
+public class AdminStatsService {}

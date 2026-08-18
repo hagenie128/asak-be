@@ -12,5 +12,4 @@ import org.springframework.web.bind.annotation.RestController;
 // 4) 검증: 토글/정렬 저장 후 재조회, 존재하지 않는 id, 정렬 충돌(409), 유효성 실패를 API로 확인한다.
 @RestController
 @RequestMapping("/api/admin/paymentMethods")
-public class AdminPaymentMethodController {
-}
+public class AdminPaymentMethodController {}

@@ -7,5 +7,4 @@ import org.springframework.stereotype.Service;
 // 2) targetType/targetId/isSoldOut 검증, 중복 target 병합/거절, 없는 target·0건 update 규칙을 ErrorCode와 맞춘다.
 // 3) changes가 여러 건이면 전체 롤백/부분 성공 중 하나를 정하고 transaction으로 보장한 뒤 TODO-040/042/043과 연결한다.
 @Service
-public class AdminSoldOutService {
-}
+public class AdminSoldOutService {}

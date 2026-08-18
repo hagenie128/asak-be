@@ -1,7 +1,6 @@
 package com.asak.user.dto.order.response;
 
 import com.asak.common.enums.OrderStatus;
-
 import lombok.Builder;
 import lombok.Getter;
 
@@ -9,7 +8,7 @@ import lombok.Getter;
 //     "orderId":1,
 //     "orderNo":"ASAK20260723000001",
 //     "totalAmount":8900,
-//     "status":"RECEIVED"
+//     "status":"READY"
 // }
 
 @Getter

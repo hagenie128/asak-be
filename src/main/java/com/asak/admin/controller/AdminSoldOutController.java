@@ -11,5 +11,4 @@ import org.springframework.web.bind.annotation.RestController;
 // 4) 검증: 메뉴·재료 혼합 변경, 존재하지 않는 target, 0건 갱신, 동시 변경(409)을 API로 확인한다.
 @RestController
 @RequestMapping("/api/admin/soldOut")
-public class AdminSoldOutController {
-}
+public class AdminSoldOutController {}
