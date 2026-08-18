@@ -4,8 +4,8 @@ import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
-import lombok.Setter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 @Getter
 @Setter
@@ -27,5 +27,4 @@ public class MenuDetailResponse {
   private MenuNutritionResponse nutrition;
   private List<String> allergens;
   private List<String> tags;
-
 }

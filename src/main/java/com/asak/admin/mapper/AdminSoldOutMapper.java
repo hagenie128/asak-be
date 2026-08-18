@@ -8,5 +8,4 @@ package com.asak.admin.mapper;
 // 1) targetType + targetId 별 분기 방식 결정(case/동적 SQL/쿼리 분리)
 // 2) true/false 토글 UPDATE 추가
 // 3) 변경 건수(0/1)를 Service/Controller가 검증에 쓸 수 있게 반환
-public interface AdminSoldOutMapper {
-}
+public interface AdminSoldOutMapper {}

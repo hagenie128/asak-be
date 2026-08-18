@@ -1,17 +1,5 @@
 package com.asak.admin.service;
 
-import java.io.IOException;
-import java.nio.file.Paths;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.multipart.MultipartFile;
-
 import com.asak.admin.dto.request.CreateMenuIngredientRequest;
 import com.asak.admin.dto.request.CreateMenuNutritionRequest;
 import com.asak.admin.dto.request.CreateMenuRequest;
@@ -26,6 +14,16 @@ import com.asak.common.exception.CustomException;
 import com.asak.common.exception.ErrorCode;
 import com.asak.common.response.PageResult;
 import com.asak.common.util.FileUtil;
+import java.io.IOException;
+import java.nio.file.Paths;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 @Service
 public class AdminMenuService {
@@ -94,8 +92,8 @@ public class AdminMenuService {
   }
 
   /**
-   * 메뉴 수정. 본문은 항상 갱신하고, 자식 섹션은 null이 아니면 교체(delete+insert)한다.
-   * (요청 DTO vs 응답 DTO equals 비교는 타입이 달라 의미가 없어 제거)
+   * 메뉴 수정. 본문은 항상 갱신하고, 자식 섹션은 null이 아니면 교체(delete+insert)한다. (요청 DTO vs 응답 DTO equals 비교는 타입이 달라
+   * 의미가 없어 제거)
    */
   @Transactional
   public MenuDetailResponse updateMenu(Long menuId, CreateMenuRequest request) {
@@ -129,10 +127,7 @@ public class AdminMenuService {
     return adminMenuMapper.getMenuDetail(menuId);
   }
 
-  /**
-   * Soft delete: menu.deleted_at 만 설정. 주문 이력(order_item) FK 유지.
-   * 자식(menu_ing 등)은 복구/감사용으로 남긴다.
-   */
+  /** Soft delete: menu.deleted_at 만 설정. 주문 이력(order_item) FK 유지. 자식(menu_ing 등)은 복구/감사용으로 남긴다. */
   @Transactional
   public void deleteMenu(Long menuId) {
     requireActiveMenu(menuId);
@@ -149,8 +144,7 @@ public class AdminMenuService {
   }
 
   /**
-   * menu는 파일 URL을 저장하지 않고 media_asset의 PK만 저장한다. 기존 화면이 imageUrl만 보내는
-   * 동안에는 활성 asset을 URL로 찾아 연결한다.
+   * menu는 파일 URL을 저장하지 않고 media_asset의 PK만 저장한다. 기존 화면이 imageUrl만 보내는 동안에는 활성 asset을 URL로 찾아 연결한다.
    */
   private Long resolveMediaAssetId(Long mediaAssetId, String imageUrl) {
     if (mediaAssetId != null) {
@@ -207,8 +201,10 @@ public class AdminMenuService {
       row.put("unitId", unitId);
       row.put("isDefault", ingredient.getIsDefault() == null || ingredient.getIsDefault());
       // 클라이언트가 true를 보내더라도 핵심 재료(CORE)는 제외 불가로 저장한다.
-      row.put("canRemove", !"CORE".equals(roleCode)
-          && (ingredient.getCanRemove() == null || ingredient.getCanRemove()));
+      row.put(
+          "canRemove",
+          !"CORE".equals(roleCode)
+              && (ingredient.getCanRemove() == null || ingredient.getCanRemove()));
       row.put("sortNo", sortNo++);
       adminMenuMapper.insertMenuIngredient(row);
     }

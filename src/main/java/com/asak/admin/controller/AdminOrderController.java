@@ -1,14 +1,5 @@
 package com.asak.admin.controller;
 
-import java.time.LocalDate;
-
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PatchMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
-
 import com.asak.admin.dto.response.LiveOrderListResponse;
 import com.asak.admin.dto.response.OrderDetailResponse;
 import com.asak.admin.dto.response.OrderListResponse;
@@ -16,6 +7,13 @@ import com.asak.admin.service.AdminOrderService;
 import com.asak.common.exception.ErrorCode;
 import com.asak.common.response.ApiResponse;
 import com.asak.common.response.PageResult;
+import java.time.LocalDate;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("api/admin/orders")
@@ -46,19 +44,10 @@ public class AdminOrderController {
       @RequestParam(name = "dateFrom", required = false) LocalDate dateFrom,
       @RequestParam(name = "dateTo", required = false) LocalDate dateTo,
       @RequestParam(name = "keyword", required = false) String keyword) {
-    PageResult<OrderListResponse> result = adminOrderService.getOrderList(
-        page,
-        size,
-        orderStatus,
-        paymentStatus,
-        orderType,
-        dateFrom,
-        dateTo,
-        keyword);
-    return ApiResponse.success(
-        "ADMIN_ORDER_LIST_SUCCESS",
-        "관리자 주문 목록 조회 성공",
-        result);
+    PageResult<OrderListResponse> result =
+        adminOrderService.getOrderList(
+            page, size, orderStatus, paymentStatus, orderType, dateFrom, dateTo, keyword);
+    return ApiResponse.success("ADMIN_ORDER_LIST_SUCCESS", "관리자 주문 목록 조회 성공", result);
   }
 
   @GetMapping("/{orderId}")
@@ -68,28 +57,22 @@ public class AdminOrderController {
     if (result == null) {
       return ApiResponse.error(ErrorCode.ORDER_NOT_FOUND);
     }
-    return ApiResponse.success(
-        "ADMIN_ORDER_DETAIL_SUCCESS",
-        "관리자 주문 상세 조회 성공",
-        result);
+    return ApiResponse.success("ADMIN_ORDER_DETAIL_SUCCESS", "관리자 주문 상세 조회 성공", result);
   }
 
   @GetMapping("/live")
   public ApiResponse<LiveOrderListResponse> getLiveOrders() {
     // Empty(0건)는 오류가 아님 — 200 + 빈 content. NOT_FOUND는 특정 orderId 조회 실패에만 사용.
     LiveOrderListResponse result = adminOrderService.getLiveOrders();
-    return ApiResponse.success(
-        "ADMIN_LIVE_ORDERS_SUCCESS",
-        "관리자 Live 주문 조회 성공",
-        result);
+    return ApiResponse.success("ADMIN_LIVE_ORDERS_SUCCESS", "관리자 Live 주문 조회 성공", result);
   }
 
   // | API-008 | `PATCH /api/admin/orders/{orderId}/status` | 허용 상태 전이와 동시 변경 충돌
   // 처리 | 404, 409 상태 전이 충돌 |
 
   @PatchMapping("/{orderId}/{status}")
-  public ApiResponse<Void> changeOrderStatus(@PathVariable(name = "orderId") Long orderId,
-      @PathVariable(name = "status") String status) {
+  public ApiResponse<Void> changeOrderStatus(
+      @PathVariable(name = "orderId") Long orderId, @PathVariable(name = "status") String status) {
     OrderDetailResponse response = adminOrderService.getOrderDetail(orderId);
     if (response == null) {
       return ApiResponse.error(ErrorCode.ORDER_NOT_FOUND);
@@ -97,10 +80,8 @@ public class AdminOrderController {
 
     // Service가 규칙 위반 / 동시성 충돌을 구분해 돌려준다.
     return switch (adminOrderService.changeOrderStatus(response, status)) {
-      case SUCCESS -> ApiResponse.success(
-          "ADMIN_ORDER_STATUS_CHANGE_SUCCESS",
-          "관리자 주문 상태 변경 성공",
-          null);
+      case SUCCESS ->
+          ApiResponse.success("ADMIN_ORDER_STATUS_CHANGE_SUCCESS", "관리자 주문 상태 변경 성공", null);
       case INVALID_TRANSITION -> ApiResponse.error(ErrorCode.INVALID_ORDER_STATUS_TRANSITION);
       case CONFLICT -> ApiResponse.error(ErrorCode.ORDER_STATUS_CONFLICT);
     };
@@ -114,15 +95,13 @@ public class AdminOrderController {
     if (response == null) {
       return ApiResponse.error(ErrorCode.ORDER_NOT_FOUND);
     }
-    if (response.getOrderStatus().equals("COMPLETED") || response.getOrderStatus().equals("CANCELED")) {
+    if (response.getOrderStatus().equals("COMPLETED")
+        || response.getOrderStatus().equals("CANCELED")) {
       return ApiResponse.error(ErrorCode.ORDER_CANCEL_NOT_ALLOWED);
     }
     if (adminOrderService.cancelOrder(orderId) == 0)
       return ApiResponse.error(ErrorCode.ORDER_CANCEL_NOT_ALLOWED);
-    return ApiResponse.success(
-        "ADMIN_ORDER_CANCEL_SUCCESS",
-        "관리자 주문 취소 성공",
-        null);
+    return ApiResponse.success("ADMIN_ORDER_CANCEL_SUCCESS", "관리자 주문 취소 성공", null);
   }
 
   // TODO-071: 환불은 cancel과 분리한 PATCH /api/admin/orders/{orderId}/refund 계약으로 확정한다.

@@ -33,7 +33,7 @@ public class CartValidateItemResponse {
   private String clientCartItemId;
   private Long menuId;
   private Integer quantity;
-  private Integer unitPrice; //장바구니 메뉴별(옵션 추가한 totalPrice)
+  private Integer unitPrice; // 장바구니 메뉴별(옵션 추가한 totalPrice)
   private List<CartValidateOptionItemResponse> optionItems;
   private List<Long> excludedIngredientIds;
 }

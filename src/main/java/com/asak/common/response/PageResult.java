@@ -1,7 +1,6 @@
 package com.asak.common.response;
 
 import java.util.List;
-
 import lombok.Getter;
 
 @Getter
@@ -13,17 +12,11 @@ public class PageResult<T> {
   private final long totalElements; // 전체 데이터 개수
   private final int totalPages; // 전체 페이지 개수
 
-  public PageResult(
-      List<T> content,
-      int page,
-      int size,
-      long totalElements) {
+  public PageResult(List<T> content, int page, int size, long totalElements) {
     this.content = content;
     this.page = page;
     this.size = size;
     this.totalElements = totalElements;
-    this.totalPages = Math.max(
-        1,
-        (int) Math.ceil((double) totalElements / size));
+    this.totalPages = Math.max(1, (int) Math.ceil((double) totalElements / size));
   }
 }

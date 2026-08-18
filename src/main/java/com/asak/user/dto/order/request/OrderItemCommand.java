@@ -4,12 +4,11 @@ import java.util.List;
 
 public interface OrderItemCommand {
 
-    Long getMenuId();
+  Long getMenuId();
 
-    Integer getQuantity();
+  Integer getQuantity();
 
-    List<OptionItemRequest> getOptionItems();
+  List<OptionItemRequest> getOptionItems();
 
-    List<Long> getExcludedIngredientIds();
-
+  List<Long> getExcludedIngredientIds();
 }

@@ -1,14 +1,11 @@
 package com.asak.user.dto.payment;
 
-import java.time.LocalDateTime;
-
-import org.apache.ibatis.type.Alias;
-
 import com.asak.common.enums.PaymentStatus;
-
+import java.time.LocalDateTime;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.apache.ibatis.type.Alias;
 
 /*
     프론트엔드로부터 보내주는  response
@@ -35,12 +32,11 @@ import lombok.Setter;
 @Alias("payment")
 public class ApprovePaymentResponse {
 
-    private Long paymentId;
-    private Long orderId;
-    private String orderNo;
-    private PaymentStatus paymentStatus;
-    private int approvedAmount;
-    private LocalDateTime approvedAt;
-    private int waitingOrderCount;
-
+  private Long paymentId;
+  private Long orderId;
+  private String orderNo;
+  private PaymentStatus paymentStatus;
+  private int approvedAmount;
+  private LocalDateTime approvedAt;
+  private int waitingOrderCount;
 }

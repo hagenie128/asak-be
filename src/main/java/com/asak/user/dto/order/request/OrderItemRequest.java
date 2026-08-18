@@ -20,7 +20,7 @@ import lombok.Setter;
 @Getter
 @Setter
 @NoArgsConstructor
-public class OrderItemRequest implements OrderItemCommand{
+public class OrderItemRequest implements OrderItemCommand {
 
   private Long menuId;
   private Integer quantity;

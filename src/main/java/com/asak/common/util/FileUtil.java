@@ -10,7 +10,6 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.UUID;
 import java.util.regex.Pattern;
-
 import org.springframework.web.multipart.MultipartFile;
 
 public final class FileUtil {
@@ -19,27 +18,25 @@ public final class FileUtil {
 
   private static final String MENU_UPLOAD_URL_PREFIX = "/uploads/menu/";
 
-  private static final Pattern STORED_FILE_NAME_PATTERN = Pattern.compile("^[0-9a-f-]{36}\\.(jpg|png|webp)$",
-      Pattern.CASE_INSENSITIVE);
+  private static final Pattern STORED_FILE_NAME_PATTERN =
+      Pattern.compile("^[0-9a-f-]{36}\\.(jpg|png|webp)$", Pattern.CASE_INSENSITIVE);
 
-  private static final Map<String, String> IMAGE_EXTENSIONS = Map.of(
-      "image/jpeg", ".jpg",
-      "image/png", ".png",
-      "image/webp", ".webp");
+  private static final Map<String, String> IMAGE_EXTENSIONS =
+      Map.of(
+          "image/jpeg", ".jpg",
+          "image/png", ".png",
+          "image/webp", ".webp");
 
-  private FileUtil() {
-  }
+  private FileUtil() {}
 
-  public static String saveMenuImage(
-      MultipartFile file,
-      Path menuUploadDirectory) throws IOException {
+  public static String saveMenuImage(MultipartFile file, Path menuUploadDirectory)
+      throws IOException {
     validateImage(file);
 
     Files.createDirectories(menuUploadDirectory);
 
     String contentType = file.getContentType().toLowerCase(Locale.ROOT);
-    String storedFileName = UUID.randomUUID()
-        + IMAGE_EXTENSIONS.get(contentType);
+    String storedFileName = UUID.randomUUID() + IMAGE_EXTENSIONS.get(contentType);
 
     Path rootPath = menuUploadDirectory.toAbsolutePath().normalize();
     Path targetPath = rootPath.resolve(storedFileName).normalize();
@@ -53,11 +50,8 @@ public final class FileUtil {
     return MENU_UPLOAD_URL_PREFIX + storedFileName;
   }
 
-  public static void deleteMenuImage(
-      String imageUrl,
-      Path menuUploadDirectory) throws IOException {
-    if (imageUrl == null
-        || !imageUrl.startsWith(MENU_UPLOAD_URL_PREFIX)) {
+  public static void deleteMenuImage(String imageUrl, Path menuUploadDirectory) throws IOException {
+    if (imageUrl == null || !imageUrl.startsWith(MENU_UPLOAD_URL_PREFIX)) {
       return;
     }
 
@@ -89,10 +83,8 @@ public final class FileUtil {
     String contentType = file.getContentType();
 
     if (contentType == null
-        || !IMAGE_EXTENSIONS.containsKey(
-            contentType.toLowerCase(Locale.ROOT))) {
-      throw new IllegalArgumentException(
-          "JPG, PNG, WEBP 이미지만 업로드할 수 있습니다.");
+        || !IMAGE_EXTENSIONS.containsKey(contentType.toLowerCase(Locale.ROOT))) {
+      throw new IllegalArgumentException("JPG, PNG, WEBP 이미지만 업로드할 수 있습니다.");
     }
   }
 }

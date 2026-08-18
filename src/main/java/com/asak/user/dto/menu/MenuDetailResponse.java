@@ -8,7 +8,6 @@ import org.apache.ibatis.type.Alias;
 
 // 메뉴 디테일
 
-
 //   "data": {
 //     "menuId": 364,
 //     "categoryId": 1,

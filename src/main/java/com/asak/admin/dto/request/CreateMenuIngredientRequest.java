@@ -13,11 +13,15 @@ import lombok.NoArgsConstructor;
 public class CreateMenuIngredientRequest {
 
   private Long ingredientId;
+
   /** CORE | BASE | DEFAULT (대소문자 무시). plain 은 DEFAULT 로 매핑. */
   private String role;
+
   private Double quantity;
+
   /** UNIT_TYPE 코드. 예: G */
   private String unit;
+
   private Boolean isDefault;
   private Boolean canRemove;
 }

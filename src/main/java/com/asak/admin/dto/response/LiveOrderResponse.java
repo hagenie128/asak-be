@@ -1,9 +1,7 @@
 package com.asak.admin.dto.response;
 
-import java.time.LocalDateTime;
-
 import com.fasterxml.jackson.annotation.JsonRawValue;
-
+import java.time.LocalDateTime;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -23,6 +21,5 @@ public class LiveOrderResponse {
   private LocalDateTime createdAt;
   private Long elapsedSec;
 
-  @JsonRawValue
-  private String menus;
+  @JsonRawValue private String menus;
 }

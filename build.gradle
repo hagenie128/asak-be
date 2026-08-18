@@ -54,6 +54,11 @@ tasks.named('test') {
 	useJUnitPlatform()
 }
 
+// 빌드 전 spotlessApply 자동 실행 — 포맷 차이로 빌드 실패 방지
+tasks.named('classes') {
+	dependsOn 'spotlessApply'
+}
+
 spotless {
 	java {
 		googleJavaFormat()

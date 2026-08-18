@@ -1,7 +1,6 @@
 package com.asak.admin.dto.response;
 
 import com.fasterxml.jackson.annotation.JsonRawValue;
-
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -22,6 +21,5 @@ public class MenuIngResponse {
   private boolean canRemove;
   private int sortNo;
 
-  @JsonRawValue
-  private String allergens; // vw_menu_ing_json.allergens 그대로
+  @JsonRawValue private String allergens; // vw_menu_ing_json.allergens 그대로
 }
