@@ -9,11 +9,13 @@ import lombok.Setter;
 /*
     프론트엔드로부터 받는 requestBoby
 
-        {
+    {
     "orderId": 1,
     "paymentMethodCode": "CARD",
-    "idempotencyKey": "uuid"
+    "idempotencyKey": "uuid",
+    "orderStatus": "RECEIVED" // 주문 상태값 추가
     }
+
 
 */
 
