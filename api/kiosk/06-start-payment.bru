@@ -17,6 +17,7 @@ headers {
 body:json {
   {
     "orderId": {{orderId}},
+    "orderStatus": "READY",
     "paymentMethodCode": "CARD",
     "idempotencyKey": "bruno-local-replace-me"
   }
@@ -26,7 +27,7 @@ docs {
   # API-006
   POST /api/kiosk/payments
   응답 code: KIOSK_PAYMENT_APPROVED
-  body: orderId, paymentMethodCode, idempotencyKey
+  body: orderId, orderStatus(=READY), paymentMethodCode, idempotencyKey
   data: paymentId, orderId, orderNo, paymentStatus, approvedAmount, approvedAt, waitingOrderCount
   레거시 amount/paidAt 사용 금지
 }

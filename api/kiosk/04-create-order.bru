@@ -35,7 +35,7 @@ docs {
   POST /api/kiosk/orders
   응답 code: OK (ApiResponse.success(data) 기본값)
   data: { orderId, orderNo, totalAmount, status }
-  CreateOrderResponse.status 는 OrderStatus (RECEIVED 등). 목록/상세의 orderStatus 와 필드명이 다름.
+  CreateOrderResponse.status 는 OrderStatus (READY 등). 목록/상세의 orderStatus 와 필드명이 다름.
   클라이언트가 금액을 보내지 않음. 서버가 재계산한다.
   orderType: EAT_IN | TAKE_OUT
 }

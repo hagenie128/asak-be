@@ -1,7 +1,6 @@
 package com.asak.common.response;
 
 import com.asak.common.exception.ErrorCode;
-
 import lombok.Builder;
 import lombok.Getter;
 

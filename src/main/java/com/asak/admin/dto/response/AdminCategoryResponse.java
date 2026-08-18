@@ -1,19 +1,14 @@
 package com.asak.admin.dto.response;
 
-import org.apache.ibatis.type.Alias;
-
 import com.fasterxml.jackson.annotation.JsonProperty;
-
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.apache.ibatis.type.Alias;
 
-/**
- * 관리자 카테고리 목록 행.
- * GET /api/admin/menus/categories → PageResult.content[]
- */
+/** 관리자 카테고리 목록 행. GET /api/admin/menus/categories → PageResult.content[] */
 @Getter
 @Setter
 @Builder

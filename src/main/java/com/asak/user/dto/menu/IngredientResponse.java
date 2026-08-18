@@ -7,14 +7,14 @@ import org.apache.ibatis.type.Alias;
 
 // 재료
 
-  // {
-  //   "ingredientId": 1,
-  //   "ingName": "로메인",
-  //   "role": "base",
-  //   "unit": "g",
-  //   "isDefault": true,
-  //   "canRemove": true
-  // }
+// {
+//   "ingredientId": 1,
+//   "ingName": "로메인",
+//   "role": "base",
+//   "unit": "g",
+//   "isDefault": true,
+//   "canRemove": true
+// }
 
 @Getter
 @Setter

@@ -1,13 +1,10 @@
 package com.asak.user.dto.payment;
 
-
-import org.apache.ibatis.type.Alias;
-
 import com.asak.common.enums.PaymentMethod;
-
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.apache.ibatis.type.Alias;
 
 // {
 //         "methodId": 10828,
@@ -27,14 +24,12 @@ import lombok.Setter;
 @Alias("PaymentMethodDTO")
 public class PaymentMethodResponse {
 
-    private Long methodId;
-    private PaymentMethod methodCode;
-    private String methodName;
-    private Long imageAssetId;
-    private String imageUrl;
-    private String description;
-    private boolean active;
-    private int sortOrder;
-
-
+  private Long methodId;
+  private PaymentMethod methodCode;
+  private String methodName;
+  private Long imageAssetId;
+  private String imageUrl;
+  private String description;
+  private boolean active;
+  private int sortOrder;
 }

@@ -10,8 +10,7 @@ public final class DateUtil {
   private static final ZoneId KST = ZoneId.of("Asia/Seoul");
   private static final DateTimeFormatter DATE_FORMAT = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 
-  private DateUtil() {
-  }
+  private DateUtil() {}
 
   public static LocalDateTime now() {
     return LocalDateTime.now(KST);

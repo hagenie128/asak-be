@@ -1,18 +1,16 @@
 package com.asak.admin.service;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
 import com.asak.admin.dto.request.CreateMenuOptionGroupRequest;
 import com.asak.admin.dto.request.CreateMenuOptionItemRequest;
 import com.asak.admin.dto.response.OptionGroupSummaryResponse;
 import com.asak.admin.mapper.AdminOptionMapper;
 import com.asak.common.exception.CustomException;
 import com.asak.common.exception.ErrorCode;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class AdminOptionService {
@@ -48,7 +46,8 @@ public class AdminOptionService {
   }
 
   @Transactional
-  public void replaceMenuOptionGroups(Long menuId, List<CreateMenuOptionGroupRequest> optionGroups) {
+  public void replaceMenuOptionGroups(
+      Long menuId, List<CreateMenuOptionGroupRequest> optionGroups) {
     adminOptionMapper.deleteMenuOptOverrides(menuId);
     adminOptionMapper.deleteMenuOptionGroups(menuId);
     insertOptionGroups(menuId, optionGroups);
@@ -98,7 +97,8 @@ public class AdminOptionService {
         .orElse(null);
   }
 
-  private void insertRecommendedOverrides(Long menuId, Long policyId, Long recommendedOptionItemId) {
+  private void insertRecommendedOverrides(
+      Long menuId, Long policyId, Long recommendedOptionItemId) {
     List<Long> optionItemIds = adminOptionMapper.findOptItemIdsByPolicyId(policyId);
     if (optionItemIds == null || optionItemIds.isEmpty()) {
       throw new CustomException(ErrorCode.MENU_CREATE_INVALID);

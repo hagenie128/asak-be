@@ -1,7 +1,7 @@
 package com.asak.user.dto.payment;
 
+import com.asak.common.enums.OrderStatus;
 import com.asak.common.enums.PaymentMethod;
-
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -11,6 +11,7 @@ import lombok.Setter;
 
         {
     "orderId": 1,
+    "orderStatus": "READY",
     "paymentMethodCode": "CARD",
     "idempotencyKey": "uuid"
     }
@@ -22,8 +23,8 @@ import lombok.Setter;
 @NoArgsConstructor
 public class ApprovePaymentRequest {
 
-    private Long orderId;
-    private PaymentMethod paymentMethodCode;  // CARD, | KAKAO_PAY, |NAVER_PAY
-    private String idempotencyKey;
-
+  private Long orderId;
+  private OrderStatus orderStatus;
+  private PaymentMethod paymentMethodCode; // CARD, | KAKAO_PAY, |NAVER_PAY
+  private String idempotencyKey;
 }
