@@ -16,7 +16,7 @@
    - 관리자: API-007/008/011~013/021~024 (주문·메뉴) + 메뉴 삭제·카테고리·재료 보조 endpoint
    주문 생성은 헤더·품목·옵션·제외 재료 저장과 응답 조립까지 구현되어 있다.
    품절(API-009/010)·결제수단 설정(API-015/016)·매출(API-017~019)·대시보드(API-020)는 아직 비어 있다.
-   현재 작업 트리의 옵션 그룹 구현은 빌드 미검증일 수 있으므로 요청 전 Controller mapping을 다시 확인한다.
+   현재 작업 트리의 옵션 그룹은 `GET /api/admin/opts/groups`, `GET /api/admin/opts/{optionGroupId}`가 Controller에 있다.
 
 `Local` 환경에는 검토용 ID가 들어 있다. 실제 테스트 데이터의 메뉴·주문·결제수단 ID와
 다르면 해당 환경 변수만 바꾼다. 결제수단 기본값 `methodId: 10828`은 `CARD`이며 화면 이름은
@@ -59,7 +59,7 @@ JSON body는 camelCase만 사용한다.
 - 금액 응답은 `totalAmount`, 장바구니 항목 금액은 `unitAmount`를 사용한다.
   현재 주문 생성 DTO의 상태 필드는 `data.status`이며, 목록·상세의 상태 필드는
   `orderStatus`다. 외부 envelope의 HTTP 상태값 `status`와 혼동하지 않는다.
-- wiki `rest-api-spec.md`의 `/api/menus`, `/api/orders` 등은 **레거시**다. Bruno는 `/api/kiosk/**`, `/api/admin/**`만 쓴다.
+- wiki `rest-api-spec.md` 정본 path는 `/api/kiosk/**`, `/api/admin/**`이다. 구 `/api/menus` 표는 폐기.
 - 메뉴 삭제 시 `ing` 마스터는 지우지 않는다. `order_item`이 있으면 `MENU_DELETE_FAILED`다.
 
 ## API ↔ DB 뷰 매핑 (구현 시)
