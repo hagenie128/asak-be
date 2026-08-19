@@ -7,17 +7,22 @@
 
   <select id="getSalesSummary" resultType="com.asak.admin.dto.response.sales.SalesSummaryResponse">
     SELECT * FROM vw_sales_summary
+    <if test="dateRange != null">
+    WHERE order_date BETWEEN #{dateRange.startDate} AND #{dateRange.endDate}
   </select>
 
   <select id="getSalesHourly" resultType="com.asak.admin.dto.response.sales.SalesSummaryResponse">
     SELECT * FROM vw_sales_hourly
+    WHERE order_date = #{date}
   </select>
 
   <select id="getDailyTopMenu" resultType="com.asak.admin.dto.response.sales.DailyTopMenuResponse">
     SELECT * FROM vw_daily_top_menu
+    WHERE order_date = #{date}
   </select>
 
   <select id="getHourlyTopMenu" resultType="com.asak.admin.dto.response.sales.HourlyTopMenuResponse">
     SELECT * FROM vw_hourly_top_menu
+    WHERE order_date = #{date}
   </select>
 </mapper>
