@@ -1,6 +1,6 @@
 package com.asak.admin.mapper;
 
-import com.asak.admin.dto.response.OptionGroupSummaryResponse;
+import com.asak.admin.dto.response.item.OptionGroupSummaryResponse;
 import java.util.List;
 import java.util.Map;
 import org.apache.ibatis.annotations.Param;

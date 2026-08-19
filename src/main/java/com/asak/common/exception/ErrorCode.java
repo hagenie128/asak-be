@@ -80,7 +80,23 @@ public enum ErrorCode {
   MENU_DELETE_NOT_FOUND("MENU_DELETE_NOT_FOUND", HttpStatus.NOT_FOUND, "메뉴를 찾을 수 없습니다."),
   MENU_OPTION_GROUP_NOT_FOUND(
       "MENU_OPTION_GROUP_NOT_FOUND", HttpStatus.NOT_FOUND, "옵션 그룹을 찾을 수 없습니다."),
-  MENU_INGREDIENT_NOT_FOUND("MENU_INGREDIENT_NOT_FOUND", HttpStatus.NOT_FOUND, "재료를 찾을 수 없습니다.");
+  MENU_INGREDIENT_NOT_FOUND("MENU_INGREDIENT_NOT_FOUND", HttpStatus.NOT_FOUND, "재료를 찾을 수 없습니다."),
+
+  // Sales
+  SALES_SUMMARY_NOT_FOUND("SALES_SUMMARY_NOT_FOUND", HttpStatus.NOT_FOUND, "매출 요약을 찾을 수 없습니다."),
+  DATE_RANGE_INVALID("DATE_RANGE_INVALID", HttpStatus.BAD_REQUEST, "날짜 범위가 유효하지 않습니다."),
+  SALES_MONTHLY_NOT_FOUND("SALES_MONTHLY_NOT_FOUND", HttpStatus.NOT_FOUND, "월별 매출을 찾을 수 없습니다."),
+  SALES_DAILY_NOT_FOUND("SALES_DAILY_NOT_FOUND", HttpStatus.NOT_FOUND, "일별 매출을 찾을 수 없습니다."),
+  SALES_HOURLY_NOT_FOUND("SALES_HOURLY_NOT_FOUND", HttpStatus.NOT_FOUND, "시간별 매출을 찾을 수 없습니다."),
+  SALES_DASHBOARD_NOT_FOUND(
+      "SALES_DASHBOARD_NOT_FOUND", HttpStatus.NOT_FOUND, "대시보드 매출을 찾을 수 없습니다."),
+  START_DATE_REQUIRED("START_DATE_REQUIRED", HttpStatus.BAD_REQUEST, "날짜를 입력해주세요."),
+  END_DATE_GREATER_THAN_TODAY(
+      "END_DATE_GREATER_THAN_TODAY", HttpStatus.BAD_REQUEST, "종료 날짜는 오늘 이후일 수 없습니다."),
+  START_DATE_GREATER_THAN_TODAY(
+      "START_DATE_GREATER_THAN_TODAY", HttpStatus.BAD_REQUEST, "시작 날짜는 오늘 이후일 수 없습니다."),
+  END_DATE_LESS_THAN_START_DATE(
+      "END_DATE_LESS_THAN_START_DATE", HttpStatus.BAD_REQUEST, "종료 날짜는 시작 날짜보다 이전일 수 없습니다.");
 
   private final String code;
   private final HttpStatus status;

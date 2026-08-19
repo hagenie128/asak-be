@@ -1,16 +1,21 @@
 # API·DB 구현 규칙
 
-> 상태: Current · 기준일: 2026-07-23
+> 상태: Current · 기준일: 2026-08-19 (이전 기준일 2026-07-23)
 
 ## 실제 연결 상태
 
+2026-08-19에 코드로 확인한 상태다. 파일 존재와 내용 기준이며 실행·응답 검증은 하지 않았다.
+
 | 항목 | 현재 상태 | 작업 시 주의 |
 | --- | --- | --- |
-| `ApiResponse<T>` | 필드 구조 존재 | 성공/실패 factory와 Controller 적용은 아직 필요 |
-| Controller/Service/Mapper | 패키지와 빈 클래스 존재 | 매핑 annotation, Service 로직, SQL은 아직 없음 |
-| Bruno `api/` | 목표 계약 요청 24개 존재 | `SPEC_ONLY`; 구현 전 성공 응답을 기대하지 않음 |
-| MyBatis | 의존성·mapper-locations 설정 존재 | Mapper scan, SQL, 결과 DTO 매핑은 API별 확인 필요 |
-| DB 설정 | 외부 MySQL 접속 정보와 `ddl-auto=none` 존재 | 스키마를 코드가 자동 변경하지 않으며, 실제 컬럼 확인이 선행 |
+| `ApiResponse<T>` | 5필드 envelope + `success()` factory 구현됨. Controller 13개 중 10개가 사용 | `code`는 숫자가 아니라 문자열 상수다. 아래 "업무 코드 규칙" 항목 참고 |
+| 예외 처리 | `ErrorCode`, `GlobalExceptionHandler` 구현됨 | 오류 코드 정본은 `ErrorCode.java` |
+| Controller | 13개. 9개가 매핑 annotation 보유 | 나머지는 골격 상태일 수 있으니 파일을 직접 확인 |
+| Service | 10개. 주문·결제·메뉴 로직 구현됨 (`UserOrderService` 471줄, `AdminMenuService` 279줄, `UserPayService` 206줄) | 금액 계산 정본은 `UserOrderService.validateAndPriceItems()` |
+| Mapper XML | 10개 중 7개에 SQL 있음(총 70문). `AdminPaymentMethodMapper`, `AdminSoldOutMapper`, `DeviceEventMapper` 3개는 **비어 있음** | 해당 3개 영역은 아직 SQL 없음 |
+| Bruno `api/` | 요청 37개 | 구현된 API와 미구현 API가 섞여 있으니 개별 확인 |
+| MyBatis | `mapper-locations: classpath:/mappers/**/*.xml` 설정됨 | — |
+| DB 설정 | 외부 MySQL 접속 정보와 `ddl-auto=none` | 스키마를 코드가 자동 변경하지 않는다. 실제 컬럼은 `docs/아삭_mysql.sql` 실측본으로 확인 |
 
 ## 목표 API 범위
 
@@ -27,17 +32,44 @@
 
 이 항목은 새 정책이 아니라 다음 정본을 구현 단계에 맞춰 연결한 것이다.
 
-- [DevCopilot API 정리 기준](../../../ASAK/docs/governance/devcopilot-api-alignment-2026-07-23.md): 이 저장소에 적용할 `{ success, status, code, message, data }` 계약과 현재 API 목록
-- [예외 구현 기준](../../../ASAK/docs/product_bible/11_Backend_Implementation/01-common/EXCEPTION_IMPLEMENTATION.md): `ErrorCode`, `BusinessException`, `GlobalExceptionHandler`의 구현 골격
-- [검증·예외 규칙](../../../ASAK/docs/product_bible/06_Engineering_Bible/03-backend/VALIDATION_AND_EXCEPTION_RULES.md): Bean Validation/Service 검증/DB 제약의 역할과 400·404·409 기준
+- [예외 구현 기준](../../../ASAK/docs/product_bible/11_Backend_Implementation/BACKEND_COMMON_IMPLEMENTATION.md): `ErrorCode`, `BusinessException`, `GlobalExceptionHandler`의 구현 골격 — "원문: `EXCEPTION_IMPLEMENTATION.md`" 절
+- [검증·예외 규칙](../../../ASAK/docs/product_bible/06_Engineering_Bible/BACKEND_ENGINEERING_RULES.md): Bean Validation/Service 검증/DB 제약의 역할과 400·404·409 기준 — "원문: `VALIDATION_AND_EXCEPTION_RULES.md`" 절
+- ~~DevCopilot API 정리 기준~~ (`governance/devcopilot-api-alignment-2026-07-23.md`): 커밋 `63277c2` 에서 삭제됐고 대체 문서가 없다. `{ success, status, code, message, data }` 5필드 계약은 `ApiResponse` 구현이 정본이다.
 
-현재 `ApiResponse`, `GlobalExceptionHandler`, `ErrorCode`는 소스에 클래스 또는 필드 골격만 있으므로, 관리자 API를 만들기 전에 위 세 문서를 기준으로 공통 기반을 먼저 완성한다. `API_DESIGN_RULES.md`의 3필드 예시는 2026-07-23 정렬 문서의 5필드 계약과 다르므로, 구현 시에는 후자를 적용하고 차이를 남긴다.
+`ApiResponse`, `GlobalExceptionHandler`, `ErrorCode`는 2026-08-19 기준 구현돼 있다(위 표 참고). `API_DESIGN_RULES.md`의 3필드 예시는 5필드 계약과 다르므로, 구현 시에는 후자를 적용하고 차이를 남긴다.
 
 ### 업무 코드 규칙
 
-- API의 `code`는 문자열이지만 값은 `"0000"`, `"1001"`, `"2001"`처럼 고유 숫자 코드로 반환한다.
-- HTTP `status`는 전송 결과(`400`/`404`/`409` 등), 업무 `code`는 프론트가 오류를 구분하는 값이다.
-- 현재 공통 매핑은 옵션 `1001`, 메뉴 `2001`~`2002`, 주문 `3001`~`3003`, 결제 `4001`~`4003`이다. 상세 목록은 `ErrorCode.java`를 정본으로 한다.
+**업무 `code`는 문자열 상수다.** (2026-08-19 확정)
+
+HTTP `status`는 전송 결과(`400`/`404`/`409` 등)이고, 업무 `code`는 프론트가 오류를 구분하는 값이다.
+둘은 역할이 다르다. `409` 하나가 메뉴 품절·옵션 품절·주문 상태 충돌·멱등성 키 충돌을 모두 가리키므로,
+프론트는 `status`가 아니라 `code`로 분기해 화면 안내를 정한다.
+
+```json
+{
+  "success": false,
+  "status": 409,
+  "code": "IDEMPOTENCY_KEY_CONFLICT",
+  "message": "이미 다른 결제 요청에 사용된 멱등성 키입니다.",
+  "data": null
+}
+```
+
+- `code` 값은 `ErrorCode` enum 상수 이름과 같은 문자열이다. `MENU_SOLD_OUT`, `CART_EMPTY`,
+  `IDEMPOTENCY_KEY_CONFLICT` 처럼 읽어서 뜻이 통해야 한다.
+- **정본은 [`ErrorCode.java`](../../src/main/java/com/asak/common/exception/ErrorCode.java)다.**
+  2026-08-19 기준 53개이며 장바구니·메뉴·옵션 검증 / 주문 / 결제 / 매출 네 묶음으로 나뉜다.
+  HTTP status 분포는 `CONFLICT` 17, `NOT_FOUND` 13, `BAD_REQUEST` 12, `INTERNAL_SERVER_ERROR` 11.
+  개수는 자주 바뀌므로 정확한 목록은 항상 파일을 직접 볼 것.
+- 새 오류를 추가할 때는 `ErrorCode` 에 상수를 넣고 `CustomException` 으로 던진다.
+  `GlobalExceptionHandler` 가 `ApiResponse.error(errorCode)` 로 위 형태의 응답을 만든다.
+- 잡히지 않은 예외는 `500` + `code: "INTERNAL_SERVER_ERROR"` 로 나간다.
+
+> **폐기된 규칙:** 이전 판은 `code` 값을 `"0000"`, `"1001"`, `"2001"` 같은 숫자로 쓰라고 적었고
+> 옵션 `1001`, 메뉴 `2001`~`2002`, 주문 `3001`~`3003`, 결제 `4001`~`4003` 매핑을 실었다.
+> 구현은 그 규칙을 따르지 않았고(`ApiResponse` 주석: `레거시 "0000" 숫자 코드 사용 안 함`),
+> 근거가 될 `devcopilot-api-alignment-2026-07-23.md` 도 저장소에 없다. 숫자 코드는 쓰지 않는다.
 
 ## 필드·DB 매핑
 
@@ -82,10 +114,15 @@
 
 ## 정본 링크
 
+> **2026-08-19 재연결:** `product_bible` 이 평탄화·통합되면서(`70ca782` → `c0b743d`) `order/`,
+> `payment/`, `menu/`, `01-common/`, `03-backend/` 하위 폴더와 `*_API_CONTRACT.md` 파일이 사라졌다.
+> 계약 문서들은 각 영역의 `*_BIBLE.md` 로 흡수됐고, 통합본이 `## 원문:` 절로 출처를 밝히고 있어
+> 그 표기를 근거로 아래 링크를 다시 걸었다. 원문 이름으로 검색할 때는 통합본 안의 해당 절을 찾으면 된다.
+
 - [테이블 DDL 실측본](../아삭_mysql.sql) · [뷰 정의](../view.sql) · [동기화 도구](../tools/README.md)
 - [중앙 테이블 정의서](../../../ASAK/docs/wiki/db-table-definition.md) · [중앙 뷰 정의서](../../../ASAK/docs/wiki/db-view-definition.md)
 - [API 계약 Bruno 안내](../../api/README.md)
-- [메뉴 API 계약](../../../ASAK/docs/product_bible/03_Menu_Inventory_SoldOut/menu/MENU_API_CONTRACT.md)
-- [주문 API 계약](../../../ASAK/docs/product_bible/02_Order_Cart_Payment/order/ORDER_API_CONTRACT.md)
-- [결제 API 계약](../../../ASAK/docs/product_bible/02_Order_Cart_Payment/payment/PAYMENT_API_CONTRACT.md)
+- [메뉴 API 계약](../../../ASAK/docs/product_bible/03_Menu_Inventory_SoldOut/MENU_BIBLE.md) — "원문: `MENU_API_CONTRACT.md`" 절
+- [주문 API 계약](../../../ASAK/docs/product_bible/02_Order_Cart_Payment/ORDER_BIBLE.md) — "원문: `ORDER_API_CONTRACT.md`" 절
+- [결제 API 계약](../../../ASAK/docs/product_bible/02_Order_Cart_Payment/PAYMENT_BIBLE.md) — "원문: `PAYMENT_API_CONTRACT.md`" 절
 - [정본 계약 결정](../../../ASAK/docs/governance/canonical-contract-decisions-2026-07-16.md)

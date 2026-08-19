@@ -299,6 +299,23 @@ def sql_tokens(sql):
     return re.findall(r"`[^`]+`|'[^']*'|[A-Za-z_][A-Za-z0-9_]*|[0-9]+|[^ ]", sql)
 
 
+def paren_only_difference(left_tokens, right_tokens):
+    """두 토큰열의 차이가 괄호뿐인지 판정한다.
+
+    MySQL 은 조인 트리에 중첩 괄호를 붙여 저장하고 view.sql 은 가독성을 위해 그것을
+    생략한다. 그런 차이는 의미가 같다. 반면 리터럴이나 식별자가 다르면 정의가 다른 것이며,
+    현재 데이터에서 실행 결과가 우연히 같더라도 같다고 판정해서는 안 된다.
+    """
+    matcher = difflib.SequenceMatcher(None, left_tokens, right_tokens, autojunk=False)
+    for tag, i1, i2, j1, j2 in matcher.get_opcodes():
+        if tag == "equal":
+            continue
+        for token in left_tokens[i1:i2] + right_tokens[j1:j2]:
+            if token not in ("(", ")"):
+                return False
+    return True
+
+
 # ---------------------------------------------------------------- diff
 
 
@@ -588,20 +605,31 @@ def cmd_verify(args):
     log("[뷰] 정의 토큰 비교")
     actual_views = parse_actual_views()
     doc_views = parse_doc_views()
-    differing = []
+    cosmetic, semantic = [], []
     for name in sorted(actual_views):
         if name not in doc_views:
             log("  !! 문서에 없음: %s" % name)
             ok = False
             continue
-        if normalize_sql(actual_views[name]) != normalize_sql(doc_views[name]):
-            differing.append(name)
-    log("  결과: 일치 %d개 / 표기 차이 %d개"
-        % (len(actual_views) - len(differing) - 0, len(differing)))
+        left = normalize_sql(actual_views[name])
+        right = normalize_sql(doc_views[name])
+        if left == right:
+            continue
+        if paren_only_difference(sql_tokens(left), sql_tokens(right)):
+            cosmetic.append(name)
+        else:
+            semantic.append(name)
+    log("  결과: 일치 %d개 / 괄호 표기 차이 %d개 / 정의 차이 %d개"
+        % (len(actual_views) - len(cosmetic) - len(semantic), len(cosmetic), len(semantic)))
 
-    if differing:
-        log("[뷰] 표기가 다른 뷰는 실제로 실행해 결과가 같은지 확인")
-        ok = verify_view_equivalence(differing, doc_views) and ok
+    for name in semantic:
+        log("  !! 정의가 다르다: %s (괄호 외 토큰이 다름)" % name)
+        log("     실행 결과가 현재 데이터에서 같더라도 같다고 보지 않는다. diff 로 내용 확인할 것")
+        ok = False
+
+    if cosmetic:
+        log("[뷰] 괄호만 다른 뷰는 실제로 실행해 결과가 같은지 확인")
+        ok = verify_view_equivalence(cosmetic, doc_views) and ok
 
     log("")
     log("최종: %s" % ("문서가 실제와 일치한다" if ok else "차이가 있다. diff 를 실행할 것"))

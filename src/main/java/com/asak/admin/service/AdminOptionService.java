@@ -1,7 +1,7 @@
 package com.asak.admin.service;
 
-import com.asak.admin.dto.request.CreateMenuOptionGroupRequest;
-import com.asak.admin.dto.response.OptionGroupSummaryResponse;
+import com.asak.admin.dto.request.item.CreateMenuOptionGroupRequest;
+import com.asak.admin.dto.response.item.OptionGroupSummaryResponse;
 import com.asak.admin.mapper.AdminOptionMapper;
 import com.asak.common.exception.CustomException;
 import com.asak.common.exception.ErrorCode;

@@ -254,7 +254,7 @@ CREATE TABLE `opt_item` (
     `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     `updated_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     PRIMARY KEY (`id`),
-    KEY `fk_option_item_group` (`opt_group_id`),
+    UNIQUE KEY `uq_opt_item_group_name` (`opt_group_id`,`name`),
     KEY `fk_option_item_ingredient` (`ing_id`),
     KEY `fk_option_item_unit` (`unit_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;

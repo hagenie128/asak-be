@@ -1,6 +1,6 @@
 package com.asak.admin.controller;
 
-import com.asak.admin.dto.response.OptionGroupSummaryResponse;
+import com.asak.admin.dto.response.item.OptionGroupSummaryResponse;
 import com.asak.admin.service.AdminOptionService;
 import com.asak.common.response.ApiResponse;
 import java.util.List;
