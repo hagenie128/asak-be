@@ -1,5 +1,6 @@
 package com.asak.admin.controller;
 
+import org.jspecify.annotations.Nullable;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -24,9 +25,10 @@ public class AdminSalesController {
   // 기간 200 응답을 먼저 정한다.
   @GetMapping("/sales/summary")
   public ApiResponse<SalesSummaryResponse> getSalesSummary(@RequestParam String startDate,
-      @RequestParam String endDate) {
+      @RequestParam @Nullable String endDate) {
 
-    if (startDate == null || endDate == null) {
+        
+    if (startDate == null) {
       return ApiResponse.error(ErrorCode.DATE_RANGE_INVALID);
     }
 
