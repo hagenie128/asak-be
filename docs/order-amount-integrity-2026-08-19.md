@@ -1,4 +1,4 @@
-# 주문 금액 정합성 조사
+﻿# 주문 금액 정합성 조사
 
 > 작성일: 2026-08-19 (수치 기준 17:14)
 > 대상: `orders`, `order_item`, `order_item_option`, `payment`
@@ -70,7 +70,7 @@ totalAmount += lineAmount;
 시드다. 코드가 정상이라는 근거가 여기 있다.
 
 > 2026-08 은 한때 98.1% 였다. 중복 옵션 통합 과정에서 37건이 깨졌고 같은 날 보정해 100% 로
-> 되돌렸다. 경위는 `2026-08-19_duplicate_option_cleanup_plan.md` 0-2절.
+> 되돌렸다. 경위는 `duplicate-option-cleanup-plan-2026-08-19.md` 0-2절.
 
 ### 3-3. `orders.total_price` — 이쪽은 대체로 맞다
 

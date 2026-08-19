@@ -1,6 +1,6 @@
-# ASAK 문서 동기화 — PDF 대조 정리 운영 결정 (2026-08-19)
+﻿# ASAK 문서 동기화 — PDF 대조 정리 운영 결정 (2026-08-19)
 
-- 대상 문서: `docs/2026-08-19_pdf_intersection_cleanup_plan.md`
+- 대상 문서: `docs/pdf-intersection-cleanup-plan-2026-08-19.md`
 - 범위: PDF 대조 결과를 실제 삭제 지시로 오해하지 않도록 운영 처리 기준 기록
 - 소스코드·실제 DB·Git: 수정하지 않음
 
