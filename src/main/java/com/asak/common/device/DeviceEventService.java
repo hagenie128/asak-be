@@ -40,7 +40,7 @@ public class DeviceEventService {
   public synchronized Optional<DeviceEventResponse> claimNextPendingEvent() {
     return commands.values().stream()
         .filter(command -> command.status() == DevicePrintCommand.Status.PENDING)
-        .min(Comparator.comparingLong(DevicePrintCommand::eventId))
+        .min(Comparator.comparingLong((DevicePrintCommand command) -> command.eventId()))
         .map(
             command -> {
               DevicePrintCommand processing =
@@ -77,7 +77,8 @@ public class DeviceEventService {
 
   public List<DeviceEventResponse> findAll() {
     return commands.values().stream()
-        .sorted(Comparator.comparingLong(DevicePrintCommand::eventId).reversed())
+        .sorted(
+            Comparator.comparingLong((DevicePrintCommand command) -> command.eventId()).reversed())
         .map(DeviceEventResponse::from)
         .toList();
   }

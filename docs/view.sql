@@ -1,8 +1,29 @@
--- ASAK runtime DB views (MySQL)
--- Source of truth: live asak_db SHOW CREATE VIEW
+-- =============================================
+-- Project: 아삭 — runtime DB views (MySQL 8)
+-- Source: 운영 DB(asak_db) SHOW CREATE VIEW 실측
 -- Synced: 2026-08-11
--- Formatted for readability (same semantics as live DB).
--- Do not edit DEFINER; apply with a privileged account as needed.
+-- Verified: 2026-08-19 (뷰 22개, 실제 DB와 의미 동일 확인)
+-- =============================================
+--
+-- 검증 방법과 결과 (2026-08-19)
+--  * 22개 전부 실제 DB에 존재하고, 문서에만 있거나 빠진 뷰는 없다.
+--  * 정의를 문자열 리터럴 보존 + 키워드 소문자화 + 공백 정규화 후 비교한 결과
+--    20개는 토큰 단위까지 완전 일치했다.
+--  * `vw_menu_list`, `vw_menu_opt_policy_json` 두 개는 MySQL이 붙이는 조인 트리
+--    괄호가 이 파일에서 생략돼 있다. 가독성을 위해 뺀 것이고 의미는 같다.
+--    실제 뷰와 이 파일의 SQL을 각각 실행해 행 수·전체 체크섬·컬럼 순서가
+--    모두 같음을 확인했다 (vw_menu_list 72행, vw_menu_opt_policy_json 324행).
+--  * 22개 모두 정상 조회되며, backup_* 테이블을 참조하는 뷰는 없다.
+--
+-- 주의
+--  * 이 파일은 가독성을 위해 줄바꿈만 넣은 실측본이다. 뷰를 바꿀 일이 있으면
+--    운영 DB에 반영한 뒤 다시 덤프해 갱신한다.
+--  * 실제 뷰는 전부 DEFINER=`asakasak`@`%`, SQL SECURITY DEFINER 로 만들어져 있다.
+--    이 파일의 CREATE OR REPLACE 문에는 DEFINER 절이 없으므로, 그대로 적용하면
+--    실행한 계정이 definer 가 된다. 운영에 적용할 때는 권한 계정으로 실행하거나
+--    DEFINER 절을 명시할 것.
+--  * 테이블 DDL 은 docs/아삭_mysql.sql 에 있다.
+-- =============================================
 
 
 -- -----------------------------------------------------------------------------
