@@ -15,6 +15,11 @@
 --    모두 같음을 확인했다 (vw_menu_list 72행, vw_menu_opt_policy_json 324행).
 --  * 22개 모두 정상 조회되며, backup_* 테이블을 참조하는 뷰는 없다.
 --
+-- vw_order_live 의 READY 포함 (2026-08-19)
+--    주방 보드가 결제 대기(READY) 주문도 보여주도록 상태 필터를 4곳 모두
+--    `code IN ('RECEIVED','PREPARING','READY')` 로 넓혔다. 운영 DB 적용을 확인했고,
+--    현재 보드에 READY 3건이 함께 잡힌다 (PREPARING 9 · RECEIVED 1 · READY 3 = 13행).
+--
 -- 주의
 --  * 이 파일은 가독성을 위해 줄바꿈만 넣은 실측본이다. 뷰를 바꿀 일이 있으면
 --    운영 DB에 반영한 뒤 다시 덤프해 갱신한다.
