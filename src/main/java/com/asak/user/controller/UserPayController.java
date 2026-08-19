@@ -80,6 +80,7 @@ public class UserPayController {
   // "orderId": 1,
   // "paymentMethodCode": "CARD",
   // "idempotencyKey": "uuid"
+  //  "orderStatus": "RECEIVED" 추가) 결제까지 완료된 주문 상태값 보내주기
   // }
   // --------------- api-006 결제 승인 ------------------------
   @PostMapping("/payments")

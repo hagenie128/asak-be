@@ -58,8 +58,8 @@ public class UserPayService {
       throw new CustomException(ErrorCode.INVALID_ORDER_REQUEST);
     }
 
-    // 4. 결제 요청은 READY 주문에 대해서만 허용
-    if (request.getOrderStatus() != OrderStatus.READY) {
+    // 4. 결제 요청은 RECEIVED 주문에 대해서만 허용
+    if (request.getOrderStatus() != OrderStatus.RECEIVED) {
       throw new CustomException(ErrorCode.ORDER_STATUS_CONFLICT);
     }
   }
@@ -132,7 +132,7 @@ public class UserPayService {
   // requestBody 정본
   //     {
   // "orderId": 1,
-  // "orderStatus": "READY",
+  // "orderStatus": "RECEIVED",
   // "paymentMethodCode": "CARD",
   // "idempotencyKey": "uuid"
   // }
