@@ -1,25 +1,25 @@
-package com.asak.admin.dto.response;
+package com.asak.admin.dto.response.orders;
 
-import com.fasterxml.jackson.annotation.JsonRawValue;
 import java.time.LocalDateTime;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-/** SCR-009 live order board row. */
+// API-007 GET /api/admin/orders 목록 행. DB view: vw_order_list_summary.
+// 금액 필드명은 api/admin/02-order-list.bru 계약대로 totalAmount.
 @Getter
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class LiveOrderResponse {
+public class OrderListResponse {
   private Long orderId;
   private String orderNo;
-  private String orderTypeLabel;
+  private String orderType;
   private String orderStatus;
+  private String paymentStatus;
   private int totalAmount;
   private LocalDateTime createdAt;
-  private Long elapsedSec;
-
-  @JsonRawValue private String menus;
+  private int itemCount;
+  private String menuSummary;
 }

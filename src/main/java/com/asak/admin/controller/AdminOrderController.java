@@ -1,8 +1,8 @@
 package com.asak.admin.controller;
 
-import com.asak.admin.dto.response.LiveOrderListResponse;
-import com.asak.admin.dto.response.OrderDetailResponse;
-import com.asak.admin.dto.response.OrderListResponse;
+import com.asak.admin.dto.response.orders.LiveOrderListResponse;
+import com.asak.admin.dto.response.orders.OrderDetailResponse;
+import com.asak.admin.dto.response.orders.OrderListResponse;
 import com.asak.admin.service.AdminOrderService;
 import com.asak.common.exception.ErrorCode;
 import com.asak.common.response.ApiResponse;

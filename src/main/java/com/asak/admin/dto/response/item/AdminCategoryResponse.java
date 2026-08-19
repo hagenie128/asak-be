@@ -1,4 +1,4 @@
-package com.asak.admin.dto.response;
+package com.asak.admin.dto.response.item;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;

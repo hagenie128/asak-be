@@ -1,4 +1,4 @@
-package com.asak.admin.dto.response;
+package com.asak.admin.dto.response.orders;
 
 import java.util.List;
 import lombok.AllArgsConstructor;

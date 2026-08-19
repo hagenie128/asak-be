@@ -1,4 +1,4 @@
-package com.asak.admin.dto.response;
+package com.asak.admin.dto.response.menus;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

@@ -1,4 +1,4 @@
-package com.asak.admin.dto.response;
+package com.asak.admin.dto.response.orders;
 
 import com.fasterxml.jackson.annotation.JsonRawValue;
 import lombok.AllArgsConstructor;

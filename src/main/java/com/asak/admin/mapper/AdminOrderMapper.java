@@ -1,9 +1,10 @@
 package com.asak.admin.mapper;
 
 import com.asak.admin.dto.request.OrderListFilter;
-import com.asak.admin.dto.response.LiveOrderResponse;
-import com.asak.admin.dto.response.OrderDetailResponse;
-import com.asak.admin.dto.response.OrderListResponse;
+import com.asak.admin.dto.response.orders.LiveOrderResponse;
+import com.asak.admin.dto.response.orders.OrderDetailResponse;
+import com.asak.admin.dto.response.orders.OrderListResponse;
+
 import java.util.List;
 import java.util.Map;
 import org.apache.ibatis.annotations.Param;

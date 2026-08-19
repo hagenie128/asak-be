@@ -2,10 +2,10 @@ package com.asak.admin.controller;
 
 import com.asak.admin.dto.request.CreateMenuRequest;
 import com.asak.admin.dto.request.MenuListRequest;
-import com.asak.admin.dto.response.AdminCategoryResponse;
-import com.asak.admin.dto.response.IngredientResponse;
-import com.asak.admin.dto.response.MenuDetailResponse;
-import com.asak.admin.dto.response.MenuListResponse;
+import com.asak.admin.dto.response.item.AdminCategoryResponse;
+import com.asak.admin.dto.response.item.IngredientResponse;
+import com.asak.admin.dto.response.menus.MenuDetailResponse;
+import com.asak.admin.dto.response.menus.MenuListResponse;
 import com.asak.admin.service.AdminMenuService;
 import com.asak.admin.service.AdminOptionService;
 import com.asak.common.exception.CustomException;
