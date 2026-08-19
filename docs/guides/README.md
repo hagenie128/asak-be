@@ -1,6 +1,6 @@
-# ASAK Backend 보조 가이드
+﻿# ASAK Backend 보조 가이드
 
-이 폴더는 백엔드 저장소에 남아 있는 팀 참고 문서와 중앙 구현 가이드로 이동하기 위한 안내를 모읍니다. 제품 정책과 API 계약의 정본은 워크스페이스의 `ASAK/docs/`에 있으며, 현재 백엔드 구현 절차는 `../implementation_guide/`를 우선합니다.
+이 폴더는 백엔드 저장소에 남아 있는 팀 참고 문서와 중앙 구현 가이드로 이동하기 위한 안내를 모읍니다. 제품 정책과 API 계약의 정본은 워크스페이스의 `ASAK/docs/`에 있으며, 현재 백엔드 구현 절차는 `../implementation-guide/`를 우선합니다.
 
 ## 로컬 문서
 
@@ -14,11 +14,11 @@
 
 ## 현재 구현 문서
 
-- [구현 가이드 시작](../implementation_guide/00-start-here.md)
-- [고정 규칙](../implementation_guide/01-fixed-rules.md)
-- [API·DB 구현](../implementation_guide/04-api-db-implementation.md)
-- [QA·릴리스](../implementation_guide/06-qa-release-guide.md)
-- [기능 구현 매트릭스](../implementation_guide/08-feature-implementation-matrix.md)
+- [구현 가이드 시작](../implementation-guide/00-start-here.md)
+- [고정 규칙](../implementation-guide/01-fixed-rules.md)
+- [API·DB 구현](../implementation-guide/04-api-db-implementation.md)
+- [QA·릴리스](../implementation-guide/06-qa-release-guide.md)
+- [기능 구현 매트릭스](../implementation-guide/08-feature-implementation-matrix.md)
 - [백엔드 루트 README](../../README.md)
 - [구현 계획](../../IMPLEMENTATION_PLAN.md)
 

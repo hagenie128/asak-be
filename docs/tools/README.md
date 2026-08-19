@@ -1,4 +1,4 @@
-# 스키마 문서 동기화 도구
+﻿# 스키마 문서 동기화 도구
 
 `schema_sync.py` 는 운영 DB(`asak_db`)의 실제 DDL 을 읽어, 스키마 문서 두 개가
 실제와 맞는지 대조하고 어긋나면 갱신한다.
@@ -14,7 +14,7 @@
 `media_asset` 테이블이 통째로 빠져 있었고, `payment.idempotency_key` 가 없어서
 문서만 보고 INSERT 하면 `Field 'idempotency_key' doesn't have a default value` 로
 실패했다. AUTO_INCREMENT, DEFAULT, UNIQUE 도 대부분 누락돼 있었고 외래키는 46개
-전부 이름이 달랐다. 자세한 내역은 `docs/2026-08-19_schema_doc_drift.md` 에 있다.
+전부 이름이 달랐다. 자세한 내역은 `docs/schema-doc-drift-2026-08-19.md` 에 있다.
 
 손으로 맞추면 또 어긋난다. 그래서 실제 DB 에서 뽑아 생성하도록 도구로 만들었다.
 
@@ -42,7 +42,7 @@ python docs/tools/schema_sync.py all
 | 명령 | 하는 일 |
 |---|---|
 | `dump` | 실제 DDL 을 `out/` 에 덤프 (다른 명령의 입력) |
-| `diff` | 문서 vs 실제 대조표를 `out/drift_report.md` 로 생성 |
+| `diff` | 문서 vs 실제 대조표를 `out/drift-report.md` 로 생성 |
 | `sync` | `아삭_mysql.sql` 재생성. 기본은 `out/` 에 미리보기만 |
 | `sync --write` | 재생성 결과를 문서에 반영 |
 | `verify` | 문서와 실제가 같은지 검증 |
