@@ -1,9 +1,18 @@
 -- =============================================
 -- Project: 아삭
--- DBMS: MySQL
+-- DBMS: MySQL 8
 -- Target/model charset: utf8mb4
 -- SQL file encoding: UTF-8
--- Generated: 2026-08-07 08:56:59 UTC
+-- Source: 운영 DB(asak_db) SHOW CREATE TABLE 실측
+-- Synced: 2026-08-19
+--
+-- 주의
+--  * 이 파일은 운영 DB 실제 DDL 을 그대로 옮긴 정본이다. 손으로 고치지 말고,
+--    스키마가 바뀌면 운영 DB 에서 다시 덤프해 갱신한다.
+--  * AUTO_INCREMENT 현재값은 런타임 값이라 기록하지 않는다.
+--  * 컬럼 단위 COLLATE 는 테이블 기본값(utf8mb4_unicode_ci)과 같아 생략했다.
+--  * 뷰(vw_*) 정의는 docs/view.sql 에 있다 (2026-08-19 실제와 의미 동일 확인).
+--  * backup_* / *_backup_* 테이블은 일회성 백업본이라 여기 포함하지 않는다.
 -- =============================================
 
 SET NAMES 'utf8mb4';
@@ -14,264 +23,369 @@ SET FOREIGN_KEY_CHECKS = 0;
 -- =============================================
 
 CREATE TABLE `allergen` (
-    `id` BIGINT NOT NULL PRIMARY KEY,
-    `name` VARCHAR(50) NOT NULL
+    `id` BIGINT NOT NULL AUTO_INCREMENT,
+    `name` VARCHAR(50) NOT NULL,
+    PRIMARY KEY (`id`),
+    UNIQUE KEY `name` (`name`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 
 CREATE TABLE `category` (
-    `sort_no` INT NOT NULL,
-    `id` BIGINT NOT NULL PRIMARY KEY,
-    `active` TINYINT(1) NOT NULL,
-    `name` VARCHAR(50) NOT NULL
+    `id` BIGINT NOT NULL AUTO_INCREMENT,
+    `name` VARCHAR(50) NOT NULL,
+    `sort_no` INT NOT NULL DEFAULT '0',
+    `active` TINYINT(1) NOT NULL DEFAULT '1',
+    PRIMARY KEY (`id`),
+    UNIQUE KEY `name` (`name`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 
 CREATE TABLE `code_group` (
-    `id` BIGINT NOT NULL PRIMARY KEY,
+    `id` BIGINT NOT NULL AUTO_INCREMENT,
+    `group_code` VARCHAR(50) NOT NULL,
     `name` VARCHAR(50) NOT NULL,
-    `group_code` VARCHAR(50) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
-
-CREATE TABLE `tag` (
-    `id` BIGINT NOT NULL PRIMARY KEY,
-    `code` VARCHAR(50) NOT NULL,
-    `color_hex` VARCHAR(20) NULL,
-    `name` VARCHAR(50) NOT NULL,
-    `active` TINYINT(1) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
-
-CREATE TABLE `menu` (
-    `id` BIGINT NOT NULL PRIMARY KEY,
-    `price` INT NOT NULL,
-    `description` TEXT NULL,
-    `created_at` TIMESTAMP NOT NULL,
-    `sold_out` TINYINT(1) NOT NULL,
-    `name` VARCHAR(100) NOT NULL,
-    `image_url` TEXT NULL,
-    `updated_at` TIMESTAMP NOT NULL,
-    `deleted_at` TIMESTAMP NULL,
-    `cat_id` BIGINT NOT NULL
+    PRIMARY KEY (`id`),
+    UNIQUE KEY `group_code` (`group_code`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 
 CREATE TABLE `common_code` (
-    `sort_no` INT NOT NULL,
-    `id` BIGINT NOT NULL PRIMARY KEY,
-    `name` VARCHAR(50) NOT NULL,
-    `code` VARCHAR(50) NOT NULL,
+    `id` BIGINT NOT NULL AUTO_INCREMENT,
     `code_grp_id` BIGINT NOT NULL,
-    `active` TINYINT(1) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
-
-CREATE TABLE `menu_tag` (
-    `id` BIGINT NOT NULL PRIMARY KEY,
-    `menu_id` BIGINT NOT NULL,
-    `tag_id` BIGINT NOT NULL
+    `code` VARCHAR(50) NOT NULL,
+    `name` VARCHAR(50) NOT NULL,
+    `sort_no` INT NOT NULL DEFAULT '0',
+    `active` TINYINT(1) NOT NULL DEFAULT '1',
+    PRIMARY KEY (`id`),
+    UNIQUE KEY `uq_common_code_group_code` (`code_grp_id`,`code`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 
 CREATE TABLE `ing` (
+    `id` BIGINT NOT NULL AUTO_INCREMENT,
     `name` VARCHAR(100) NOT NULL,
     `type_id` BIGINT NOT NULL,
-    `sold_out` TINYINT(1) NOT NULL,
-    `id` BIGINT NOT NULL PRIMARY KEY
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
-
-CREATE TABLE `ing_nutr` (
-    `id` BIGINT NOT NULL PRIMARY KEY,
-    `ing_id` BIGINT NOT NULL,
-    `serving_g` DECIMAL(8,2) NULL,
-    `kcal` DECIMAL(8,2) NULL,
-    `carb_g` DECIMAL(8,2) NULL,
-    `sugar_g` DECIMAL(8,2) NULL,
-    `protein_g` DECIMAL(8,2) NULL,
-    `fat_g` DECIMAL(8,2) NULL,
-    `saturated_fat_g` DECIMAL(8,2) NULL,
-    `sodium_mg` DECIMAL(8,2) NULL,
-    `source_id` BIGINT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
-
-CREATE TABLE `menu_nutr` (
-    `id` BIGINT NOT NULL PRIMARY KEY,
-    `protein_g` DECIMAL(8,2) NULL,
-    `fat_g` DECIMAL(8,2) NULL,
-    `source_id` BIGINT NULL,
-    `menu_id` BIGINT NOT NULL,
-    `kcal` DECIMAL(8,2) NULL,
-    `carb_g` DECIMAL(8,2) NULL,
-    `sodium_mg` DECIMAL(8,2) NULL,
-    `serving_g` DECIMAL(8,2) NULL,
-    `sugar_g` DECIMAL(8,2) NULL,
-    `saturated_fat_g` DECIMAL(8,2) NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
-
-CREATE TABLE `opt_group` (
-    `id` BIGINT NOT NULL PRIMARY KEY,
-    `group_type_id` BIGINT NOT NULL,
-    `max_select` INT NOT NULL,
-    `name` VARCHAR(100) NOT NULL,
-    `min_select` INT NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
-
-CREATE TABLE `orders` (
-    `canceled_at` TIMESTAMP NULL,
-    `id` BIGINT NOT NULL PRIMARY KEY,
-    `status_id` BIGINT NOT NULL,
-    `total_price` INT NOT NULL,
-    `order_no` VARCHAR(50) NOT NULL,
-    `order_type_id` BIGINT NOT NULL,
-    `created_at` TIMESTAMP NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
-
-CREATE TABLE `pay_method_cfg` (
-    `sort_no` INT NOT NULL,
-    `id` BIGINT NOT NULL PRIMARY KEY,
-    `name` VARCHAR(50) NOT NULL,
-    `method_id` BIGINT NOT NULL,
-    `active` TINYINT(1) NOT NULL
+    `sold_out` TINYINT(1) NOT NULL DEFAULT '0',
+    `kcal` DECIMAL(8,2) DEFAULT NULL COMMENT '칼로리',
+    `protein_g` DECIMAL(8,2) DEFAULT NULL COMMENT '단백질 g',
+    `icon_asset_id` BIGINT DEFAULT NULL COMMENT 'media_asset FK (아이콘)',
+    `photo_asset_id` BIGINT DEFAULT NULL COMMENT 'media_asset FK (사진)',
+    PRIMARY KEY (`id`),
+    UNIQUE KEY `name` (`name`),
+    KEY `fk_ingredient_type` (`type_id`),
+    KEY `fk_ing_icon_asset_id` (`icon_asset_id`),
+    KEY `fk_ing_photo_asset_id` (`photo_asset_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 
 CREATE TABLE `ing_allergen` (
-    `id` BIGINT NOT NULL PRIMARY KEY,
+    `id` BIGINT NOT NULL AUTO_INCREMENT,
     `ing_id` BIGINT NOT NULL,
-    `allergen_id` BIGINT NOT NULL
+    `allergen_id` BIGINT NOT NULL,
+    PRIMARY KEY (`id`),
+    UNIQUE KEY `uq_ingredient_allergen` (`ing_id`,`allergen_id`),
+    KEY `fk_ingredient_allergen_allergen` (`allergen_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 
-CREATE TABLE `menu_ing` (
-    `unit_id` BIGINT NULL,
-    `is_default` TINYINT(1) NOT NULL,
-    `sort_no` INT NOT NULL,
-    `id` BIGINT NOT NULL PRIMARY KEY,
-    `menu_id` BIGINT NOT NULL,
-    `role_id` BIGINT NOT NULL,
-    `can_remove` TINYINT(1) NOT NULL,
+CREATE TABLE `ing_nutr` (
+    `id` BIGINT NOT NULL,
     `ing_id` BIGINT NOT NULL,
-    `quantity` DECIMAL(8,2) NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
-
-CREATE TABLE `opt_item` (
-    `created_at` TIMESTAMP NOT NULL,
-    `amount` DECIMAL(8,2) NULL,
-    `unit_id` BIGINT NULL,
-    `id` BIGINT NOT NULL PRIMARY KEY,
-    `add_price` INT NOT NULL,
-    `color_hex` VARCHAR(20) NULL,
-    `opt_group_id` BIGINT NOT NULL,
-    `sold_out` TINYINT(1) NOT NULL,
-    `updated_at` TIMESTAMP NOT NULL,
-    `list_price` INT NULL,
-    `name` VARCHAR(100) NOT NULL,
-    `icon_url` TEXT NULL,
-    `ing_id` BIGINT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
-
-CREATE TABLE `opt_policy` (
-    `id` BIGINT NOT NULL PRIMARY KEY,
-    `policy_key` CHAR(64) NOT NULL,
-    `name` VARCHAR(120) NOT NULL,
-    `min_select` INT NOT NULL,
-    `max_select` INT NOT NULL,
-    `item_count` INT NOT NULL,
-    `menu_count` INT NOT NULL,
-    `created_at` TIMESTAMP NOT NULL,
-    `updated_at` TIMESTAMP NOT NULL,
-    `active` TINYINT(1) NOT NULL,
-    `required` TINYINT(1) NOT NULL,
-    `opt_group_id` BIGINT NOT NULL,
-    `sort_no` INT NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
-
-CREATE TABLE `order_item` (
-    `id` BIGINT NOT NULL PRIMARY KEY,
-    `order_id` BIGINT NOT NULL,
-    `quantity` INT NOT NULL,
-    `menu_id` BIGINT NOT NULL,
-    `price` INT NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
-
-CREATE TABLE `payment` (
-    `refunded_at` TIMESTAMP NULL,
-    `id` BIGINT NOT NULL PRIMARY KEY,
-    `order_id` BIGINT NOT NULL,
-    `status_id` BIGINT NOT NULL,
-    `paid_at` TIMESTAMP NULL,
-    `method_id` BIGINT NOT NULL,
-    `amount` INT NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
-
-CREATE TABLE `menu_opt_override` (
-    `id` BIGINT NOT NULL PRIMARY KEY,
-    `menu_id` BIGINT NOT NULL,
-    `note` VARCHAR(255) NULL,
-    `is_default` TINYINT(1) NULL,
-    `opt_item_id` BIGINT NOT NULL,
-    `sort_no` INT NULL,
-    `active` TINYINT(1) NULL,
-    `recommended` TINYINT(1) NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
-
-CREATE TABLE `opt_item_comp` (
-    `sort_no` INT NOT NULL,
-    `id` BIGINT NOT NULL PRIMARY KEY,
-    `quantity` DECIMAL(8,2) NULL,
-    `ing_id` BIGINT NULL,
-    `opt_item_id` BIGINT NOT NULL,
-    `name` VARCHAR(100) NOT NULL,
-    `unit_id` BIGINT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
-
-CREATE TABLE `menu_opt_policy` (
-    `id` BIGINT NOT NULL PRIMARY KEY,
-    `menu_id` BIGINT NOT NULL,
-    `policy_id` BIGINT NOT NULL,
-    `priority` INT NOT NULL,
-    `required` TINYINT(1) NOT NULL,
-    `sort_no` INT NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
-
-CREATE TABLE `opt_policy_item` (
-    `id` BIGINT NOT NULL PRIMARY KEY,
-    `policy_id` BIGINT NOT NULL,
-    `active` TINYINT(1) NOT NULL,
-    `is_default` TINYINT(1) NOT NULL,
-    `opt_item_id` BIGINT NOT NULL,
-    `sort_no` INT NOT NULL,
-    `recommended` TINYINT(1) NOT NULL
+    `serving_g` DECIMAL(8,2) DEFAULT NULL COMMENT '표준 제공량 g',
+    `kcal` DECIMAL(8,2) DEFAULT NULL COMMENT '칼로리',
+    `carb_g` DECIMAL(8,2) DEFAULT NULL COMMENT '탄수화물 g',
+    `sugar_g` DECIMAL(8,2) DEFAULT NULL COMMENT '당류 g',
+    `protein_g` DECIMAL(8,2) DEFAULT NULL COMMENT '단백질 g',
+    `fat_g` DECIMAL(8,2) DEFAULT NULL COMMENT '지방 g',
+    `saturated_fat_g` DECIMAL(8,2) DEFAULT NULL COMMENT '포화지방 g',
+    `sodium_mg` DECIMAL(8,2) DEFAULT NULL COMMENT '나트륨 mg',
+    `source_id` BIGINT DEFAULT NULL COMMENT '데이터 출처 코드 ID',
+    PRIMARY KEY (`id`),
+    UNIQUE KEY `uq_ing_nutr_ing_id` (`ing_id`),
+    KEY `fk_ing_nutr_source_id` (`source_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 
 CREATE TABLE `item_exclusion` (
-    `id` BIGINT NOT NULL PRIMARY KEY,
+    `id` BIGINT NOT NULL AUTO_INCREMENT,
     `order_item_id` BIGINT NOT NULL,
-    `ing_id` BIGINT NOT NULL
+    `ing_id` BIGINT NOT NULL,
+    PRIMARY KEY (`id`),
+    UNIQUE KEY `uq_item_exclusion` (`order_item_id`,`ing_id`),
+    KEY `fk_item_exclusion_ingredient` (`ing_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+
+CREATE TABLE `media_asset` (
+    `id` BIGINT NOT NULL AUTO_INCREMENT,
+    `provider_id` BIGINT NOT NULL,
+    `public_id` VARCHAR(255) NOT NULL,
+    `asset_folder` VARCHAR(255) DEFAULT NULL,
+    `url` VARCHAR(500) NOT NULL,
+    `format` VARCHAR(20) DEFAULT NULL,
+    `width` INT DEFAULT NULL,
+    `height` INT DEFAULT NULL,
+    `bytes` INT DEFAULT NULL,
+    `uploaded_at` TIMESTAMP NULL DEFAULT NULL,
+    `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    `deleted_at` TIMESTAMP NULL DEFAULT NULL,
+    PRIMARY KEY (`id`),
+    UNIQUE KEY `uq_media_asset_provider_public_id` (`provider_id`,`public_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+
+CREATE TABLE `menu` (
+    `id` BIGINT NOT NULL AUTO_INCREMENT,
+    `cat_id` BIGINT NOT NULL,
+    `name` VARCHAR(100) NOT NULL,
+    `price` INT NOT NULL DEFAULT '0',
+    `image_url` TEXT,
+    `image_asset_id` BIGINT DEFAULT NULL,
+    `description` TEXT,
+    `sold_out` TINYINT(1) NOT NULL DEFAULT '0',
+    `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    `updated_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    `deleted_at` TIMESTAMP NULL DEFAULT NULL,
+    PRIMARY KEY (`id`),
+    KEY `fk_menu_category` (`cat_id`),
+    KEY `idx_menu_deleted_at` (`deleted_at`),
+    KEY `fk_menu_image_asset_id` (`image_asset_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+
+CREATE TABLE `menu_ing` (
+    `id` BIGINT NOT NULL AUTO_INCREMENT,
+    `menu_id` BIGINT NOT NULL,
+    `ing_id` BIGINT NOT NULL,
+    `role_id` BIGINT NOT NULL,
+    `quantity` DECIMAL(8,2) DEFAULT NULL,
+    `unit_id` BIGINT DEFAULT NULL,
+    `is_default` TINYINT(1) NOT NULL DEFAULT '1',
+    `can_remove` TINYINT(1) NOT NULL DEFAULT '1',
+    `sort_no` INT NOT NULL DEFAULT '0',
+    PRIMARY KEY (`id`),
+    UNIQUE KEY `uq_menu_ingredient_role` (`menu_id`,`ing_id`,`role_id`),
+    KEY `fk_menu_ingredient_ingredient` (`ing_id`),
+    KEY `fk_menu_ingredient_role` (`role_id`),
+    KEY `fk_menu_ingredient_unit` (`unit_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+
+CREATE TABLE `menu_nutr` (
+    `id` BIGINT NOT NULL AUTO_INCREMENT,
+    `menu_id` BIGINT NOT NULL,
+    `kcal` DECIMAL(8,2) DEFAULT NULL,
+    `protein_g` DECIMAL(8,2) DEFAULT NULL,
+    `carb_g` DECIMAL(8,2) DEFAULT NULL,
+    `fat_g` DECIMAL(8,2) DEFAULT NULL,
+    `sodium_mg` DECIMAL(8,2) DEFAULT NULL,
+    `source_id` BIGINT DEFAULT NULL,
+    `serving_g` DECIMAL(8,2) DEFAULT NULL COMMENT '표준 제공량 g',
+    `sugar_g` DECIMAL(8,2) DEFAULT NULL COMMENT '당류 g',
+    `saturated_fat_g` DECIMAL(8,2) DEFAULT NULL COMMENT '포화지방 g',
+    PRIMARY KEY (`id`),
+    UNIQUE KEY `menu_id` (`menu_id`),
+    KEY `fk_menu_nutrition_source` (`source_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+
+CREATE TABLE `menu_opt_override` (
+    `id` BIGINT NOT NULL AUTO_INCREMENT,
+    `menu_id` BIGINT NOT NULL,
+    `opt_item_id` BIGINT NOT NULL,
+    `recommended` TINYINT(1) DEFAULT NULL,
+    `is_default` TINYINT(1) DEFAULT NULL,
+    `sort_no` INT DEFAULT NULL,
+    `active` TINYINT(1) DEFAULT NULL,
+    `note` VARCHAR(255) DEFAULT NULL,
+    PRIMARY KEY (`id`),
+    UNIQUE KEY `uq_menu_option_override` (`menu_id`,`opt_item_id`),
+    KEY `fk_menu_option_override_item` (`opt_item_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+
+CREATE TABLE `menu_opt_policy` (
+    `id` BIGINT NOT NULL AUTO_INCREMENT,
+    `menu_id` BIGINT NOT NULL,
+    `policy_id` BIGINT NOT NULL,
+    `sort_no` INT NOT NULL DEFAULT '0',
+    `required` TINYINT(1) NOT NULL DEFAULT '0',
+    `priority` INT NOT NULL DEFAULT '0',
+    PRIMARY KEY (`id`),
+    UNIQUE KEY `uq_menu_option_policy` (`menu_id`,`policy_id`),
+    KEY `fk_menu_option_policy_policy` (`policy_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+
+CREATE TABLE `menu_tag` (
+    `id` BIGINT NOT NULL AUTO_INCREMENT,
+    `menu_id` BIGINT NOT NULL,
+    `tag_id` BIGINT NOT NULL,
+    PRIMARY KEY (`id`),
+    UNIQUE KEY `uq_menu_tag` (`menu_id`,`tag_id`),
+    KEY `fk_menu_tag_tag` (`tag_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+
+CREATE TABLE `opt_group` (
+    `id` BIGINT NOT NULL AUTO_INCREMENT,
+    `name` VARCHAR(100) NOT NULL,
+    `group_type_id` BIGINT NOT NULL,
+    `min_select` INT NOT NULL DEFAULT '0',
+    `max_select` INT NOT NULL DEFAULT '1',
+    PRIMARY KEY (`id`),
+    KEY `fk_option_group_type` (`group_type_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+
+CREATE TABLE `opt_item` (
+    `id` BIGINT NOT NULL AUTO_INCREMENT,
+    `opt_group_id` BIGINT NOT NULL,
+    `ing_id` BIGINT DEFAULT NULL,
+    `name` VARCHAR(100) NOT NULL,
+    `add_price` INT NOT NULL DEFAULT '0',
+    `list_price` INT DEFAULT NULL,
+    `amount` DECIMAL(8,2) DEFAULT NULL,
+    `unit_id` BIGINT DEFAULT NULL,
+    `icon_url` TEXT,
+    `color_hex` VARCHAR(20) DEFAULT NULL,
+    `sold_out` TINYINT(1) NOT NULL DEFAULT '0',
+    `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    `updated_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    PRIMARY KEY (`id`),
+    KEY `fk_option_item_group` (`opt_group_id`),
+    KEY `fk_option_item_ingredient` (`ing_id`),
+    KEY `fk_option_item_unit` (`unit_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+
+CREATE TABLE `opt_item_comp` (
+    `id` BIGINT NOT NULL AUTO_INCREMENT,
+    `opt_item_id` BIGINT NOT NULL,
+    `ing_id` BIGINT DEFAULT NULL,
+    `name` VARCHAR(100) NOT NULL,
+    `quantity` DECIMAL(8,2) DEFAULT NULL,
+    `unit_id` BIGINT DEFAULT NULL,
+    `sort_no` INT NOT NULL DEFAULT '0',
+    PRIMARY KEY (`id`),
+    KEY `fk_option_item_component_item` (`opt_item_id`),
+    KEY `fk_option_item_component_ingredient` (`ing_id`),
+    KEY `fk_option_item_component_unit` (`unit_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+
+CREATE TABLE `opt_policy` (
+    `id` BIGINT NOT NULL AUTO_INCREMENT,
+    `policy_key` CHAR(64) NOT NULL,
+    `name` VARCHAR(120) NOT NULL,
+    `opt_group_id` BIGINT NOT NULL,
+    `sort_no` INT NOT NULL DEFAULT '0',
+    `required` TINYINT(1) NOT NULL DEFAULT '0',
+    `min_select` INT NOT NULL DEFAULT '0',
+    `max_select` INT NOT NULL DEFAULT '1',
+    `item_count` INT NOT NULL DEFAULT '0',
+    `menu_count` INT NOT NULL DEFAULT '0',
+    `active` TINYINT(1) NOT NULL DEFAULT '1',
+    `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    `updated_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    PRIMARY KEY (`id`),
+    UNIQUE KEY `policy_key` (`policy_key`),
+    KEY `fk_option_policy_group` (`opt_group_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+
+CREATE TABLE `opt_policy_item` (
+    `id` BIGINT NOT NULL AUTO_INCREMENT,
+    `policy_id` BIGINT NOT NULL,
+    `opt_item_id` BIGINT NOT NULL,
+    `recommended` TINYINT(1) NOT NULL DEFAULT '0',
+    `is_default` TINYINT(1) NOT NULL DEFAULT '0',
+    `sort_no` INT NOT NULL DEFAULT '0',
+    `active` TINYINT(1) NOT NULL DEFAULT '1',
+    PRIMARY KEY (`id`),
+    UNIQUE KEY `uq_option_policy_item` (`policy_id`,`opt_item_id`),
+    KEY `fk_option_policy_item_item` (`opt_item_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+
+CREATE TABLE `order_item` (
+    `id` BIGINT NOT NULL AUTO_INCREMENT,
+    `order_id` BIGINT NOT NULL,
+    `menu_id` BIGINT NOT NULL,
+    `quantity` INT NOT NULL DEFAULT '1',
+    `price` INT NOT NULL DEFAULT '0',
+    PRIMARY KEY (`id`),
+    KEY `fk_order_item_order` (`order_id`),
+    KEY `fk_order_item_menu` (`menu_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 
 CREATE TABLE `order_item_option` (
-    `id` BIGINT NOT NULL PRIMARY KEY,
+    `id` BIGINT NOT NULL AUTO_INCREMENT,
     `order_item_id` BIGINT NOT NULL,
-    `quantity` INT NOT NULL,
-    `price` INT NOT NULL,
-    `opt_item_id` BIGINT NOT NULL
+    `opt_item_id` BIGINT NOT NULL,
+    `quantity` INT NOT NULL DEFAULT '1',
+    `price` INT NOT NULL DEFAULT '0',
+    PRIMARY KEY (`id`),
+    UNIQUE KEY `uq_order_item_option` (`order_item_id`,`opt_item_id`),
+    KEY `fk_order_item_option_option` (`opt_item_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+
+CREATE TABLE `orders` (
+    `id` BIGINT NOT NULL AUTO_INCREMENT,
+    `order_no` VARCHAR(50) NOT NULL,
+    `order_type_id` BIGINT NOT NULL,
+    `status_id` BIGINT NOT NULL,
+    `total_price` INT NOT NULL DEFAULT '0',
+    `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    `canceled_at` TIMESTAMP NULL DEFAULT NULL,
+    PRIMARY KEY (`id`),
+    UNIQUE KEY `order_no` (`order_no`),
+    KEY `fk_orders_type` (`order_type_id`),
+    KEY `idx_orders_status_created_at` (`status_id`,`created_at`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+
+CREATE TABLE `pay_method_cfg` (
+    `id` BIGINT NOT NULL AUTO_INCREMENT,
+    `method_id` BIGINT NOT NULL,
+    `name` VARCHAR(50) NOT NULL,
+    `image_asset_id` BIGINT DEFAULT NULL,
+    `description` VARCHAR(100) DEFAULT NULL,
+    `active` TINYINT(1) NOT NULL DEFAULT '1',
+    `sort_no` INT NOT NULL DEFAULT '0',
+    PRIMARY KEY (`id`),
+    UNIQUE KEY `method_id` (`method_id`),
+    KEY `fk_pay_method_cfg_image_asset` (`image_asset_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+
+CREATE TABLE `payment` (
+    `id` BIGINT NOT NULL AUTO_INCREMENT,
+    `order_id` BIGINT NOT NULL,
+    `method_id` BIGINT NOT NULL,
+    `status_id` BIGINT NOT NULL,
+    `amount` INT NOT NULL DEFAULT '0',
+    `paid_at` TIMESTAMP NULL DEFAULT NULL,
+    `refunded_at` TIMESTAMP NULL DEFAULT NULL,
+    `idempotency_key` VARCHAR(64) NOT NULL,
+    PRIMARY KEY (`id`),
+    UNIQUE KEY `order_id` (`order_id`),
+    UNIQUE KEY `uk_payment_idempotency_key` (`idempotency_key`),
+    KEY `fk_payment_method` (`method_id`),
+    KEY `fk_payment_status` (`status_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+
+CREATE TABLE `tag` (
+    `id` BIGINT NOT NULL AUTO_INCREMENT,
+    `code` VARCHAR(50) NOT NULL,
+    `name` VARCHAR(50) NOT NULL,
+    `color_hex` VARCHAR(20) DEFAULT NULL,
+    `active` TINYINT(1) NOT NULL DEFAULT '1',
+    PRIMARY KEY (`id`),
+    UNIQUE KEY `code` (`code`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 
@@ -279,11 +393,23 @@ CREATE TABLE `order_item_option` (
 -- Foreign Key Constraints
 -- =============================================
 
-ALTER TABLE `common_code` ADD CONSTRAINT `fk_common_code_code_grp_id`
+ALTER TABLE `common_code` ADD CONSTRAINT `fk_common_code_group`
     FOREIGN KEY (`code_grp_id`) REFERENCES `code_group` (`id`);
 
-ALTER TABLE `ing` ADD CONSTRAINT `fk_ing_type_id`
+ALTER TABLE `ing` ADD CONSTRAINT `fk_ing_icon_asset_id`
+    FOREIGN KEY (`icon_asset_id`) REFERENCES `media_asset` (`id`);
+
+ALTER TABLE `ing` ADD CONSTRAINT `fk_ing_photo_asset_id`
+    FOREIGN KEY (`photo_asset_id`) REFERENCES `media_asset` (`id`);
+
+ALTER TABLE `ing` ADD CONSTRAINT `fk_ingredient_type`
     FOREIGN KEY (`type_id`) REFERENCES `common_code` (`id`);
+
+ALTER TABLE `ing_allergen` ADD CONSTRAINT `fk_ingredient_allergen_allergen`
+    FOREIGN KEY (`allergen_id`) REFERENCES `allergen` (`id`);
+
+ALTER TABLE `ing_allergen` ADD CONSTRAINT `fk_ingredient_allergen_ingredient`
+    FOREIGN KEY (`ing_id`) REFERENCES `ing` (`id`);
 
 ALTER TABLE `ing_nutr` ADD CONSTRAINT `fk_ing_nutr_ing_id`
     FOREIGN KEY (`ing_id`) REFERENCES `ing` (`id`);
@@ -291,116 +417,120 @@ ALTER TABLE `ing_nutr` ADD CONSTRAINT `fk_ing_nutr_ing_id`
 ALTER TABLE `ing_nutr` ADD CONSTRAINT `fk_ing_nutr_source_id`
     FOREIGN KEY (`source_id`) REFERENCES `common_code` (`id`);
 
-ALTER TABLE `ing_allergen` ADD CONSTRAINT `fk_ing_allergen_ing_id`
+ALTER TABLE `item_exclusion` ADD CONSTRAINT `fk_item_exclusion_ingredient`
     FOREIGN KEY (`ing_id`) REFERENCES `ing` (`id`);
 
-ALTER TABLE `ing_allergen` ADD CONSTRAINT `fk_ing_allergen_allergen_id`
-    FOREIGN KEY (`allergen_id`) REFERENCES `allergen` (`id`);
-
-ALTER TABLE `item_exclusion` ADD CONSTRAINT `fk_item_exclusion_order_item_id`
+ALTER TABLE `item_exclusion` ADD CONSTRAINT `fk_item_exclusion_order_item`
     FOREIGN KEY (`order_item_id`) REFERENCES `order_item` (`id`);
 
-ALTER TABLE `item_exclusion` ADD CONSTRAINT `fk_item_exclusion_ing_id`
-    FOREIGN KEY (`ing_id`) REFERENCES `ing` (`id`);
+ALTER TABLE `media_asset` ADD CONSTRAINT `fk_media_asset_provider_id`
+    FOREIGN KEY (`provider_id`) REFERENCES `common_code` (`id`);
 
-ALTER TABLE `menu` ADD CONSTRAINT `fk_menu_cat_id`
+ALTER TABLE `menu` ADD CONSTRAINT `fk_menu_category`
     FOREIGN KEY (`cat_id`) REFERENCES `category` (`id`);
 
-ALTER TABLE `menu_ing` ADD CONSTRAINT `fk_menu_ing_unit_id`
-    FOREIGN KEY (`unit_id`) REFERENCES `common_code` (`id`);
+ALTER TABLE `menu` ADD CONSTRAINT `fk_menu_image_asset_id`
+    FOREIGN KEY (`image_asset_id`) REFERENCES `media_asset` (`id`);
 
-ALTER TABLE `menu_ing` ADD CONSTRAINT `fk_menu_ing_menu_id`
+ALTER TABLE `menu_ing` ADD CONSTRAINT `fk_menu_ingredient_ingredient`
+    FOREIGN KEY (`ing_id`) REFERENCES `ing` (`id`);
+
+ALTER TABLE `menu_ing` ADD CONSTRAINT `fk_menu_ingredient_menu`
     FOREIGN KEY (`menu_id`) REFERENCES `menu` (`id`);
 
-ALTER TABLE `menu_ing` ADD CONSTRAINT `fk_menu_ing_role_id`
+ALTER TABLE `menu_ing` ADD CONSTRAINT `fk_menu_ingredient_role`
     FOREIGN KEY (`role_id`) REFERENCES `common_code` (`id`);
 
-ALTER TABLE `menu_ing` ADD CONSTRAINT `fk_menu_ing_ing_id`
-    FOREIGN KEY (`ing_id`) REFERENCES `ing` (`id`);
+ALTER TABLE `menu_ing` ADD CONSTRAINT `fk_menu_ingredient_unit`
+    FOREIGN KEY (`unit_id`) REFERENCES `common_code` (`id`);
 
-ALTER TABLE `menu_nutr` ADD CONSTRAINT `fk_menu_nutr_source_id`
+ALTER TABLE `menu_nutr` ADD CONSTRAINT `fk_menu_nutrition_menu`
+    FOREIGN KEY (`menu_id`) REFERENCES `menu` (`id`);
+
+ALTER TABLE `menu_nutr` ADD CONSTRAINT `fk_menu_nutrition_source`
     FOREIGN KEY (`source_id`) REFERENCES `common_code` (`id`);
 
-ALTER TABLE `menu_nutr` ADD CONSTRAINT `fk_menu_nutr_menu_id`
-    FOREIGN KEY (`menu_id`) REFERENCES `menu` (`id`);
-
-ALTER TABLE `menu_opt_override` ADD CONSTRAINT `fk_menu_opt_override_menu_id`
-    FOREIGN KEY (`menu_id`) REFERENCES `menu` (`id`);
-
-ALTER TABLE `menu_opt_override` ADD CONSTRAINT `fk_menu_opt_override_opt_item_id`
+ALTER TABLE `menu_opt_override` ADD CONSTRAINT `fk_menu_option_override_item`
     FOREIGN KEY (`opt_item_id`) REFERENCES `opt_item` (`id`);
 
-ALTER TABLE `menu_opt_policy` ADD CONSTRAINT `fk_menu_opt_policy_menu_id`
+ALTER TABLE `menu_opt_override` ADD CONSTRAINT `fk_menu_option_override_menu`
     FOREIGN KEY (`menu_id`) REFERENCES `menu` (`id`);
 
-ALTER TABLE `menu_opt_policy` ADD CONSTRAINT `fk_menu_opt_policy_policy_id`
+ALTER TABLE `menu_opt_policy` ADD CONSTRAINT `fk_menu_option_policy_menu`
+    FOREIGN KEY (`menu_id`) REFERENCES `menu` (`id`);
+
+ALTER TABLE `menu_opt_policy` ADD CONSTRAINT `fk_menu_option_policy_policy`
     FOREIGN KEY (`policy_id`) REFERENCES `opt_policy` (`id`);
 
-ALTER TABLE `menu_tag` ADD CONSTRAINT `fk_menu_tag_menu_id`
+ALTER TABLE `menu_tag` ADD CONSTRAINT `fk_menu_tag_menu`
     FOREIGN KEY (`menu_id`) REFERENCES `menu` (`id`);
 
-ALTER TABLE `menu_tag` ADD CONSTRAINT `fk_menu_tag_tag_id`
+ALTER TABLE `menu_tag` ADD CONSTRAINT `fk_menu_tag_tag`
     FOREIGN KEY (`tag_id`) REFERENCES `tag` (`id`);
 
-ALTER TABLE `opt_group` ADD CONSTRAINT `fk_opt_group_group_type_id`
+ALTER TABLE `opt_group` ADD CONSTRAINT `fk_option_group_type`
     FOREIGN KEY (`group_type_id`) REFERENCES `common_code` (`id`);
 
-ALTER TABLE `opt_item` ADD CONSTRAINT `fk_opt_item_unit_id`
-    FOREIGN KEY (`unit_id`) REFERENCES `common_code` (`id`);
-
-ALTER TABLE `opt_item` ADD CONSTRAINT `fk_opt_item_opt_group_id`
+ALTER TABLE `opt_item` ADD CONSTRAINT `fk_option_item_group`
     FOREIGN KEY (`opt_group_id`) REFERENCES `opt_group` (`id`);
 
-ALTER TABLE `opt_item` ADD CONSTRAINT `fk_opt_item_ing_id`
+ALTER TABLE `opt_item` ADD CONSTRAINT `fk_option_item_ingredient`
     FOREIGN KEY (`ing_id`) REFERENCES `ing` (`id`);
 
-ALTER TABLE `opt_item_comp` ADD CONSTRAINT `fk_opt_item_comp_ing_id`
+ALTER TABLE `opt_item` ADD CONSTRAINT `fk_option_item_unit`
+    FOREIGN KEY (`unit_id`) REFERENCES `common_code` (`id`);
+
+ALTER TABLE `opt_item_comp` ADD CONSTRAINT `fk_option_item_component_ingredient`
     FOREIGN KEY (`ing_id`) REFERENCES `ing` (`id`);
 
-ALTER TABLE `opt_item_comp` ADD CONSTRAINT `fk_opt_item_comp_opt_item_id`
+ALTER TABLE `opt_item_comp` ADD CONSTRAINT `fk_option_item_component_item`
     FOREIGN KEY (`opt_item_id`) REFERENCES `opt_item` (`id`);
 
-ALTER TABLE `opt_item_comp` ADD CONSTRAINT `fk_opt_item_comp_unit_id`
+ALTER TABLE `opt_item_comp` ADD CONSTRAINT `fk_option_item_component_unit`
     FOREIGN KEY (`unit_id`) REFERENCES `common_code` (`id`);
 
-ALTER TABLE `opt_policy` ADD CONSTRAINT `fk_opt_policy_opt_group_id`
+ALTER TABLE `opt_policy` ADD CONSTRAINT `fk_option_policy_group`
     FOREIGN KEY (`opt_group_id`) REFERENCES `opt_group` (`id`);
 
-ALTER TABLE `opt_policy_item` ADD CONSTRAINT `fk_opt_policy_item_policy_id`
+ALTER TABLE `opt_policy_item` ADD CONSTRAINT `fk_option_policy_item_item`
+    FOREIGN KEY (`opt_item_id`) REFERENCES `opt_item` (`id`);
+
+ALTER TABLE `opt_policy_item` ADD CONSTRAINT `fk_option_policy_item_policy`
     FOREIGN KEY (`policy_id`) REFERENCES `opt_policy` (`id`);
 
-ALTER TABLE `opt_policy_item` ADD CONSTRAINT `fk_opt_policy_item_opt_item_id`
-    FOREIGN KEY (`opt_item_id`) REFERENCES `opt_item` (`id`);
-
-ALTER TABLE `order_item` ADD CONSTRAINT `fk_order_item_order_id`
-    FOREIGN KEY (`order_id`) REFERENCES `orders` (`id`);
-
-ALTER TABLE `order_item` ADD CONSTRAINT `fk_order_item_menu_id`
+ALTER TABLE `order_item` ADD CONSTRAINT `fk_order_item_menu`
     FOREIGN KEY (`menu_id`) REFERENCES `menu` (`id`);
 
-ALTER TABLE `order_item_option` ADD CONSTRAINT `fk_order_item_option_order_item_id`
-    FOREIGN KEY (`order_item_id`) REFERENCES `order_item` (`id`);
-
-ALTER TABLE `order_item_option` ADD CONSTRAINT `fk_order_item_option_opt_item_id`
-    FOREIGN KEY (`opt_item_id`) REFERENCES `opt_item` (`id`);
-
-ALTER TABLE `orders` ADD CONSTRAINT `fk_orders_status_id`
-    FOREIGN KEY (`status_id`) REFERENCES `common_code` (`id`);
-
-ALTER TABLE `orders` ADD CONSTRAINT `fk_orders_order_type_id`
-    FOREIGN KEY (`order_type_id`) REFERENCES `common_code` (`id`);
-
-ALTER TABLE `pay_method_cfg` ADD CONSTRAINT `fk_pay_method_cfg_method_id`
-    FOREIGN KEY (`method_id`) REFERENCES `common_code` (`id`);
-
-ALTER TABLE `payment` ADD CONSTRAINT `fk_payment_order_id`
+ALTER TABLE `order_item` ADD CONSTRAINT `fk_order_item_order`
     FOREIGN KEY (`order_id`) REFERENCES `orders` (`id`);
 
-ALTER TABLE `payment` ADD CONSTRAINT `fk_payment_status_id`
+ALTER TABLE `order_item_option` ADD CONSTRAINT `fk_order_item_option_item`
+    FOREIGN KEY (`order_item_id`) REFERENCES `order_item` (`id`);
+
+ALTER TABLE `order_item_option` ADD CONSTRAINT `fk_order_item_option_option`
+    FOREIGN KEY (`opt_item_id`) REFERENCES `opt_item` (`id`);
+
+ALTER TABLE `orders` ADD CONSTRAINT `fk_orders_status`
     FOREIGN KEY (`status_id`) REFERENCES `common_code` (`id`);
 
-ALTER TABLE `payment` ADD CONSTRAINT `fk_payment_method_id`
+ALTER TABLE `orders` ADD CONSTRAINT `fk_orders_type`
+    FOREIGN KEY (`order_type_id`) REFERENCES `common_code` (`id`);
+
+ALTER TABLE `pay_method_cfg` ADD CONSTRAINT `fk_pay_method_cfg_image_asset`
+    FOREIGN KEY (`image_asset_id`) REFERENCES `media_asset` (`id`);
+
+ALTER TABLE `pay_method_cfg` ADD CONSTRAINT `fk_payment_method_config_method`
     FOREIGN KEY (`method_id`) REFERENCES `common_code` (`id`);
+
+ALTER TABLE `payment` ADD CONSTRAINT `fk_payment_method`
+    FOREIGN KEY (`method_id`) REFERENCES `common_code` (`id`);
+
+ALTER TABLE `payment` ADD CONSTRAINT `fk_payment_order`
+    FOREIGN KEY (`order_id`) REFERENCES `orders` (`id`);
+
+ALTER TABLE `payment` ADD CONSTRAINT `fk_payment_status`
+    FOREIGN KEY (`status_id`) REFERENCES `common_code` (`id`);
+
 
 SET FOREIGN_KEY_CHECKS = 1;
 

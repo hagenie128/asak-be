@@ -51,7 +51,7 @@ public class UserOrderService {
   private ValidatedOrderResult validateAndPriceItems(
       List<? extends OrderItemCommand> requestedItems) {
 
-    validateItemQuantityLimits(requestedItems, OrderItemCommand::getQuantity);
+    validateItemQuantityLimits(requestedItems, item -> item.getQuantity());
 
     int totalAmount = 0;
     List<ValidatedOrderItem> validatedItems = new ArrayList<>();
@@ -106,7 +106,7 @@ public class UserOrderService {
         unitPrice += optionInfo.getExtraPrice() * option.getQuantity();
 
         selectedQuantityByPolicy.merge(
-            optionInfo.getPolicyId(), option.getQuantity(), Integer::sum);
+            optionInfo.getPolicyId(), option.getQuantity(), (existing, added) -> existing + added);
 
         validatedOptions.add(
             new ValidatedOptionItem(

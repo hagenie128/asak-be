@@ -1,7 +1,6 @@
 package com.asak.admin.service;
 
 import com.asak.admin.dto.request.CreateMenuOptionGroupRequest;
-import com.asak.admin.dto.request.CreateMenuOptionItemRequest;
 import com.asak.admin.dto.response.OptionGroupSummaryResponse;
 import com.asak.admin.mapper.AdminOptionMapper;
 import com.asak.common.exception.CustomException;
@@ -90,8 +89,8 @@ public class AdminOptionService {
       return null;
     }
     return group.getItems().stream()
-        .filter(item -> Boolean.TRUE.equals(item.getIsRecommended()))
-        .map(CreateMenuOptionItemRequest::getOptionItemId)
+        .filter(item -> item != null && Boolean.TRUE.equals(item.getIsRecommended()))
+        .map(item -> item.getOptionItemId())
         .filter(id -> id != null)
         .findFirst()
         .orElse(null);
