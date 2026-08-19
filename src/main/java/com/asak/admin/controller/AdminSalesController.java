@@ -1,10 +1,12 @@
 package com.asak.admin.controller;
 
 import com.asak.admin.dto.response.sales.DailySalesSummaryItemResponse;
+import com.asak.admin.dto.response.sales.MonthlySalesSummaryItemResponse;
 import com.asak.admin.service.AdminSalesService;
 import com.asak.common.exception.ErrorCode;
 import com.asak.common.response.ApiResponse;
 import java.time.LocalDate;
+import java.util.Collections;
 import java.util.List;
 import org.jspecify.annotations.Nullable;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -53,8 +55,15 @@ public class AdminSalesController {
     }
     return ApiResponse.success("ADMIN_SALES_SUMMARY_SUCCESS", "관리자 매출 요약 조회 성공", responses);
   }
+
   // TODO-016: GET /api/admin/sales/monthly?year. year 범위와 월이 없는 경우의 0값/누락 표현을
   // DTO로 고정한다.
+  @GetMapping("/sales/monthly")
+  public ApiResponse<List<MonthlySalesSummaryItemResponse>> getMonthlySalesSummary(
+      @RequestParam int year) {
+    return ApiResponse.success(
+        "ADMIN_MONTHLY_SALES_SUCCESS", "관리자 월별 매출 조회 성공", Collections.emptyList());
+  }
   // TODO-017: GET /api/admin/sales/daily?date. 매장 시간대 기준 일자와 주문 상태 포함 기준을 명시한다.
   // TODO-023: GET /api/admin/dashboard. summary와 중복 집계를 피하고 TODO-024/025이 소비할 단일
   // 응답 DTO를 확정한다.
