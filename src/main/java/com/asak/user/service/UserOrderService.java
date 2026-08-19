@@ -315,8 +315,8 @@ public class UserOrderService {
     // 주문 유형 text로 변환(orderTypeCode는 응답값이 아니라 DB 조회 조건)
     String orderTypeCode = request.getOrderType().name();
 
-                // 주문 상태는 응답에서도 재사용하므로 OrderStatus enum으로 유지한다.
-                OrderStatus initialStatus = OrderStatus.RECEIVED;
+    // 주문 상태는 응답에서도 재사용하므로 OrderStatus enum으로 유지한다.
+    OrderStatus initialStatus = OrderStatus.RECEIVED;
 
     // 주문 유형 확인
     Long orderTypeId = orderMapper.findOrderTypeId(orderTypeCode);
@@ -410,16 +410,16 @@ public class UserOrderService {
       }
     }
 
-                // 10. 응답 생성
-                // [피드백] CreateOrderResponse는 @Builder 기반이므로 setter가 아니라 완성된 응답을 한 번에 만든다.
-                // OrderStatus enum은 JSON 직렬화 시 최신 명세의 "RECEIVED" 문자열로 반환된다.
-                return CreateOrderResponse.builder()
-                                .orderId(orderId)
-                                .orderNo(orderNo)
-                                .totalAmount(result.totalAmount())
-                                .status(initialStatus)
-                                .build();
-        }
+    // 10. 응답 생성
+    // [피드백] CreateOrderResponse는 @Builder 기반이므로 setter가 아니라 완성된 응답을 한 번에 만든다.
+    // OrderStatus enum은 JSON 직렬화 시 최신 명세의 "RECEIVED" 문자열로 반환된다.
+    return CreateOrderResponse.builder()
+        .orderId(orderId)
+        .orderNo(orderNo)
+        .totalAmount(result.totalAmount())
+        .status(initialStatus)
+        .build();
+  }
 
   /** 기존 orders 테이블을 기준으로 ASAKyyMMddNNNN 주문번호 생성 */
   private String generateOrderNo() {

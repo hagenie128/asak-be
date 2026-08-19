@@ -26,8 +26,6 @@ import org.apache.ibatis.type.Alias;
     }
 */
 
-
-
 @Getter
 @Setter
 @NoArgsConstructor
