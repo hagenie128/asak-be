@@ -160,10 +160,10 @@ com.asak/
     │   ├── AdminMenuController.java # - 메뉴 목록·상세·등록·수정·삭제, 카테고리·재료 조회
     │   ├── AdminOptionController.java # - 옵션 그룹 목록·상세 조회
     │   ├── AdminOrderController.java# - 주문 목록·상세, Live 보드, 상태 변경·취소
-    │   ├── AdminAuthController.java # - 관리자 로그인 (TODO-060 미구현)
-    │   ├── AdminSoldOutController.java # - 품절 관리 (TODO-040 미구현)
-    │   ├── AdminPaymentMethodController.java # - 결제수단 설정 (TODO-044 미구현)
-    │   └── AdminStatsController.java# - 매출·대시보드 집계 (TODO-048~056 미구현)
+    │   ├── AdminAuthController.java # - 관리자 로그인 (TODO-027 미구현)
+    │   ├── AdminSoldOutController.java # - 품절 관리 (TODO-007 미구현)
+    │   ├── AdminPaymentMethodController.java # - 결제수단 설정 (TODO-011 미구현)
+    │   └── AdminStatsController.java# - 매출·대시보드 집계 (TODO-015~023 미구현)
     │
     ├── service/                     # [비즈니스 로직] 관리자 실제 처리
     │   ├── AdminMenuService.java    # - 메뉴 등록·수정·soft delete, 참조 존재 검증
@@ -252,11 +252,11 @@ src/main/resources/
 
 | API | Controller | 기본 경로 | 남은 작업 |
 | --- | --- | --- | --- |
-| API-009 / 010 | `AdminSoldOutController` | `/api/admin/soldOut` | TODO-040 품절 조회·변경 |
-| API-015 / 016 | `AdminPaymentMethodController` | `/api/admin/paymentMethods` | TODO-044 결제수단 목록·설정 |
-| API-017 / 018 / 019 | `AdminStatsController` | `/api/admin/sales/**` | TODO-048~050 일별·요약·월별 매출 |
-| API-020 | `AdminStatsController` | `/api/admin/dashboard` | TODO-056 대시보드 집계 |
-| — | `AdminAuthController` | `/api/admin/login` | TODO-060 로그인·JWT 발급 |
+| API-009 / 010 | `AdminSoldOutController` | `/api/admin/soldOut` | TODO-007 품절 조회·변경 |
+| API-015 / 016 | `AdminPaymentMethodController` | `/api/admin/paymentMethods` | TODO-011 결제수단 목록·설정 |
+| API-017 / 018 / 019 | `AdminStatsController` | `/api/admin/sales/**` | TODO-015~017 일별·요약·월별 매출 |
+| API-020 | `AdminStatsController` | `/api/admin/dashboard` | TODO-023 대시보드 집계 |
+| — | `AdminAuthController` | `/api/admin/login` | TODO-027 로그인·JWT 발급 |
 
 > ⚠️ API-015/016 경로는 현재 코드가 camelCase(`/api/admin/paymentMethods`)이고 Product Bible은 kebab-case(`/api/admin/payment-methods`)입니다. 프론트 연결 전에 정본을 하나로 확정해야 합니다.
 
@@ -345,7 +345,7 @@ Java와 JSON은 camelCase, DB 컬럼은 snake_case를 씁니다.
 
 `SecurityConfig`는 JWT 전환 전 단계로 **모든 요청을 임시 허용**(`anyRequest().permitAll()`)하고, CORS는 모든 origin을 허용합니다. 세션은 `STATELESS`이고 `PasswordEncoder`와 `AuthenticationManager` Bean만 준비된 상태입니다.
 
-> ⚠️ 인증이 완료된 상태로 간주하면 안 됩니다. 배포 전에 `/api/admin/login`은 `permitAll`, 그 외 `/api/admin/**`은 `authenticated`로 전환하고 허용 origin을 제한해야 합니다. (TODO-063)
+> ⚠️ 인증이 완료된 상태로 간주하면 안 됩니다. 배포 전에 `/api/admin/login`은 `permitAll`, 그 외 `/api/admin/**`은 `authenticated`로 전환하고 허용 origin을 제한해야 합니다. (TODO-030)
 
 ---
 
@@ -427,7 +427,7 @@ Controller → Service → Mapper interface → Mapper XML → MySQL → Respons
 
 **역할:** JWT(JSON Web Token)를 생성·파싱·검증합니다.
 
-**동작 방식:** `common/security` 패키지의 `JwtTokenProvider`가 이 라이브러리로 토큰을 만들고 검증합니다. 관리자 로그인(TODO-060)이 구현되면 실제로 사용됩니다.
+**동작 방식:** `common/security` 패키지의 `JwtTokenProvider`가 이 라이브러리로 토큰을 만들고 검증합니다. 관리자 로그인(TODO-027)이 구현되면 실제로 사용됩니다.
 
 ### 10) Spring Boot DevTools
 

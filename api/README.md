@@ -34,10 +34,10 @@ Bruno `api` 폴더는 실행 중인 백엔드와 맞춰 호출하기 위한 요�
 | 주문 취소 | `PATCH /api/admin/orders/{orderId}/cancel` | 구현. code `ADMIN_ORDER_CANCEL_SUCCESS` |
 | 관리자 메뉴 | `/api/admin/menus` CRUD·카테고리·재료 | 구현 |
 | 옵션 그룹 | `GET /api/admin/opts/groups`, `GET /api/admin/opts/{optionGroupId}` | 구현 |
-| 품절 | `/api/admin/soldOut` | SPEC_ONLY (TODO-040) |
-| 관리자 결제수단 | `/api/admin/paymentMethods` | SPEC_ONLY (TODO-044) |
-| 매출·대시보드 | `/api/admin/sales/**`, `/api/admin/dashboard` | SPEC_ONLY (TODO-048~056) |
-| 관리자 로그인 | `POST /api/admin/login` | SPEC_ONLY (TODO-060) |
+| 품절 | `/api/admin/soldOut` | SPEC_ONLY (TODO-007) |
+| 관리자 결제수단 | `/api/admin/paymentMethods` | SPEC_ONLY (TODO-011) |
+| 매출·대시보드 | `/api/admin/sales/**`, `/api/admin/dashboard` | SPEC_ONLY (TODO-015~023) |
+| 관리자 로그인 | `POST /api/admin/login` | SPEC_ONLY (TODO-027) |
 
 ## 요청 파일 형식
 

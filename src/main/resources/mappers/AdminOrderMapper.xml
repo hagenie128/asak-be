@@ -149,9 +149,9 @@ SET status_id = #{canceledStatusId},
 canceled_at = NOW()
 WHERE id = #{orderId}
 </update>
-<!-- TODO-072: 환불 SQL을 cancel SQL과 분리한다.
+<!-- TODO-039: 환불 SQL을 cancel SQL과 분리한다.
   1) orders 취소와 payment 환불 상태 변경을 한 쿼리로 묶지 않고, 각각 의미 있는 update id와 행 수를 반환한다.
-  2) TODO-008/071에서 승인 결제·환불 상태·멱등성 정책을 확정한 뒤 payment/refund update와 조회 SQL을 추가한다.
+  2) TODO-001/038에서 승인 결제·환불 상태·멱등성 정책을 확정한 뒤 payment/refund update와 조회 SQL을 추가한다.
   3) Service가 cancel/refund 시나리오를 하나의 트랜잭션으로 호출하고, 0건·동시 변경·이미 환불됨을 ErrorCode로 구분한다.
   4) MyBatis XML 변경 뒤 compileJava만으로 끝내지 말고 Spring context 기동과 실제 row 검증까지 실행한다.
 -->

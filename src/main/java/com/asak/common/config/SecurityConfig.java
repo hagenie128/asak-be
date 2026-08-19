@@ -31,7 +31,7 @@ public class SecurityConfig {
         .sessionManagement(
             session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
 
-        // TODO-063: TODO-061 provider와 TODO-062 filter 검증 뒤 /api/admin/login은 permitAll,
+        // TODO-030: TODO-028 provider와 TODO-029 filter 검증 뒤 /api/admin/login은 permitAll,
         // 그 외 /api/admin/**는 authenticated로 전환한다. kiosk/user 공개 범위는 별도 명시한다.
         // 401(미인증)·403(권한 없음) JSON 응답을 GlobalExceptionHandler/API envelope와 맞추고 CORS preflight는 막지
         // 않는다.
@@ -71,7 +71,7 @@ public class SecurityConfig {
   }
 
   /**
-   * TODO-060 연동: 관리자 로그인 시 AuthenticationManager를 사용한다. UserDetailsService/PasswordEncoder와 실제 관리자
+   * TODO-027 연동: 관리자 로그인 시 AuthenticationManager를 사용한다. UserDetailsService/PasswordEncoder와 실제 관리자
    * 계정 공급자가 등록된 뒤 정상·실패 인증을 확인한다.
    */
   @Bean

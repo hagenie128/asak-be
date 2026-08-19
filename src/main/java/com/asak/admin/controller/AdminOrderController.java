@@ -104,7 +104,7 @@ public class AdminOrderController {
     return ApiResponse.success("ADMIN_ORDER_CANCEL_SUCCESS", "관리자 주문 취소 성공", null);
   }
 
-  // TODO-071: 환불은 cancel과 분리한 PATCH /api/admin/orders/{orderId}/refund 계약으로 확정한다.
-  // TODO-008의 승인 결제 취소 정책, TODO-072의 payment/refund SQL, 프런트 TODO-073/075를 함께 확정한 뒤 구현한다.
+  // TODO-038: 환불은 cancel과 분리한 PATCH /api/admin/orders/{orderId}/refund 계약으로 확정한다.
+  // TODO-001의 승인 결제 취소 정책, TODO-039의 payment/refund SQL, 프런트 TODO-040/042를 함께 확정한 뒤 구현한다.
   // request body·멱등키·허용 상태·이미 환불됨(409) ErrorCode를 문서화하고, 상태 전이와 결제 변경은 하나의 트랜잭션으로 검증한다.
 }
