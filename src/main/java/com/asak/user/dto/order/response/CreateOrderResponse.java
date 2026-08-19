@@ -4,6 +4,7 @@ import com.asak.common.enums.OrderStatus;
 import lombok.Builder;
 import lombok.Getter;
 
+//    api-005 주문생성
 // {
 //     "orderId":1,
 //     "orderNo":"ASAK20260723000001",

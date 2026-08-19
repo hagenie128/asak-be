@@ -17,9 +17,14 @@ headers {
 body:json {
   {
     "orderId": {{orderId}},
-    "orderStatus": "READY",
-    "paymentMethodCode": "CARD",
-    "idempotencyKey": "bruno-local-replace-me"
+    "orderStatus": "RECEIVED",
+    "paymentMethodCode": "TOSS_PAY",
+    "idempotencyKey": "uuid",
+    "tossPayment": {
+      "paymentKey": "tgen_20260819...",
+      "orderId": "A202607230001",
+      "amount": 8900
+    }
   }
 }
 
@@ -27,7 +32,9 @@ docs {
   # API-006
   POST /api/kiosk/payments
   응답 code: KIOSK_PAYMENT_APPROVED
-  body: orderId, orderStatus(=READY), paymentMethodCode, idempotencyKey
+  body: orderId, orderStatus(=RECEIVED), paymentMethodCode(=TOSS_PAY), idempotencyKey, tossPayment
+  tossPayment: paymentKey, orderId(토스페이먼츠 주문번호), amount
+  실행 전 idempotencyKey, paymentKey, tossPayment.orderId, amount를 실제 결제값으로 교체
   data: paymentId, orderId, orderNo, paymentStatus, approvedAmount, approvedAt, waitingOrderCount
   레거시 amount/paidAt 사용 금지
 }

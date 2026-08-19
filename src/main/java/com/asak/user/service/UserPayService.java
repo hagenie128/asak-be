@@ -12,6 +12,7 @@ import com.asak.user.dto.payment.command.PaymentInsertCommand;
 import com.asak.user.dto.payment.query.PaymentIdempotencyCheck;
 import com.asak.user.dto.payment.query.PaymentMethodContext;
 import com.asak.user.dto.payment.query.PaymentOrderContext;
+import com.asak.user.dto.payment.query.TossPaymentAuth;
 import com.asak.user.mapper.UserPayMapper;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -61,6 +62,42 @@ public class UserPayService {
     // 4. 결제 요청은 RECEIVED 주문에 대해서만 허용
     if (request.getOrderStatus() != OrderStatus.RECEIVED) {
       throw new CustomException(ErrorCode.ORDER_STATUS_CONFLICT);
+    }
+
+
+    /*
+     * 토스를 사용하는 결제수단은
+     * 프론트에서 받은 토스 인증 결과가 필수다.
+     */
+    if (isTossEasyPay(
+        request.getPaymentMethodCode()
+    )) {
+        TossPaymentAuth tossPayment =
+            request.getTossPayment();
+
+        if (tossPayment == null
+            || tossPayment.getPaymentKey() == null
+            || tossPayment.getPaymentKey().isBlank()
+            || tossPayment.getOrderId() == null
+            || tossPayment.getOrderId().isBlank()
+            || tossPayment.getAmount() == null
+            || tossPayment.getAmount() <= 0) {
+            throw new CustomException(
+                ErrorCode.TOSS_PAYMENT_AUTH_REQUIRED
+            );
+        }
+    }
+
+        /*
+     * CARD는 토스 인증 데이터를 사용하지 않는다.
+     * 잘못 섞인 요청도 차단하려면 아래 검증을 추가한다.
+     */
+    if (request.getPaymentMethodCode()
+            == PaymentMethod.CARD
+        && request.getTossPayment() != null) {
+        throw new CustomException(
+            ErrorCode.INVALID_PAYMENT_REQUEST
+        );
     }
   }
 
@@ -119,24 +156,40 @@ public class UserPayService {
 
   // ------------ getPaymentResult()가 null 일때 처리 ------------
   private ApprovePaymentResponse getRequiredPaymentResult(Long paymentId) {
-
+    
     ApprovePaymentResponse result = payMapper.getPaymentResult(paymentId);
-
+    
     if (result == null) {
       throw new CustomException(ErrorCode.PAYMENT_CREATE_FAILED);
     }
-
+    
     return result;
   }
+  
+  // ------------ 토스 결제수단 판별 추가 ------------
+  private boolean isTossEasyPay(PaymentMethod paymentMethod) {
+    return paymentMethod == PaymentMethod.TOSS_PAY
+        || paymentMethod == PaymentMethod.KAKAO_PAY
+        || paymentMethod == PaymentMethod.NAVER_PAY;
+}
 
   // requestBody 정본
-  //     {
-  // "orderId": 1,
-  // "orderStatus": "RECEIVED",
-  // "paymentMethodCode": "CARD",
-  // "idempotencyKey": "uuid"
-  // }
+  // --토스페이 반영 x --
+  // {"orderId": 1, "paymentMethodCode": "CARD", "idempotencyKey": "uuid",
+  // "orderStatus": "RECEIVED"}
 
+  // --토스페이반영 o --
+  // {
+  //   "orderId": 1,
+  //   "orderStatus": "RECEIVED",
+  //   "paymentMethodCode": "TOSS_PAY",
+  //   "idempotencyKey": "uuid",
+  //   "tossPayment": {
+  //     "paymentKey": "tgen_...",
+  //     "orderId": "A202607230001",
+  //     "amount": 8900
+  //   }
+  // }
   //     {
   //   "success": true,
   //   "status": 200,

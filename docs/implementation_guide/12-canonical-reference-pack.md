@@ -1,6 +1,6 @@
 # 백엔드 정본 참조 팩
 
-> 상태: Current · 확인일: 2026-07-28
+> 상태: Current · 확인일: 2026-08-19
 > 목적: API를 구현할 때 Product Bible, Bruno, Admin/Kiosk mock, 현재 소스를 다시
 > 흩어져 찾지 않도록 **실행에 필요한 내용만** 한 곳에 모은다. 이 문서는 계약 요약이며,
 > 소스 코드를 대신하거나 구현 완료를 뜻하지 않는다.
@@ -89,16 +89,27 @@ POST /api/kiosk/payments
 
 ```json
 {
-  "orderId": 128,
-  "paymentMethodCode": "CARD",
-  "idempotencyKey": "uuid"
+  "orderId": 1,
+  "orderStatus": "RECEIVED",
+  "paymentMethodCode": "TOSS_PAY",
+  "idempotencyKey": "uuid",
+  "tossPayment": {
+    "paymentKey": "tgen_20260819...",
+    "orderId": "A202607230001",
+    "amount": 8900
+  }
 }
 ```
 
+`tossPayment`는 토스페이먼츠 승인에 필요한 정보다. 최상위 `orderId`는 백엔드의 주문 PK이고,
+`tossPayment.orderId`는 토스페이먼츠에 전달한 주문번호다. `tossPayment.amount`는
+`orders.total_price`와 일치해야 한다.
+
 성공 data는 `paymentId`, `orderId`, `orderNo`, `paymentStatus: APPROVED`,
 `approvedAmount`, `waitingOrderCount`, `approvedAt`이다. 실패 data는 주문을 지우지 않고
-`paymentStatus: FAILED`, `failureCode`, `canRetry`를 반환한다. `CARD`에는 삼성페이가
-포함되고 `KAKAO_PAY`, `NAVER_PAY`는 비활성 상태여도 목록에는 표시할 수 있다.
+`paymentStatus: FAILED`, `failureCode`, `canRetry`를 반환한다. 토스페이먼츠 연동 결제의
+`paymentMethodCode`는 `TOSS_PAY`를 사용한다. `CARD`에는 삼성페이가 포함되고
+`KAKAO_PAY`, `NAVER_PAY`는 비활성 상태여도 목록에는 표시할 수 있다.
 
 ## 5. Admin: 첫 세로 기능은 실시간 주문 — API-021 + API-008
 
