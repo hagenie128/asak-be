@@ -1,6 +1,7 @@
 package com.asak.admin.mapper;
 
 import java.util.List;
+import java.util.Map;
 
 import com.asak.admin.dto.response.sales.DailyTopMenuResponse;
 import com.asak.admin.dto.response.sales.HourlyTopMenuResponse;
@@ -12,11 +13,12 @@ import com.asak.admin.dto.response.sales.SalesSummaryResponse;
 // XML resultMap/컬럼 alias를 DTO camelCase와 맞춘 뒤, 빈 기간·0 매출·경계 날짜를 Mapper 단위로 확인한다.
 public interface AdminSalesMapper {
 
-  List<SalesSummaryResponse> getSalesSummary(String startDate, String endDate);
+  List<SalesSummaryResponse> getSalesSummary(Map<String, Object> dateRange);
 
-  List<SalesSummaryResponse> getSalesHourly(String year);
+  List<SalesSummaryResponse> getSalesHourly(String date);
 
   List<DailyTopMenuResponse> getDailyTopMenu(String date);
 
   List<HourlyTopMenuResponse> getHourlyTopMenu(String date);
+
 }

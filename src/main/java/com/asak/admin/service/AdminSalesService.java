@@ -1,9 +1,11 @@
 package com.asak.admin.service;
 
+import java.time.LocalDate;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import com.asak.admin.dto.response.sales.DailyTopMenuResponse;
 import com.asak.admin.dto.response.sales.HourlyTopMenuResponse;
@@ -23,15 +25,19 @@ public class AdminSalesService {
   }
 
   public List<SalesSummaryResponse> getSalesSummary(String startDate, String endDate) {
-    List<SalesSummaryResponse> response = adminSalesMapper.getSalesSummary(startDate, endDate);
+
+    Map<String, Object> dateRange = new HashMap<>();
+    dateRange.put("startDate", LocalDate.parse(startDate));
+    dateRange.put("endDate", LocalDate.parse(endDate));
+    List<SalesSummaryResponse> response = adminSalesMapper.getSalesSummary(dateRange);
     if (response.isEmpty()) {
       return null;
     }
     return response;
   }
 
-  public List<SalesSummaryResponse> getSalesHourly(String year) {
-    List<SalesSummaryResponse> response = adminSalesMapper.getSalesHourly(year);
+  public List<SalesSummaryResponse> getSalesHourly(String date) {
+    List<SalesSummaryResponse> response = adminSalesMapper.getSalesHourly(date);
     if (response.isEmpty()) {
       return null;
     }

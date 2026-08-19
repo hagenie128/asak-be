@@ -12,7 +12,7 @@
 | 예외 처리 | `ErrorCode`, `GlobalExceptionHandler` 구현됨 | 오류 코드 정본은 `ErrorCode.java` |
 | Controller | 13개. 9개가 매핑 annotation 보유 | 나머지는 골격 상태일 수 있으니 파일을 직접 확인 |
 | Service | 10개. 주문·결제·메뉴 로직 구현됨 (`UserOrderService` 471줄, `AdminMenuService` 279줄, `UserPayService` 206줄) | 금액 계산 정본은 `UserOrderService.validateAndPriceItems()` |
-| Mapper XML | 10개 중 6개에 SQL 있음(총 66문). `AdminPaymentMethodMapper`, `AdminSoldOutMapper`, `AdminStatsMapper`, `DeviceEventMapper` 4개는 **비어 있음** | 해당 4개 영역은 아직 SQL 없음 |
+| Mapper XML | 10개 중 7개에 SQL 있음(총 70문). `AdminPaymentMethodMapper`, `AdminSoldOutMapper`, `DeviceEventMapper` 3개는 **비어 있음** | 해당 3개 영역은 아직 SQL 없음 |
 | Bruno `api/` | 요청 37개 | 구현된 API와 미구현 API가 섞여 있으니 개별 확인 |
 | MyBatis | `mapper-locations: classpath:/mappers/**/*.xml` 설정됨 | — |
 | DB 설정 | 외부 MySQL 접속 정보와 `ddl-auto=none` | 스키마를 코드가 자동 변경하지 않는다. 실제 컬럼은 `docs/아삭_mysql.sql` 실측본으로 확인 |
@@ -59,8 +59,9 @@ HTTP `status`는 전송 결과(`400`/`404`/`409` 등)이고, 업무 `code`는 �
 - `code` 값은 `ErrorCode` enum 상수 이름과 같은 문자열이다. `MENU_SOLD_OUT`, `CART_EMPTY`,
   `IDEMPOTENCY_KEY_CONFLICT` 처럼 읽어서 뜻이 통해야 한다.
 - **정본은 [`ErrorCode.java`](../../src/main/java/com/asak/common/exception/ErrorCode.java)다.**
-  2026-08-19 기준 51개이며 장바구니·메뉴·옵션 검증 / 주문 / 결제 / 매출 네 묶음으로 나뉜다.
+  2026-08-19 기준 53개이며 장바구니·메뉴·옵션 검증 / 주문 / 결제 / 매출 네 묶음으로 나뉜다.
   HTTP status 분포는 `CONFLICT` 17, `NOT_FOUND` 13, `BAD_REQUEST` 12, `INTERNAL_SERVER_ERROR` 11.
+  개수는 자주 바뀌므로 정확한 목록은 항상 파일을 직접 볼 것.
 - 새 오류를 추가할 때는 `ErrorCode` 에 상수를 넣고 `CustomException` 으로 던진다.
   `GlobalExceptionHandler` 가 `ApiResponse.error(errorCode)` 로 위 형태의 응답을 만든다.
 - 잡히지 않은 예외는 `500` + `code: "INTERNAL_SERVER_ERROR"` 로 나간다.
