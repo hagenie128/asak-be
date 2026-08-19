@@ -52,12 +52,22 @@
 | `menu.sold_out` | `isSoldOut` | 메뉴 판매 가능 여부 |
 | `category.sort_no` | `sortOrder` | 탭/목록 정렬 |
 | `category.active` | `isActive` | 카테고리 노출 여부 |
+| `payment.idempotency_key` | `idempotencyKey` | 결제 승인 요청 필드. 저장 후 UNIQUE로 중복 결제 차단 |
+| `menu.image_asset_id` | `mediaAssetId` | `media_asset` FK. 조회 URL은 `media_asset.url` |
 
 ## 실제 DB 정책
+
+> 컬럼·기본값·제약조건의 정본은 [`docs/아삭_mysql.sql`](../아삭_mysql.sql)이다. 운영 DB 실측본이며
+> [`docs/tools/schema_sync.py`](../tools/README.md)로 재생성·검증한다. 문서와 실제가 어긋난 적이 있으므로
+> 컬럼을 기억이나 옛 문서로 가정하지 말 것 (2026-08-19 대조 내역: [`docs/2026-08-19_schema_doc_drift.md`](../2026-08-19_schema_doc_drift.md)).
 
 - 옵션 조회 경로는 `menu_opt_policy → opt_policy → opt_policy_item → opt_item`이다. `menu_option`은 레거시 명칭이다.
 - 재료 제외와 선택 옵션은 `item_exclusion`, `order_item`, `order_item_option`에 저장한다.
 - 결제수단과 상태 코드는 `pay_method_cfg`, `common_code`를 사용한다.
+- 결제 승인은 `payment.idempotency_key`(`VARCHAR(64) NOT NULL UNIQUE`, DB 기본값 없음)로 멱등성을 보장한다. 클라이언트가 요청마다 UUID를 보내고 서버가 저장한다. 같은 키인데 `order_id`나 결제수단이 다르면 `IDEMPOTENCY_KEY_CONFLICT`(409)다. 수동 INSERT 시 이 컬럼을 빠뜨리면 `Field 'idempotency_key' doesn't have a default value`로 실패한다.
+- 이미지는 `media_asset`에 모으고 `menu.image_asset_id`, `ing.icon_asset_id`, `ing.photo_asset_id`, `pay_method_cfg.image_asset_id`가 참조한다. 메뉴 조회는 `media_asset`을 `LEFT JOIN`한다. 배경은 [`MENU_IMAGE_ASSET_FLOW.md`](../MENU_IMAGE_ASSET_FLOW.md) 참고.
+- `orders.order_no`와 `payment.order_id`는 UNIQUE다. 주문번호 중복 발급과 한 주문의 이중 결제 행을 DB가 막는다.
+- 외래키 제약 이름은 옛 테이블 이름을 쓰는 것이 많다(`fk_ingredient_type`, `fk_payment_method_config_method` 등). `DROP FOREIGN KEY` 시 테이블명에서 유추하지 말고 실측본을 확인한다.
 - 매출 API는 `vw_sales_daily`, `vw_sales_hourly`, `vw_top_menu_daily`, `vw_top_menu_hourly`를 읽기 원본으로 사용한다.
 - 전액 환불의 순매출은 0이어야 하며, 취소/환불 주문은 인기 메뉴 집계에서 제외한다.
 - `menu.active`는 실제 DB에 없으므로 새 필드로 가정하지 않는다.
@@ -72,6 +82,8 @@
 
 ## 정본 링크
 
+- [테이블 DDL 실측본](../아삭_mysql.sql) · [뷰 정의](../view.sql) · [동기화 도구](../tools/README.md)
+- [중앙 테이블 정의서](../../../ASAK/docs/wiki/db-table-definition.md) · [중앙 뷰 정의서](../../../ASAK/docs/wiki/db-view-definition.md)
 - [API 계약 Bruno 안내](../../api/README.md)
 - [메뉴 API 계약](../../../ASAK/docs/product_bible/03_Menu_Inventory_SoldOut/menu/MENU_API_CONTRACT.md)
 - [주문 API 계약](../../../ASAK/docs/product_bible/02_Order_Cart_Payment/order/ORDER_API_CONTRACT.md)

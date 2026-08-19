@@ -345,7 +345,7 @@ FROM ((((((`orders` `o`
                   JOIN `opt_item` `oit` on((`oit`.`id` = `oio`.`opt_item_id`)))
                  JOIN `opt_group` `og` on((`og`.`id` = `oit`.`opt_group_id`)))
                 JOIN `common_code` `gt` on((`gt`.`id` = `og`.`group_type_id`)))
-          WHERE ((`active_st`.`code` IN ('RECEIVED','PREPARING'))
+          WHERE ((`active_st`.`code` IN ('RECEIVED','PREPARING','READY'))
                  AND (`gt`.`code` IN ('BASE','DRESSING')))
           GROUP BY `oio`.`order_item_id`) `bd` on((`bd`.`order_item_id` = `oi`.`id`)))
       LEFT JOIN
@@ -363,7 +363,7 @@ FROM ((((((`orders` `o`
                     JOIN `opt_item` `oit` on((`oit`.`id` = `oio`.`opt_item_id`)))
                    JOIN `opt_group` `og` on((`og`.`id` = `oit`.`opt_group_id`)))
                   JOIN `common_code` `gt` on((`gt`.`id` = `og`.`group_type_id`)))
-            WHERE ((`active_st`.`code` IN ('RECEIVED','PREPARING'))
+            WHERE ((`active_st`.`code` IN ('RECEIVED','PREPARING','READY'))
                    AND (`gt`.`code` NOT IN ('BASE','DRESSING','REQUEST')))
             UNION ALL SELECT `ie`.`order_item_id` AS `order_item_id`,'exclude' AS `tone`,`i`.`name` AS `label`
             FROM ((((`orders` `active_o`
@@ -371,9 +371,9 @@ FROM ((((((`orders` `o`
                     JOIN `order_item` `active_oi` on((`active_oi`.`order_id` = `active_o`.`id`)))
                    JOIN `item_exclusion` `ie` on((`ie`.`order_item_id` = `active_oi`.`id`)))
                   JOIN `ing` `i` on((`i`.`id` = `ie`.`ing_id`)))
-            WHERE (`active_st`.`code` IN ('RECEIVED','PREPARING'))) `tag_rows`
+            WHERE (`active_st`.`code` IN ('RECEIVED','PREPARING','READY'))) `tag_rows`
          GROUP BY `tag_rows`.`order_item_id`) `tags` on((`tags`.`order_item_id` = `oi`.`id`)))
-WHERE (`st`.`code` IN ('RECEIVED','PREPARING'))
+WHERE (`st`.`code` IN ('RECEIVED','PREPARING','READY'))
 GROUP BY `o`.`id`,`o`.`order_no`,`ot`.`name`,`st`.`code`,`o`.`total_price`,`o`.`created_at`;
 
 -- -----------------------------------------------------------------------------
