@@ -2,7 +2,7 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.asak.admin.mapper.AdminMenuMapper">
 
- <resultMap id="menuDetailMap" type="com.asak.admin.dto.response.MenuDetailResponse">
+ <resultMap id="menuDetailMap" type="com.asak.admin.dto.response.menus.MenuDetailResponse">
   <id column="menu_id" property="menuId"/>
   <result column="category_id" property="categoryId"/>
   <result column="category_name" property="categoryName"/>
@@ -11,11 +11,11 @@
   <result column="image_url" property="imageUrl"/>
   <result column="description" property="description"/>
   <result column="sold_out" property="isSoldOut"/>
-  <association property="nutrition" javaType="com.asak.admin.dto.response.MenuNutritionResponse"
+  <association property="nutrition" javaType="com.asak.admin.dto.response.menus.MenuNutritionResponse"
                column="menu_id" select="findMenuNutrition"/>
-  <collection property="ingredients" ofType="com.asak.admin.dto.response.MenuIngredientSummaryResponse"
+  <collection property="ingredients" ofType="com.asak.admin.dto.response.menus.MenuIngredientSummaryResponse"
               column="menu_id" select="findMenuIngredientSummaries"/>
-  <collection property="optionGroups" ofType="com.asak.admin.dto.response.OptionGroupSummaryResponse"
+  <collection property="optionGroups" ofType="com.asak.admin.dto.response.item.OptionGroupSummaryResponse"
               column="menu_id" select="findMenuOptionGroupSummaries"/>
   <collection property="allergens" ofType="java.lang.String"
               column="menu_id" select="findMenuAllergens"/>
@@ -35,7 +35,7 @@
     AND m.deleted_at IS NULL
 </select>
 
-<select id="findMenuIngredientSummaries" resultType="com.asak.admin.dto.response.MenuIngredientSummaryResponse">
+<select id="findMenuIngredientSummaries" resultType="com.asak.admin.dto.response.menus.MenuIngredientSummaryResponse">
   SELECT ingredient_id AS ingredientId, ing_name AS name, ing_sold_out AS isSoldOut,
          role, quantity, unit,
          is_default AS isDefault, can_remove AS canRemove
@@ -50,7 +50,7 @@
            ingredient_id
 </select>
 
-<select id="findMenuOptionGroupSummaries" resultType="com.asak.admin.dto.response.OptionGroupSummaryResponse">
+<select id="findMenuOptionGroupSummaries" resultType="com.asak.admin.dto.response.item.OptionGroupSummaryResponse">
   SELECT
       policy.option_group_id AS optionGroupId,
       policy.name,
@@ -76,7 +76,7 @@
   ORDER BY policy.sort_order
 </select>
 
-<select id="findMenuNutrition" resultType="com.asak.admin.dto.response.MenuNutritionResponse">
+<select id="findMenuNutrition" resultType="com.asak.admin.dto.response.menus.MenuNutritionResponse">
   SELECT serving_g AS servingG,
          kcal,
          carb_g AS carbG,
@@ -140,7 +140,7 @@
   </where>
 </sql>
 
-<select id="getMenus" resultType="com.asak.admin.dto.response.MenuListResponse">
+<select id="getMenus" resultType="com.asak.admin.dto.response.menus.MenuListResponse">
   SELECT ml.menu_id AS menuId,
          ml.category_id AS categoryId,
          ml.name,
@@ -166,7 +166,7 @@
   <include refid="menuListWhere"/>
 </select>
 
-<select id="getCategories" resultType="com.asak.admin.dto.response.AdminCategoryResponse">
+<select id="getCategories" resultType="com.asak.admin.dto.response.item.AdminCategoryResponse">
   SELECT id AS categoryId,
          name AS categoryName,
          sort_no AS sortOrder,
@@ -176,7 +176,7 @@
   ORDER BY sort_no ASC
 </select>
 
-<select id="getCategoryById" resultType="com.asak.admin.dto.response.AdminCategoryResponse">
+<select id="getCategoryById" resultType="com.asak.admin.dto.response.item.AdminCategoryResponse">
   SELECT id AS categoryId,
          name AS categoryName,
          sort_no AS sortOrder,
@@ -187,7 +187,7 @@
   LIMIT 1
 </select>
 
-<select id="getIngredientDetail" resultType="com.asak.admin.dto.response.IngredientResponse">
+<select id="getIngredientDetail" resultType="com.asak.admin.dto.response.item.IngredientResponse">
   SELECT
     i.id AS id,
     i.name AS name,
@@ -255,7 +255,7 @@
   LIMIT 1
 </select>
 
-<select id="getIngredients" resultType="com.asak.admin.dto.response.IngredientResponse">
+<select id="getIngredients" resultType="com.asak.admin.dto.response.item.IngredientResponse">
   SELECT
     i.id AS id,
     i.name AS name,

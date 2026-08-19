@@ -3,7 +3,6 @@ package com.asak.admin.dto.response.sales;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.Date;
-
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;

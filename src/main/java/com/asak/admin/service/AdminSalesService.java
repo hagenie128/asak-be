@@ -1,16 +1,16 @@
 package com.asak.admin.service;
 
+import com.asak.admin.dto.response.sales.DailySalesSummaryItemResponse;
+import com.asak.admin.dto.response.sales.DailyTopMenuResponse;
+import com.asak.admin.dto.response.sales.HourlySalesSummaryItemResponse;
+import com.asak.admin.dto.response.sales.HourlyTopMenuResponse;
+import com.asak.admin.mapper.AdminSalesMapper;
 import java.time.LocalDate;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
 import org.springframework.stereotype.Service;
-
-import com.asak.admin.dto.response.sales.DailyTopMenuResponse;
-import com.asak.admin.dto.response.sales.HourlyTopMenuResponse;
-import com.asak.admin.dto.response.sales.SalesSummaryResponse;
-import com.asak.admin.mapper.AdminSalesMapper;
 
 // TODO-018: summary/monthly/daily/dashboard 집계 로직을 Mapper 호출과 DTO 조립으로 구현한다.
 // Controller의 날짜 query를 검증된 값으로 받고, 집계 기준(주문 상태·시간대·0값)을 네 endpoint에서 일관되게 적용한다.
@@ -24,38 +24,39 @@ public class AdminSalesService {
     this.adminSalesMapper = adminSalesMapper;
   }
 
-  public List<SalesSummaryResponse> getSalesSummary(String startDate, String endDate) {
+  public List<DailySalesSummaryItemResponse> getSalesSummary(
+      LocalDate startDate, LocalDate endDate) {
 
     Map<String, Object> dateRange = new HashMap<>();
-    dateRange.put("startDate", LocalDate.parse(startDate));
-    dateRange.put("endDate", LocalDate.parse(endDate));
-    List<SalesSummaryResponse> response = adminSalesMapper.getSalesSummary(dateRange);
+    dateRange.put("startDate", startDate);
+    dateRange.put("endDate", endDate);
+    List<DailySalesSummaryItemResponse> response = adminSalesMapper.getSalesSummary(dateRange);
     if (response.isEmpty()) {
-      return null;
+      return Collections.emptyList();
     }
     return response;
   }
 
-  public List<SalesSummaryResponse> getSalesHourly(String date) {
-    List<SalesSummaryResponse> response = adminSalesMapper.getSalesHourly(date);
+  public List<HourlySalesSummaryItemResponse> getSalesHourly(LocalDate date) {
+    List<HourlySalesSummaryItemResponse> response = adminSalesMapper.getSalesHourly(date);
     if (response.isEmpty()) {
-      return null;
+      return Collections.emptyList();
     }
     return response;
   }
 
-  public List<DailyTopMenuResponse> getDailyTopMenu(String date) {
+  public List<DailyTopMenuResponse> getDailyTopMenu(LocalDate date) {
     List<DailyTopMenuResponse> response = adminSalesMapper.getDailyTopMenu(date);
     if (response.isEmpty()) {
-      return null;
+      return Collections.emptyList();
     }
     return response;
   }
 
-  public List<HourlyTopMenuResponse> getHourlyTopMenu(String date) {
+  public List<HourlyTopMenuResponse> getHourlyTopMenu(LocalDate date) {
     List<HourlyTopMenuResponse> response = adminSalesMapper.getHourlyTopMenu(date);
     if (response.isEmpty()) {
-      return null;
+      return Collections.emptyList();
     }
     return response;
   }

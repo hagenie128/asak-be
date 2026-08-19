@@ -1,7 +1,7 @@
 package com.asak.admin.controller;
 
-import com.asak.admin.dto.request.CreateMenuRequest;
-import com.asak.admin.dto.request.MenuListRequest;
+import com.asak.admin.dto.request.menus.CreateMenuRequest;
+import com.asak.admin.dto.request.menus.MenuListRequest;
 import com.asak.admin.dto.response.item.AdminCategoryResponse;
 import com.asak.admin.dto.response.item.IngredientResponse;
 import com.asak.admin.dto.response.menus.MenuDetailResponse;

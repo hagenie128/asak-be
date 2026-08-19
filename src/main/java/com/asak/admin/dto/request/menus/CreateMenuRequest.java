@@ -1,5 +1,6 @@
-package com.asak.admin.dto.request;
+package com.asak.admin.dto.request.menus;
 
+import com.asak.admin.dto.request.item.CreateMenuOptionGroupRequest;
 import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Builder;

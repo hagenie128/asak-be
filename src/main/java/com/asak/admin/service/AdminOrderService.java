@@ -1,6 +1,6 @@
 package com.asak.admin.service;
 
-import com.asak.admin.dto.request.OrderListFilter;
+import com.asak.admin.dto.request.orders.OrderListFilter;
 import com.asak.admin.dto.response.orders.LiveOrderListResponse;
 import com.asak.admin.dto.response.orders.LiveOrderResponse;
 import com.asak.admin.dto.response.orders.OrderDetailResponse;

@@ -3,7 +3,7 @@
 <mapper namespace="com.asak.admin.mapper.AdminOptionMapper">
 
   <!-- 카탈로그: opt_group 기준. 메뉴 연결 시 findOptPolicyId 로 policy 를 해석한다. -->
-  <select id="getOptionGroups" resultType="com.asak.admin.dto.response.OptionGroupSummaryResponse">
+  <select id="getOptionGroups" resultType="com.asak.admin.dto.response.item.OptionGroupSummaryResponse">
     SELECT
       og.id AS optionGroupId,
       og.name AS name,
@@ -24,7 +24,7 @@
     ORDER BY og.id
   </select>
 
-  <select id="getOptionGroupDetail" resultType="com.asak.admin.dto.response.OptionGroupSummaryResponse">
+  <select id="getOptionGroupDetail" resultType="com.asak.admin.dto.response.item.OptionGroupSummaryResponse">
     SELECT
       og.id AS optionGroupId,
       og.name AS name,

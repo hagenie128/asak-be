@@ -1,4 +1,4 @@
-package com.asak.admin.dto.request;
+package com.asak.admin.dto.request.item;
 
 import java.util.List;
 import lombok.AllArgsConstructor;

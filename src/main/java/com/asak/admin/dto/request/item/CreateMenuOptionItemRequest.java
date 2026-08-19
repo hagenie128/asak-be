@@ -1,4 +1,4 @@
-package com.asak.admin.dto.request;
+package com.asak.admin.dto.request.item;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

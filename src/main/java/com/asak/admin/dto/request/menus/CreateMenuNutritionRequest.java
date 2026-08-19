@@ -1,4 +1,4 @@
-package com.asak.admin.dto.request;
+package com.asak.admin.dto.request.menus;
 
 import java.math.BigDecimal;
 import lombok.AllArgsConstructor;

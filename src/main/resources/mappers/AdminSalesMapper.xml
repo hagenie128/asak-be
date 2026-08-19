@@ -5,24 +5,25 @@
   DTO camelCase에 맞는 column alias/resultMap을 사용한다. view 사용 시 실제 정의·빈 기간·성능을 검증한다. -->
 <mapper namespace="com.asak.admin.mapper.AdminSalesMapper">
 
-  <select id="getSalesSummary" resultType="com.asak.admin.dto.response.sales.SalesSummaryResponse">
-    SELECT * FROM vw_sales_summary
+  <select id="getSalesSummary" resultType="com.asak.admin.dto.response.sales.DailySalesSummaryItemResponse">
+    SELECT * FROM vw_sales_daily
     <if test="dateRange != null">
-    WHERE order_date BETWEEN #{dateRange.startDate} AND #{dateRange.endDate}
+      WHERE sales_date BETWEEN #{dateRange.startDate} AND #{dateRange.endDate}
+    </if>
   </select>
 
-  <select id="getSalesHourly" resultType="com.asak.admin.dto.response.sales.SalesSummaryResponse">
+  <select id="getSalesHourly" resultType="com.asak.admin.dto.response.sales.HourlySalesSummaryItemResponse">
     SELECT * FROM vw_sales_hourly
-    WHERE order_date = #{date}
+    WHERE sales_date = #{date}
   </select>
 
   <select id="getDailyTopMenu" resultType="com.asak.admin.dto.response.sales.DailyTopMenuResponse">
-    SELECT * FROM vw_daily_top_menu
-    WHERE order_date = #{date}
+    SELECT * FROM vw_top_menu_daily
+    WHERE sales_date = #{date}
   </select>
 
   <select id="getHourlyTopMenu" resultType="com.asak.admin.dto.response.sales.HourlyTopMenuResponse">
-    SELECT * FROM vw_hourly_top_menu
-    WHERE order_date = #{date}
+    SELECT * FROM vw_top_menu_hourly
+    WHERE sales_date = #{date}
   </select>
 </mapper>

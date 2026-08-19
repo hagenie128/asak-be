@@ -1,4 +1,4 @@
-package com.asak.admin.dto.request;
+package com.asak.admin.dto.request.orders;
 
 import java.time.LocalDateTime;
 import lombok.Builder;

@@ -1,10 +1,10 @@
 package com.asak.admin.service;
 
-import com.asak.admin.dto.request.CreateMenuIngredientRequest;
-import com.asak.admin.dto.request.CreateMenuNutritionRequest;
-import com.asak.admin.dto.request.CreateMenuRequest;
-import com.asak.admin.dto.request.CreateMenuTagRequest;
-import com.asak.admin.dto.request.MenuListRequest;
+import com.asak.admin.dto.request.menus.CreateMenuIngredientRequest;
+import com.asak.admin.dto.request.menus.CreateMenuNutritionRequest;
+import com.asak.admin.dto.request.menus.CreateMenuRequest;
+import com.asak.admin.dto.request.menus.CreateMenuTagRequest;
+import com.asak.admin.dto.request.menus.MenuListRequest;
 import com.asak.admin.dto.response.item.AdminCategoryResponse;
 import com.asak.admin.dto.response.item.IngredientResponse;
 import com.asak.admin.dto.response.menus.MenuDetailResponse;

@@ -1,7 +1,6 @@
 package com.asak.admin.dto.response.sales;
 
 import java.util.List;
-
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;

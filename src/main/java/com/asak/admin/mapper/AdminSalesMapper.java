@@ -1,24 +1,20 @@
 package com.asak.admin.mapper;
 
+import com.asak.admin.dto.response.sales.DailySalesSummaryItemResponse;
+import com.asak.admin.dto.response.sales.DailyTopMenuResponse;
+import com.asak.admin.dto.response.sales.HourlySalesSummaryItemResponse;
+import com.asak.admin.dto.response.sales.HourlyTopMenuResponse;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 
-import com.asak.admin.dto.response.sales.DailyTopMenuResponse;
-import com.asak.admin.dto.response.sales.HourlyTopMenuResponse;
-import com.asak.admin.dto.response.sales.SalesSummaryResponse;
-
-// TODO-018: selectSalesSummary / selectSalesMonthly / selectSalesDaily / selectDashboard를 DTO 반환형으로
-// 선언한다.
-// 날짜 조건·완료 주문 상태·집계 시간대는 Controller 주석/판매 계약과 같은 기준을 쓰고, N+1 대신 집계 SQL 또는 검증된 view를 사용한다.
-// XML resultMap/컬럼 alias를 DTO camelCase와 맞춘 뒤, 빈 기간·0 매출·경계 날짜를 Mapper 단위로 확인한다.
 public interface AdminSalesMapper {
 
-  List<SalesSummaryResponse> getSalesSummary(Map<String, Object> dateRange);
+  List<DailySalesSummaryItemResponse> getSalesSummary(Map<String, Object> dateRange);
 
-  List<SalesSummaryResponse> getSalesHourly(String date);
+  List<HourlySalesSummaryItemResponse> getSalesHourly(LocalDate date);
 
-  List<DailyTopMenuResponse> getDailyTopMenu(String date);
+  List<DailyTopMenuResponse> getDailyTopMenu(LocalDate date);
 
-  List<HourlyTopMenuResponse> getHourlyTopMenu(String date);
-
+  List<HourlyTopMenuResponse> getHourlyTopMenu(LocalDate date);
 }
