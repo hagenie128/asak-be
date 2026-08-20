@@ -1,0 +1,21 @@
+meta {
+  name: Admin Daily Sales Time Slots
+  type: http
+  seq: 25
+}
+
+get {
+  url: {{baseUrl}}/api/admin/sales/daily/time-slots?date={{salesDate}}&intervalMinutes={{intervalMinutes}}
+  body: none
+  auth: none
+}
+
+docs {
+  # Sales daily detail
+  GET /api/admin/sales/daily/time-slots?date=YYYY-MM-DD&intervalMinutes=30|60
+  SUCCESS: ADMIN_SALES_TIME_SLOTS_SUCCESS
+  data: List<DailySalesTimeSlotResponse>
+  30분은 salesMinute 0 또는 30, 60분은 항상 0이다.
+  영업시간 10:00~22:00의 빈 구간만 0으로 채운다. 미래 날짜는 400 DATE_RANGE_INVALID.
+  intervalMinutes가 30 또는 60이 아니면 400 SALES_INTERVAL_INVALID.
+}

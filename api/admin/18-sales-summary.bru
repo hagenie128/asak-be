@@ -5,13 +5,15 @@ meta {
 }
 
 get {
-  url: {{baseUrl}}/api/admin/sales/summary?startDate={{startDate}}&endDate={{endDate}}
+  url: {{baseUrl}}/api/admin/sales/summary?period={{salesPeriod}}
   body: none
   auth: none
 }
 
 docs {
   # API-018
-  GET /api/admin/sales/summary?startDate&endDate
-  SPEC_ONLY: AdminStatsController 클래스 매핑만 있음. 메서드 없음 (TODO-015).
+  GET /api/admin/sales/summary?period=today|week|month
+  SUCCESS: ADMIN_SALES_SUMMARY_SUCCESS
+  data: SalesSummaryResponse
+  period 기본값은 month이다. 그 외 값은 400 SALES_PERIOD_INVALID.
 }

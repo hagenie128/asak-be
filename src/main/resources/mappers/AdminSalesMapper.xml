@@ -1,29 +1,305 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<!-- TODO-018: sales summary/monthly/daily + dashboard SELECT를 구현한다.
-  날짜 parameter와 주문 상태·시간대 기준은 AdminStatsController/Service와 동일하게 유지하고,
-  DTO camelCase에 맞는 column alias/resultMap을 사용한다. view 사용 시 실제 정의·빈 기간·성능을 검증한다. -->
 <mapper namespace="com.asak.admin.mapper.AdminSalesMapper">
 
-  <select id="getSalesSummary" resultType="com.asak.admin.dto.response.sales.DailySalesSummaryItemResponse">
-    SELECT * FROM vw_sales_daily
-    <if test="dateRange != null">
-      WHERE sales_date BETWEEN #{dateRange.startDate} AND #{dateRange.endDate}
-    </if>
+  <!--
+    TODO-018: View는 업무 집계만 담당한다.
+    summary/monthly/daily DTO 조립, 빈 날짜와 영업시간 0-fill은 AdminSalesService가 담당한다.
+  -->
+
+  <select id="getMinYear" resultType="int">
+    SELECT COALESCE(MIN(year), YEAR(CURDATE()))
+    FROM vw_sales_monthly
   </select>
 
-  <select id="getSalesHourly" resultType="com.asak.admin.dto.response.sales.HourlySalesSummaryItemResponse">
-    SELECT * FROM vw_sales_hourly
-    WHERE sales_date = #{date}
+<select id="getDailySalesRows"
+        resultType="com.asak.admin.dto.response.sales.daily.DailySalesRowResponse">
+    SELECT
+        sales_date AS date,
+        order_count AS orderCount,
+        canceled_order_count AS canceledOrderCount,
+        gross_sales_amount AS grossSalesAmount,
+        canceled_amount AS canceledAmount,
+        net_sales_amount AS totalAmount,
+        average_order_amount AS avgAmount,
+        cancel_rate AS cancelRate
+    FROM vw_sales_daily
+    WHERE sales_date BETWEEN #{startDate} AND #{endDate}
+    ORDER BY sales_date
+</select>
+
+<select id="getHourlySalesByRange"
+        resultType="com.asak.admin.dto.response.sales.HourlySalesResponse">
+  SELECT
+    sales_hour AS hour,
+    COALESCE(SUM(order_count), 0) AS orderCount,
+    COALESCE(SUM(net_sales_amount), 0) AS salesAmount
+  FROM vw_sales_hourly
+  WHERE sales_date BETWEEN #{startDate} AND #{endDate}
+  GROUP BY sales_hour
+  ORDER BY sales_hour
+</select>
+
+  <select id="getDailySalesTimeSlots"
+          resultType="com.asak.admin.dto.response.sales.daily.DailySalesTimeSlotResponse">
+    <choose>
+      <when test="intervalMinutes == 30">
+        SELECT
+          sales_hour AS salesHour,
+          sales_minute AS salesMinute,
+          order_count AS orderCount,
+          net_sales_amount AS netSalesAmount,
+          COALESCE(ROUND(net_sales_amount / NULLIF(order_count, 0), 0), 0)
+            AS averageOrderAmount
+        FROM vw_sales_30min
+        WHERE sales_date = #{salesDate}
+        ORDER BY sales_hour, sales_minute
+      </when>
+      <otherwise>
+        SELECT
+          sales_hour AS salesHour,
+          0 AS salesMinute,
+          SUM(order_count) AS orderCount,
+          SUM(net_sales_amount) AS netSalesAmount,
+          COALESCE(ROUND(SUM(net_sales_amount) / NULLIF(SUM(order_count), 0), 0), 0)
+            AS averageOrderAmount
+        FROM vw_sales_30min
+        WHERE sales_date = #{salesDate}
+        GROUP BY sales_hour
+        ORDER BY sales_hour
+      </otherwise>
+    </choose>
   </select>
 
-  <select id="getDailyTopMenu" resultType="com.asak.admin.dto.response.sales.DailyTopMenuResponse">
-    SELECT * FROM vw_top_menu_daily
-    WHERE sales_date = #{date}
+<select id="getMonthlySalesRows"
+        resultType="com.asak.admin.dto.response.sales.month.MonthlySalesRowResponse">
+    SELECT
+        CONCAT(year, '-', LPAD(month, 2, '0')) AS month,
+        total_orders AS orderCount,
+        total_sales AS totalAmount,
+        average_order_amount AS avgAmount,
+        canceled_orders AS canceledOrders,
+        gross_sales_amount AS grossSalesAmount,
+        canceled_amount AS canceledAmount,
+        cancel_rate AS cancelRate
+    FROM vw_sales_monthly
+    WHERE year = #{year}
+    ORDER BY year, month
+</select>
+
+  <select id="getMenuRankingByRange"
+          resultType="com.asak.admin.dto.response.sales.MenuSalesRankingResponse">
+    SELECT
+      ROW_NUMBER() OVER (ORDER BY SUM(sales_amount) DESC, menu_id) AS `rank`,
+      menu_id AS menuId,
+      menu_name AS menuName,
+      SUM(order_count) AS orderCount,
+      SUM(sales_amount) AS salesAmount
+    FROM vw_top_menu_daily
+    WHERE sales_date BETWEEN #{startDate} AND #{endDate}
+    GROUP BY menu_id, menu_name
+    ORDER BY salesAmount DESC, menuId
+    LIMIT 4
   </select>
 
-  <select id="getHourlyTopMenu" resultType="com.asak.admin.dto.response.sales.HourlyTopMenuResponse">
-    SELECT * FROM vw_top_menu_hourly
-    WHERE sales_date = #{date}
+  <select id="getPaymentShare"
+          resultType="com.asak.admin.dto.response.sales.SalesShareResponse">
+    SELECT
+      payment_method_name AS label,
+      ROUND(
+        COUNT(*) / NULLIF(
+          (SELECT COUNT(*)
+           FROM vw_order_summary
+           WHERE DATE(paid_at) BETWEEN #{startDate} AND #{endDate}
+             AND payment_status_code NOT IN ('CANCELED', 'REFUNDED')),
+          0
+        ) * 100,
+        2
+      ) AS percent
+    FROM vw_order_summary
+    WHERE DATE(paid_at) BETWEEN #{startDate} AND #{endDate}
+      AND payment_status_code NOT IN ('CANCELED', 'REFUNDED')
+    GROUP BY payment_method_name
+    ORDER BY percent DESC, label
+  </select>
+
+  <select id="getOrderShare"
+          resultType="com.asak.admin.dto.response.sales.SalesShareResponse">
+    SELECT
+      order_type_name AS label,
+      ROUND(
+        SUM(order_count) / NULLIF(
+          (SELECT SUM(order_count)
+           FROM vw_order_status_summary
+           WHERE order_date BETWEEN #{startDate} AND #{endDate}
+             AND status_code != 'CANCELED'),
+          0
+        ) * 100,
+        2
+      ) AS percent
+    FROM vw_order_status_summary
+    WHERE order_date BETWEEN #{startDate} AND #{endDate}
+      AND status_code != 'CANCELED'
+    GROUP BY order_type_name
+    ORDER BY percent DESC, label
+  </select>
+
+  <!--
+    getDashboardKpi: vw_sales_daily는 GROUP BY가 있어 MySQL이 뷰를 병합하지 못하고, 바깥의
+    "WHERE sales_date IN (...)"를 걸기 전에 orders 전체 이력을 먼저 집계한다(2026-08-20 실측
+    ~1.2~1.4초). 그래서 이 두 날짜만 필요한 경우엔 뷰를 거치지 않고 orders.created_at으로
+    먼저 좁혀서(±1일 여유를 둬 자정 넘어 결제되는 경우까지 커버) 베이스 테이블에서 직접 집계한다.
+    (2026-08-20 검증: 결과값 뷰 기준과 완전 일치, ~1.2~1.4초 -> ~80ms.)
+    activeOrderCount도 vw_order_live(주방보드용 JSON 상세 뷰) COUNT는 상세 JSON까지 다 계산돼
+    ~400ms가 들어서, 단순 상태 카운트로 대체했다(결과 동일, ~400ms -> ~6ms).
+  -->
+  <select id="getDashboardKpi" resultType="map">
+    SELECT
+      COALESCE(SUM(CASE WHEN sales_date = #{today} THEN net_sales_amount END), 0) AS netSalesAmount,
+      COALESCE(SUM(CASE WHEN sales_date = #{today} THEN order_count END), 0) AS orderCount,
+      COALESCE(SUM(CASE WHEN sales_date = #{today} THEN average_order_amount END), 0) AS averageOrderAmount,
+      COALESCE(SUM(CASE WHEN sales_date = #{yesterday} THEN net_sales_amount END), 0) AS prevNetSalesAmount,
+      COALESCE(SUM(CASE WHEN sales_date = #{yesterday} THEN order_count END), 0) AS prevOrderCount,
+      COALESCE(SUM(CASE WHEN sales_date = #{yesterday} THEN average_order_amount END), 0) AS prevAverageOrderAmount,
+      (SELECT COUNT(*) FROM orders o2 JOIN common_code st2 ON st2.id = o2.status_id
+       WHERE st2.code IN ('RECEIVED', 'PREPARING', 'READY')) AS activeOrderCount
+    FROM (
+      SELECT
+        DATE(COALESCE(p.paid_at, o.created_at)) AS sales_date,
+        COUNT(DISTINCT CASE
+                WHEN p.paid_at IS NOT NULL AND os.code &lt;> 'CANCELED'
+                     AND ps.code NOT IN ('CANCELED', 'REFUNDED') THEN o.id
+              END) AS order_count,
+        (COALESCE(SUM(CASE WHEN p.paid_at IS NOT NULL THEN p.amount ELSE 0 END), 0)
+         - COALESCE(SUM(CASE
+                          WHEN p.paid_at IS NOT NULL
+                               AND (os.code = 'CANCELED' OR ps.code IN ('CANCELED', 'REFUNDED'))
+                          THEN p.amount ELSE 0
+                        END), 0)) AS net_sales_amount,
+        ROUND(
+          (COALESCE(SUM(CASE WHEN p.paid_at IS NOT NULL THEN p.amount ELSE 0 END), 0)
+           - COALESCE(SUM(CASE
+                            WHEN p.paid_at IS NOT NULL
+                                 AND (os.code = 'CANCELED' OR ps.code IN ('CANCELED', 'REFUNDED'))
+                            THEN p.amount ELSE 0
+                          END), 0))
+          / NULLIF(COUNT(DISTINCT CASE
+                           WHEN p.paid_at IS NOT NULL AND os.code &lt;> 'CANCELED'
+                                AND ps.code NOT IN ('CANCELED', 'REFUNDED') THEN o.id
+                         END), 0),
+          0
+        ) AS average_order_amount
+      FROM orders o
+      LEFT JOIN payment p ON p.order_id = o.id
+      LEFT JOIN common_code ps ON ps.id = p.status_id
+      LEFT JOIN common_code os ON os.id = o.status_id
+      WHERE o.created_at >= DATE_SUB(#{yesterday}, INTERVAL 1 DAY)
+        AND o.created_at &lt; DATE_ADD(#{today}, INTERVAL 1 DAY)
+        AND DATE(COALESCE(p.paid_at, o.created_at)) IN (#{today}, #{yesterday})
+      GROUP BY DATE(COALESCE(p.paid_at, o.created_at))
+    ) daily
+  </select>
+
+  <!--
+    getDashboardRecentOrders: vw_order_list_summary는 GROUP_CONCAT 파생 테이블을 order_item
+    전체(8만 3천여 행)에 대해 먼저 계산한 뒤 정렬·3건만 자르는 구조라 ~1.3초가 걸린다
+    (2026-08-20 실측). 뷰를 상관 서브쿼리로 재작성해서 CREATE VIEW로 적용해봤지만, MySQL은
+    SELECT 목록에 상관 서브쿼리가 있는 뷰는 병합(merge)하지 않고 여전히 통째로 구체화해서
+    오히려 더 느려졌다(~6.7초) — 그래서 뷰는 원래대로 되돌렸다.
+    대신 뷰를 거치지 않고 이 쿼리에서 직접 orders/order_item을 상관 서브쿼리로 조회하면
+    (뷰로 감싸지 않은 순수 SELECT라 ORDER BY·LIMIT이 정상적으로 앞단에 적용됨) 문제없이
+    빨라진다. (2026-08-20 검증: 최근 500건 결과 기존 뷰 기준과 완전 일치, ~1.3초 -> ~90ms.)
+  -->
+  <select id="getDashboardRecentOrders"
+          resultType="com.asak.admin.dto.response.dashboard.DashboardRecentOrderResponse">
+    SELECT
+      o.order_no AS orderNo,
+      ot.code AS orderType,
+      CASE
+        WHEN (SELECT COUNT(*) FROM order_item oi3 WHERE oi3.order_id = o.id) > 1
+        THEN CONCAT(
+          (SELECT m.name FROM order_item oi4 JOIN menu m ON m.id = oi4.menu_id
+           WHERE oi4.order_id = o.id ORDER BY oi4.id LIMIT 1),
+          ' 외 ',
+          (SELECT COUNT(*) FROM order_item oi5 WHERE oi5.order_id = o.id) - 1
+        )
+        ELSE (SELECT m.name FROM order_item oi6 JOIN menu m ON m.id = oi6.menu_id
+              WHERE oi6.order_id = o.id ORDER BY oi6.id LIMIT 1)
+      END AS menuSummary,
+      o.total_price AS totalAmount,
+      st.code AS orderStatus,
+      DATE_FORMAT(o.created_at, '%H:%i') AS createdAtLabel
+    FROM orders o
+    JOIN common_code ot ON ot.id = o.order_type_id
+    JOIN common_code st ON st.id = o.status_id
+    ORDER BY o.created_at DESC
+    LIMIT 3
+  </select>
+
+  <select id="getDashboardStatusSummary"
+          resultType="com.asak.admin.dto.response.dashboard.DashboardOrderStatusResponse">
+    SELECT
+      status_name AS label,
+      SUM(order_count) AS count,
+      CASE status_code
+        WHEN 'PREPARING' THEN 'preparing'
+        WHEN 'COMPLETED' THEN 'complete'
+        WHEN 'CANCELED' THEN 'cancelled'
+        ELSE 'waiting'
+      END AS tone
+    FROM vw_order_status_summary
+    WHERE order_date = #{date}
+    GROUP BY status_code, status_name
+    ORDER BY status_code
+  </select>
+
+  <select id="getDashboardOrderTypeSummary" resultType="map">
+    SELECT
+      COALESCE(SUM(CASE WHEN order_type_code = 'EAT_IN' THEN order_count ELSE 0 END), 0) AS eatIn,
+      COALESCE(SUM(CASE WHEN order_type_code = 'TAKE_OUT' THEN order_count ELSE 0 END), 0) AS takeOut
+    FROM vw_order_status_summary
+    WHERE order_date = #{date}
+  </select>
+
+  <select id="getDashboardInventorySummary" resultType="map">
+    SELECT
+      (SELECT COUNT(*) FROM menu WHERE sold_out = 1) AS menuSoldOut,
+      (SELECT COUNT(*) FROM ing WHERE sold_out = 1) AS ingredientSoldOut,
+      (SELECT COUNT(*) FROM opt_item WHERE sold_out = 1) AS optionSoldOut
+  </select>
+
+  <!-- getDashboardWeeklySales: getDashboardKpi와 같은 이유로 vw_sales_daily 대신 베이스
+       테이블을 직접 좁혀서 집계한다(2026-08-20 검증: 결과값 뷰 기준과 완전 일치, ~950ms -> ~90ms). -->
+  <select id="getDashboardWeeklySales"
+          resultType="com.asak.admin.dto.response.dashboard.DashboardWeeklySalesResponse">
+    SELECT
+      DATE_FORMAT(sales_date, '%d일') AS label,
+      net_sales_amount AS amount,
+      sales_date = #{endDate} AS isCurrent
+    FROM (
+      SELECT
+        DATE(COALESCE(p.paid_at, o.created_at)) AS sales_date,
+        (COALESCE(SUM(CASE WHEN p.paid_at IS NOT NULL THEN p.amount ELSE 0 END), 0)
+         - COALESCE(SUM(CASE
+                          WHEN p.paid_at IS NOT NULL
+                               AND (os.code = 'CANCELED' OR ps.code IN ('CANCELED', 'REFUNDED'))
+                          THEN p.amount ELSE 0
+                        END), 0)) AS net_sales_amount
+      FROM orders o
+      LEFT JOIN payment p ON p.order_id = o.id
+      LEFT JOIN common_code ps ON ps.id = p.status_id
+      LEFT JOIN common_code os ON os.id = o.status_id
+      WHERE o.created_at >= DATE_SUB(#{startDate}, INTERVAL 1 DAY)
+        AND o.created_at &lt; DATE_ADD(#{endDate}, INTERVAL 1 DAY)
+        AND DATE(COALESCE(p.paid_at, o.created_at)) BETWEEN #{startDate} AND #{endDate}
+      GROUP BY DATE(COALESCE(p.paid_at, o.created_at))
+    ) daily
+    ORDER BY sales_date
+  </select>
+  <select id="getDailyOrderCount" resultType="long">
+    SELECT SUM(order_count) FROM vw_sales_daily WHERE sales_date BETWEEN #{startDate} AND #{endDate}
+  </select>
+  <select id="getDailySales" resultType="long">
+    SELECT SUM(net_sales_amount) FROM vw_sales_daily WHERE sales_date BETWEEN #{startDate} AND #{endDate}
   </select>
 </mapper>
