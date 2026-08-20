@@ -11,10 +11,17 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class DailySalesSummaryItemResponse {
+
   private Date salesDate;
+
   private BigInteger orderCount;
   private BigInteger canceledOrderCount;
+
   private BigDecimal grossSalesAmount;
   private BigDecimal canceledAmount;
   private BigDecimal netSalesAmount;
+
+  private BigDecimal averageOrderAmount;
+  private BigDecimal cancelRate;
+
 }

@@ -6,7 +6,6 @@ import com.asak.admin.service.AdminSalesService;
 import com.asak.common.exception.ErrorCode;
 import com.asak.common.response.ApiResponse;
 import java.time.LocalDate;
-import java.util.Collections;
 import java.util.List;
 import org.jspecify.annotations.Nullable;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -61,13 +60,17 @@ public class AdminSalesController {
   @GetMapping("/sales/monthly")
   public ApiResponse<List<MonthlySalesSummaryItemResponse>> getMonthlySalesSummary(
       @RequestParam int year) {
-    return ApiResponse.success(
-        "ADMIN_MONTHLY_SALES_SUCCESS", "관리자 월별 매출 조회 성공", Collections.emptyList());
+    if (year < adminSalesService.getMinYear()) {
+      return ApiResponse.error(ErrorCode.YEAR_LESS_THAN_MIN_YEAR);
+    }
+    if (year > LocalDate.now().getYear()) {
+      return ApiResponse.error(ErrorCode.YEAR_GREATER_THAN_CURRENT_YEAR);
+    }
+    List<MonthlySalesSummaryItemResponse> responses =
+        adminSalesService.getMonthlySalesSummary(year);
+    if (responses.isEmpty()) {
+      return ApiResponse.error(ErrorCode.MONTHLY_SALES_SUMMARY_NOT_FOUND);
+    }
+    return ApiResponse.success("ADMIN_MONTHLY_SALES_SUCCESS", "관리자 월별 매출 조회 성공", responses);
   }
-  // TODO-017: GET /api/admin/sales/daily?date. 매장 시간대 기준 일자와 주문 상태 포함 기준을 명시한다.
-  // TODO-023: GET /api/admin/dashboard. summary와 중복 집계를 피하고 TODO-024/025이 소비할 단일
-  // 응답 DTO를 확정한다.
-  // 구현 순서: TODO-018 Mapper/XML → Service → 이 Controller → frontend TODO-019~025;
-  // 각 endpoint는
-  // query·빈 데이터·오류를 검증한다.
 }

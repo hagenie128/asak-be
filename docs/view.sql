@@ -20,6 +20,17 @@
 --    `code IN ('RECEIVED','PREPARING','READY')` 로 넓혔다. 운영 DB 적용을 확인했고,
 --    현재 보드에 READY 3건이 함께 잡힌다 (PREPARING 9 · RECEIVED 1 · READY 3 = 13행).
 --
+-- vw_sales_daily / vw_sales_monthly / vw_sales_30min 갱신 (2026-08-20)
+--    vw_sales_daily 에 average_order_amount(객단가), cancel_rate(취소율) 컬럼을 추가했다.
+--    vw_sales_monthly(월별 집계, vw_sales_daily 를 GROUP BY 로 롤업)와
+--    vw_sales_30min(30분 단위 집계, vw_sales_hourly 와 별개로 존재)을 신규 추가했다.
+--    AdminSalesMapper.xml 의 getSalesSummary/getMonthlySalesSummary/getMinYear 가 각각
+--    vw_sales_daily/vw_sales_monthly 를 SELECT * 로 그대로 쓰므로 DailySalesSummaryItemResponse·
+--    MonthlySalesSummaryItemResponse 에 average_order_amount/cancel_rate 필드가 없다면 매핑에서
+--    빠진다. vw_sales_30min 은 아직 어떤 매퍼에서도 참조하지 않는다.
+--    이 3개는 요청받은 정의를 그대로 반영한 것으로, 실제 운영 DB에 SHOW CREATE VIEW 로 재덤프해
+--    대조하지는 않았다. 다음 스키마 동기화 때 재검증할 것.
+--
 -- 주의
 --  * 이 파일은 가독성을 위해 줄바꿈만 넣은 실측본이다. 뷰를 바꿀 일이 있으면
 --    운영 DB에 반영한 뒤 다시 덤프해 갱신한다.
@@ -425,41 +436,207 @@ FROM ((`payment` `p`
       JOIN `common_code` `ps` on((`ps`.`id` = `p`.`status_id`)));
 
 -- -----------------------------------------------------------------------------
+-- vw_sales_30min
+-- -----------------------------------------------------------------------------
+CREATE OR REPLACE VIEW `vw_sales_30min` AS
+SELECT
+    CAST(COALESCE(p.paid_at, o.created_at) AS DATE) AS `sales_date`,
+    HOUR(COALESCE(p.paid_at, o.created_at)) AS `sales_hour`,
+    CASE
+        WHEN MINUTE(COALESCE(p.paid_at, o.created_at)) < 30
+            THEN 0
+        ELSE 30
+    END AS `sales_minute`,
+    COUNT(DISTINCT CASE
+        WHEN p.paid_at IS NOT NULL
+            AND os.code <> 'CANCELED'
+            AND ps.code NOT IN ('CANCELED', 'REFUNDED')
+        THEN o.id
+    END) AS `order_count`,
+    COUNT(DISTINCT CASE
+        WHEN os.code = 'CANCELED'
+            OR ps.code IN ('CANCELED', 'REFUNDED')
+        THEN o.id
+    END) AS `canceled_order_count`,
+    COALESCE(SUM(
+        CASE
+            WHEN p.paid_at IS NOT NULL
+            THEN p.amount
+            ELSE 0
+        END
+    ), 0) AS `gross_sales_amount`,
+    COALESCE(SUM(
+        CASE
+            WHEN p.paid_at IS NOT NULL
+                AND (
+                    os.code = 'CANCELED'
+                    OR ps.code IN ('CANCELED', 'REFUNDED')
+                )
+            THEN p.amount
+            ELSE 0
+        END
+    ), 0) AS `canceled_amount`,
+    COALESCE(SUM(
+        CASE
+            WHEN p.paid_at IS NOT NULL
+            THEN p.amount
+            ELSE 0
+        END
+    ), 0)
+    -
+    COALESCE(SUM(
+        CASE
+            WHEN p.paid_at IS NOT NULL
+                AND (
+                    os.code = 'CANCELED'
+                    OR ps.code IN ('CANCELED', 'REFUNDED')
+                )
+            THEN p.amount
+            ELSE 0
+        END
+    ), 0) AS `net_sales_amount`
+FROM orders o
+LEFT JOIN payment p
+    ON p.order_id = o.id
+LEFT JOIN common_code ps
+    ON ps.id = p.status_id
+LEFT JOIN common_code os
+    ON os.id = o.status_id
+GROUP BY
+    CAST(COALESCE(p.paid_at, o.created_at) AS DATE),
+    HOUR(COALESCE(p.paid_at, o.created_at)),
+    CASE
+        WHEN MINUTE(COALESCE(p.paid_at, o.created_at)) < 30
+            THEN 0
+        ELSE 30
+    END;
+
+-- -----------------------------------------------------------------------------
 -- vw_sales_daily
 -- -----------------------------------------------------------------------------
 CREATE OR REPLACE VIEW `vw_sales_daily` AS
-SELECT cast(coalesce(`p`.`paid_at`, `o`.`created_at`) AS date) AS `sales_date`,
-       count(DISTINCT (CASE
-                           WHEN ((`p`.`paid_at` IS NOT NULL)
-                                 AND (`os`.`code` <> 'CANCELED')
-                                 AND (`ps`.`code` NOT IN ('CANCELED',
-                                                      'REFUNDED'))) THEN `o`.`id`
-                       END)) AS `order_count`,
-       count(DISTINCT (CASE
-                           WHEN ((`os`.`code` = 'CANCELED')
-                                 OR (`ps`.`code` IN ('CANCELED',
-                                                 'REFUNDED'))) THEN `o`.`id`
-                       END)) AS `canceled_order_count`,
-       coalesce(sum((CASE WHEN (`p`.`paid_at` IS NOT NULL) THEN `p`.`amount` ELSE 0
-                     END)), 0) AS `gross_sales_amount`,
-       coalesce(sum((CASE
-                         WHEN ((`p`.`paid_at` IS NOT NULL)
-                               AND ((`os`.`code` = 'CANCELED')
-                                    OR (`ps`.`code` IN ('CANCELED',
-                                                      'REFUNDED')))) THEN `p`.`amount` ELSE 0
-                     END)), 0) AS `canceled_amount`,
-       (coalesce(sum((CASE WHEN (`p`.`paid_at` IS NOT NULL) THEN `p`.`amount` ELSE 0
-                      END)), 0) - coalesce(sum((CASE
-                                                    WHEN ((`p`.`paid_at` IS NOT NULL)
-                                                          AND ((`os`.`code` = 'CANCELED')
-                                                               OR (`ps`.`code` IN ('CANCELED',
-                                                                                 'REFUNDED')))) THEN `p`.`amount` ELSE 0
-                                                END)), 0)) AS `net_sales_amount`
-FROM (((`orders` `o`
-        LEFT JOIN `payment` `p` on((`p`.`order_id` = `o`.`id`)))
-       LEFT JOIN `common_code` `ps` on((`ps`.`id` = `p`.`status_id`)))
-      LEFT JOIN `common_code` `os` on((`os`.`id` = `o`.`status_id`)))
-GROUP BY cast(coalesce(`p`.`paid_at`, `o`.`created_at`) AS date);
+SELECT
+    CAST(COALESCE(p.paid_at, o.created_at) AS DATE) AS `sales_date`,
+    COUNT(DISTINCT CASE
+        WHEN p.paid_at IS NOT NULL
+            AND os.code <> 'CANCELED'
+            AND ps.code NOT IN ('CANCELED', 'REFUNDED')
+        THEN o.id
+    END) AS `order_count`,
+    COUNT(DISTINCT CASE
+        WHEN os.code = 'CANCELED'
+            OR ps.code IN ('CANCELED', 'REFUNDED')
+        THEN o.id
+    END) AS `canceled_order_count`,
+    COALESCE(SUM(
+        CASE
+            WHEN p.paid_at IS NOT NULL
+            THEN p.amount
+            ELSE 0
+        END
+    ), 0) AS `gross_sales_amount`,
+    COALESCE(SUM(
+        CASE
+            WHEN p.paid_at IS NOT NULL
+                AND (
+                    os.code = 'CANCELED'
+                    OR ps.code IN ('CANCELED', 'REFUNDED')
+                )
+            THEN p.amount
+            ELSE 0
+        END
+    ), 0) AS `canceled_amount`,
+    (
+        COALESCE(SUM(
+            CASE
+                WHEN p.paid_at IS NOT NULL
+                THEN p.amount
+                ELSE 0
+            END
+        ), 0)
+        -
+        COALESCE(SUM(
+            CASE
+                WHEN p.paid_at IS NOT NULL
+                    AND (
+                        os.code = 'CANCELED'
+                        OR ps.code IN ('CANCELED', 'REFUNDED')
+                    )
+                THEN p.amount
+                ELSE 0
+            END
+        ), 0)
+    ) AS `net_sales_amount`,
+    /* 객단가 */
+    ROUND(
+        (
+            COALESCE(SUM(
+                CASE
+                    WHEN p.paid_at IS NOT NULL
+                    THEN p.amount
+                    ELSE 0
+                END
+            ), 0)
+            -
+            COALESCE(SUM(
+                CASE
+                    WHEN p.paid_at IS NOT NULL
+                        AND (
+                            os.code = 'CANCELED'
+                            OR ps.code IN ('CANCELED', 'REFUNDED')
+                        )
+                    THEN p.amount
+                    ELSE 0
+                END
+            ), 0)
+        )
+        /
+        NULLIF(
+            COUNT(DISTINCT CASE
+                WHEN p.paid_at IS NOT NULL
+                    AND os.code <> 'CANCELED'
+                    AND ps.code NOT IN ('CANCELED', 'REFUNDED')
+                THEN o.id
+            END),
+            0
+        ),
+        0
+    ) AS `average_order_amount`,
+    /* 취소율 */
+    ROUND(
+        COUNT(DISTINCT CASE
+            WHEN os.code = 'CANCELED'
+                OR ps.code IN ('CANCELED', 'REFUNDED')
+            THEN o.id
+        END)
+        /
+        NULLIF(
+            COUNT(DISTINCT CASE
+                WHEN p.paid_at IS NOT NULL
+                    AND os.code <> 'CANCELED'
+                    AND ps.code NOT IN ('CANCELED', 'REFUNDED')
+                THEN o.id
+            END)
+            +
+            COUNT(DISTINCT CASE
+                WHEN os.code = 'CANCELED'
+                    OR ps.code IN ('CANCELED', 'REFUNDED')
+                THEN o.id
+            END),
+            0
+        )
+        * 100,
+        2
+    ) AS `cancel_rate`
+FROM orders o
+LEFT JOIN payment p
+    ON p.order_id = o.id
+LEFT JOIN common_code ps
+    ON ps.id = p.status_id
+LEFT JOIN common_code os
+    ON os.id = o.status_id
+GROUP BY
+    CAST(COALESCE(p.paid_at, o.created_at) AS DATE);
 
 -- -----------------------------------------------------------------------------
 -- vw_sales_hourly
@@ -500,6 +677,36 @@ FROM (((`orders` `o`
       LEFT JOIN `common_code` `os` on((`os`.`id` = `o`.`status_id`)))
 GROUP BY cast(coalesce(`p`.`paid_at`, `o`.`created_at`) AS date),hour(coalesce(`p`.`paid_at`,
                                                                         `o`.`created_at`));
+
+-- -----------------------------------------------------------------------------
+-- vw_sales_monthly
+-- -----------------------------------------------------------------------------
+CREATE OR REPLACE VIEW `vw_sales_monthly` AS
+SELECT
+    YEAR(`sales_date`) AS `year`,
+    MONTH(`sales_date`) AS `month`,
+    SUM(`net_sales_amount`) AS `total_sales`,
+    SUM(`order_count`) AS `total_orders`,
+    SUM(`canceled_order_count`) AS `canceled_orders`,
+    SUM(`gross_sales_amount`) AS `gross_sales_amount`,
+    SUM(`canceled_amount`) AS `canceled_amount`,
+    ROUND(
+        SUM(`net_sales_amount`)
+        / NULLIF(SUM(`order_count`), 0),
+        0
+    ) AS `average_order_amount`,
+    ROUND(
+        SUM(`canceled_order_count`)
+        / NULLIF(
+            SUM(`order_count`) + SUM(`canceled_order_count`),
+            0
+        ) * 100,
+        2
+    ) AS `cancel_rate`
+FROM `vw_sales_daily`
+GROUP BY
+    YEAR(`sales_date`),
+    MONTH(`sales_date`);
 
 -- -----------------------------------------------------------------------------
 -- vw_soldout_catalog

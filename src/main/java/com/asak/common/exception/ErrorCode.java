@@ -96,7 +96,13 @@ public enum ErrorCode {
   START_DATE_GREATER_THAN_TODAY(
       "START_DATE_GREATER_THAN_TODAY", HttpStatus.BAD_REQUEST, "시작 날짜는 오늘 이후일 수 없습니다."),
   END_DATE_LESS_THAN_START_DATE(
-      "END_DATE_LESS_THAN_START_DATE", HttpStatus.BAD_REQUEST, "종료 날짜는 시작 날짜보다 이전일 수 없습니다.");
+      "END_DATE_LESS_THAN_START_DATE", HttpStatus.BAD_REQUEST, "종료 날짜는 시작 날짜보다 이전일 수 없습니다."),
+  YEAR_GREATER_THAN_CURRENT_YEAR(
+      "YEAR_GREATER_THAN_CURRENT_YEAR", HttpStatus.BAD_REQUEST, "현재 연도보다 이후일 수 없습니다."),
+  YEAR_LESS_THAN_MIN_YEAR(
+      "YEAR_LESS_THAN_MIN_YEAR", HttpStatus.BAD_REQUEST, "영업 시작 연도보다 이전일 수 없습니다."),
+  MONTHLY_SALES_SUMMARY_NOT_FOUND(
+      "MONTHLY_SALES_SUMMARY_NOT_FOUND", HttpStatus.NOT_FOUND, "월별 매출을 찾을 수 없습니다.");
 
   private final String code;
   private final HttpStatus status;

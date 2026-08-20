@@ -4,6 +4,7 @@ import com.asak.admin.dto.response.sales.DailySalesSummaryItemResponse;
 import com.asak.admin.dto.response.sales.DailyTopMenuResponse;
 import com.asak.admin.dto.response.sales.HourlySalesSummaryItemResponse;
 import com.asak.admin.dto.response.sales.HourlyTopMenuResponse;
+import com.asak.admin.dto.response.sales.MonthlySalesSummaryItemResponse;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
@@ -17,4 +18,8 @@ public interface AdminSalesMapper {
   List<DailyTopMenuResponse> getDailyTopMenu(LocalDate date);
 
   List<HourlyTopMenuResponse> getHourlyTopMenu(LocalDate date);
+
+  List<MonthlySalesSummaryItemResponse> getMonthlySalesSummary(int year);
+
+  int getMinYear();
 }
