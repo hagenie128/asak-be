@@ -17,6 +17,58 @@
     WHERE sales_date = #{salesDate}
   </select>
 
+  <select id="getDailySalesTimeSlots" resultType="com.asak.admin.dto.response.sales.HourlySalesSummaryItemResponse">
+    <choose>
+      <when test="intervalMinutes == 30">
+        SELECT
+          sales_date AS salesDate,
+          sales_hour AS salesHour,
+          sales_minute AS salesMinute,
+          order_count AS orderCount,
+          canceled_order_count AS canceledOrderCount,
+          gross_sales_amount AS grossSalesAmount,
+          canceled_amount AS canceledAmount,
+          net_sales_amount AS netSalesAmount,
+          COALESCE(ROUND(net_sales_amount / NULLIF(order_count, 0), 0), 0) AS averageOrderAmount,
+          COALESCE(
+            ROUND(
+              canceled_order_count / NULLIF(order_count + canceled_order_count, 0) * 100,
+              2
+            ),
+            0
+          ) AS cancelRate
+        FROM vw_sales_30min
+        WHERE sales_date = #{salesDate}
+        ORDER BY sales_hour, sales_minute
+      </when>
+      <otherwise>
+        SELECT
+          sales_date AS salesDate,
+          sales_hour AS salesHour,
+          0 AS salesMinute,
+          SUM(order_count) AS orderCount,
+          SUM(canceled_order_count) AS canceledOrderCount,
+          SUM(gross_sales_amount) AS grossSalesAmount,
+          SUM(canceled_amount) AS canceledAmount,
+          SUM(net_sales_amount) AS netSalesAmount,
+          COALESCE(ROUND(SUM(net_sales_amount) / NULLIF(SUM(order_count), 0), 0), 0)
+            AS averageOrderAmount,
+          COALESCE(
+            ROUND(
+              SUM(canceled_order_count) /
+              NULLIF(SUM(order_count) + SUM(canceled_order_count), 0) * 100,
+              2
+            ),
+            0
+          ) AS cancelRate
+        FROM vw_sales_30min
+        WHERE sales_date = #{salesDate}
+        GROUP BY sales_date, sales_hour
+        ORDER BY sales_hour
+      </otherwise>
+    </choose>
+  </select>
+
   <select id="getDailyTopMenu" resultType="com.asak.admin.dto.response.sales.DailyTopMenuResponse">
     SELECT * FROM vw_top_menu_daily
     WHERE sales_date = #{salesDate}
@@ -27,13 +79,48 @@
     WHERE sales_date = #{salesDate}
   </select>
 
-  <select id="getMonthlySalesSummary" resultType="com.asak.admin.dto.response.sales.MonthlySalesSummaryItemResponse">
-    SELECT * FROM vw_sales_monthly
-    WHERE year = #{year}
+  <select id="getMonthlyDailySales" resultType="com.asak.admin.dto.response.sales.DailySalesSummaryItemResponse">
+    SELECT * FROM vw_sales_daily
+    WHERE sales_date BETWEEN #{startDate} AND #{endDate}
+    ORDER BY sales_date
   </select>
 
   <select id="getMinYear" resultType="int">
     SELECT MIN(year)
 FROM vw_sales_monthly
+  </select>
+
+  <select id="getDashboardKpi" resultType="map">
+    SELECT COALESCE(MAX(net_sales_amount), 0) AS netSalesAmount,
+           COALESCE(MAX(order_count), 0) AS orderCount,
+           COALESCE(MAX(average_order_amount), 0) AS averageOrderAmount,
+           (SELECT COUNT(*) FROM vw_order_live) AS activeOrderCount
+    FROM vw_sales_daily WHERE sales_date = #{date}
+  </select>
+  <select id="getDashboardRecentOrders" resultType="com.asak.admin.dto.response.dashboard.AdminDashboardResponse$RecentOrder">
+    SELECT order_no AS orderNo, order_type_code AS orderType, menu_summary AS menuSummary,
+           total_price AS totalAmount, status_code AS orderStatus,
+           DATE_FORMAT(created_at, '%H:%i') AS createdAtLabel
+    FROM vw_order_list_summary ORDER BY created_at DESC LIMIT 3
+  </select>
+  <select id="getDashboardStatusSummary" resultType="com.asak.admin.dto.response.dashboard.AdminDashboardResponse$CountSummary">
+    SELECT status_name AS label, SUM(order_count) AS count,
+           CASE status_code WHEN 'PREPARING' THEN 'preparing' WHEN 'COMPLETED' THEN 'complete'
+             WHEN 'CANCELED' THEN 'cancelled' ELSE 'waiting' END AS tone
+    FROM vw_order_status_summary WHERE order_date = #{date}
+    GROUP BY status_code, status_name ORDER BY status_code
+  </select>
+  <select id="getDashboardOrderTypeSummary" resultType="map">
+    SELECT COALESCE(SUM(CASE WHEN order_type_code = 'EAT_IN' THEN order_count ELSE 0 END), 0) AS eatIn,
+           COALESCE(SUM(CASE WHEN order_type_code = 'TAKE_OUT' THEN order_count ELSE 0 END), 0) AS takeOut
+    FROM vw_order_status_summary WHERE order_date = #{date}
+  </select>
+  <select id="getDashboardInventorySummary" resultType="map">
+    SELECT (SELECT COUNT(*) FROM menu WHERE sold_out = 1) AS menuSoldOut,
+           (SELECT COUNT(*) FROM ing WHERE sold_out = 1) AS ingredientSoldOut,
+           (SELECT COUNT(*) FROM opt_item WHERE sold_out = 1) AS optionSoldOut
+  </select>
+  <select id="getDashboardWeeklySales" resultType="com.asak.admin.dto.response.sales.DailySalesSummaryItemResponse">
+    SELECT * FROM vw_sales_daily WHERE sales_date BETWEEN #{startDate} AND #{endDate} ORDER BY sales_date
   </select>
 </mapper>

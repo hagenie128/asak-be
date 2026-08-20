@@ -88,6 +88,7 @@ public enum ErrorCode {
   SALES_MONTHLY_NOT_FOUND("SALES_MONTHLY_NOT_FOUND", HttpStatus.NOT_FOUND, "월별 매출을 찾을 수 없습니다."),
   SALES_DAILY_NOT_FOUND("SALES_DAILY_NOT_FOUND", HttpStatus.NOT_FOUND, "일별 매출을 찾을 수 없습니다."),
   SALES_HOURLY_NOT_FOUND("SALES_HOURLY_NOT_FOUND", HttpStatus.NOT_FOUND, "시간별 매출을 찾을 수 없습니다."),
+  SALES_INTERVAL_INVALID("SALES_INTERVAL_INVALID", HttpStatus.BAD_REQUEST, "시간 단위는 30분 또는 60분만 허용됩니다."),
   SALES_DASHBOARD_NOT_FOUND(
       "SALES_DASHBOARD_NOT_FOUND", HttpStatus.NOT_FOUND, "대시보드 매출을 찾을 수 없습니다."),
   START_DATE_REQUIRED("START_DATE_REQUIRED", HttpStatus.BAD_REQUEST, "날짜를 입력해주세요."),
