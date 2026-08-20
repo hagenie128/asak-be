@@ -13,7 +13,12 @@ import com.asak.user.dto.payment.query.PaymentIdempotencyCheck;
 import com.asak.user.dto.payment.query.PaymentMethodContext;
 import com.asak.user.dto.payment.query.PaymentOrderContext;
 import com.asak.user.dto.payment.query.TossPaymentAuth;
+import com.asak.user.dto.payment.tossPayment.TossPaymentClient;
+import com.asak.user.dto.payment.tossPayment.TossPaymentConfirmRequest;
+import com.asak.user.dto.payment.tossPayment.TossPaymentConfirmResponse;
 import com.asak.user.mapper.UserPayMapper;
+
+import java.time.OffsetDateTime;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -25,6 +30,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class UserPayService {
 
   private final UserPayMapper payMapper;
+  private final TossPaymentClient tossPaymentClient;
 
   // --------------- api-014 결제 수단 조회 ------------------------
   public PaymentMethodListResponse getPaymentMethod() {
@@ -40,20 +46,20 @@ public class UserPayService {
 
   // ------------ 결제 승인 검증 메서드 ------------
   private void validateRequest(ApprovePaymentRequest request) {
-
+    
     // 1. 주문 요청 올바르지 않음
     if (request == null
-        || request.getOrderId() == null
-        || request.getOrderStatus() == null
-        || request.getIdempotencyKey() == null) {
-      throw new CustomException(ErrorCode.INVALID_ORDER_REQUEST);
-    }
-
-    // 2. 결제 방법이 비활성화 되어있음
-    if (request.getPaymentMethodCode() == null) {
-      throw new CustomException(ErrorCode.PAYMENT_METHOD_DISABLED);
-    }
-
+      || request.getOrderId() == null
+      || request.getOrderStatus() == null
+      || request.getIdempotencyKey() == null) {
+        throw new CustomException(ErrorCode.INVALID_ORDER_REQUEST);
+      }
+      
+      // 2. 결제 방법이 비활성화 되어있음
+      if (request.getPaymentMethodCode() == null) {
+        throw new CustomException(ErrorCode.PAYMENT_METHOD_DISABLED);
+      }
+      
     // 3.이미 처리중인 결제가 있음
     if (request.getIdempotencyKey() == null || request.getIdempotencyKey().isBlank()) {
       throw new CustomException(ErrorCode.INVALID_ORDER_REQUEST);
@@ -63,42 +69,61 @@ public class UserPayService {
     if (request.getOrderStatus() != OrderStatus.RECEIVED) {
       throw new CustomException(ErrorCode.ORDER_STATUS_CONFLICT);
     }
-
-
+    
+    
     /*
-     * 토스를 사용하는 결제수단은
-     * 프론트에서 받은 토스 인증 결과가 필수다.
-     */
-    if (isTossEasyPay(
-        request.getPaymentMethodCode()
+    * 토스를 사용하는 결제수단은
+    * 프론트에서 받은 토스 인증 결과가 필수
+    */
+   if (isTossEasyPay(
+     request.getPaymentMethodCode()
     )) {
-        TossPaymentAuth tossPayment =
-            request.getTossPayment();
-
-        if (tossPayment == null
-            || tossPayment.getPaymentKey() == null
-            || tossPayment.getPaymentKey().isBlank()
-            || tossPayment.getOrderId() == null
-            || tossPayment.getOrderId().isBlank()
-            || tossPayment.getAmount() == null
-            || tossPayment.getAmount() <= 0) {
-            throw new CustomException(
-                ErrorCode.TOSS_PAYMENT_AUTH_REQUIRED
-            );
+      TossPaymentAuth tossPayment =
+      request.getTossPayment();
+      
+      if (tossPayment == null
+        || tossPayment.getPaymentKey() == null
+        || tossPayment.getPaymentKey().isBlank()
+        || tossPayment.getOrderId() == null
+        || tossPayment.getOrderId().isBlank()
+        || tossPayment.getAmount() == null
+        || tossPayment.getAmount() <= 0) {
+          throw new CustomException(
+            ErrorCode.TOSS_PAYMENT_AUTH_REQUIRED
+          );
         }
+      }
+      
+      /*
+      * CARD는 토스 인증 데이터를 사용하지 않음
+      * 잘못 섞인 요청도 차단하려면 아래 검증을 추가
+      */
+     if (request.getPaymentMethodCode()
+      == PaymentMethod.CARD
+    && request.getTossPayment() != null) {
+      throw new CustomException(
+        ErrorCode.INVALID_PAYMENT_REQUEST
+      );
+    }
+  }
+  
+  // ------------ 결제 승인 검증 메서드 ------------
+  private void validateTossPaymentMethodsOrder(PaymentOrderContext order, ApprovePaymentRequest request ){
+
+    if(!isTossEasyPay(request.getPaymentMethodCode())){
+      return;
     }
 
-        /*
-     * CARD는 토스 인증 데이터를 사용하지 않는다.
-     * 잘못 섞인 요청도 차단하려면 아래 검증을 추가한다.
-     */
-    if (request.getPaymentMethodCode()
-            == PaymentMethod.CARD
-        && request.getTossPayment() != null) {
-        throw new CustomException(
-            ErrorCode.INVALID_PAYMENT_REQUEST
-        );
+    TossPaymentAuth tossPayment = request.getTossPayment();
+
+    if(!order.getOrderNo().equals(tossPayment.getOrderId())){
+      throw new CustomException(ErrorCode.TOSS_ORDER_ID_MISMATCH);
     }
+
+    if(order.getTotalPrice() != tossPayment.getAmount()){
+      throw new CustomException(ErrorCode.TOSS_PAYMENT_AMOUNT_MISMATCH);
+    }
+
   }
 
   // ------------ 결제 멱등성키 중복 사용 확인 메서드 ------------
@@ -169,9 +194,43 @@ public class UserPayService {
   // ------------ 토스 결제수단 판별 추가 ------------
   private boolean isTossEasyPay(PaymentMethod paymentMethod) {
     return paymentMethod == PaymentMethod.TOSS_PAY
-        || paymentMethod == PaymentMethod.KAKAO_PAY
-        || paymentMethod == PaymentMethod.NAVER_PAY;
-}
+    || paymentMethod == PaymentMethod.KAKAO_PAY
+    || paymentMethod == PaymentMethod.NAVER_PAY;
+  }
+  
+  // ------------ 토스 승인 성공 여부를 검증 ------------
+  private void validateTossApprovalResponse (TossPaymentConfirmResponse tossResponse,
+    TossPaymentConfirmRequest tossConfirmrRequest
+  ){
+
+    //토스페이먼츠로부터 승인 거절된 경우
+    if(tossResponse == null ||
+      !"DONE".equals(tossResponse.getStatus())
+    ){
+      throw new CustomException(ErrorCode.TOSS_PAYMENT_APPROVAL_FAILED);
+    }
+    
+    //토스페이먼츠로부터 PaymentKey값이 다른 경우
+    if(!tossConfirmrRequest.getPaymentKey().equals(tossResponse.getPaymentKey())){
+      throw new CustomException(ErrorCode.TOSS_PAYMENT_KEY_MISMATCH);
+    }
+    
+    //토스페이먼츠응답과 요청의 OrderId값이 다른 경우
+    if(!tossConfirmrRequest.getOrderId().equals(tossResponse.getOrderId())){
+      throw new CustomException(ErrorCode.TOSS_ORDER_ID_MISMATCH);
+    }
+    
+    //토스페이먼츠응답과 요청의 TotalAmount값이 다른 경우
+    if(tossResponse.getTotalAmount() == null ||
+        tossConfirmrRequest.getAmount().longValue() != tossResponse.getTotalAmount().longValue()){
+          throw new CustomException(ErrorCode.TOSS_PAYMENT_AMOUNT_MISMATCH);
+        }
+
+    if(tossResponse.getApprovedAt() == null){
+      throw new CustomException(ErrorCode.TOSS_PAYMENT_APPROVAL_FAILED);
+    }
+
+  }
 
   // requestBody 정본
   // --토스페이 반영 x --
@@ -228,6 +287,9 @@ public class UserPayService {
     // 3. 주문 존재 및 주문 상태 확인
     PaymentOrderContext order = validateOrderForPayment(request.getOrderId());
 
+    // 3-1. 토스페이먼츠로 추가되는 부분(토스 요청값과 DB주문번호와 금액 비교)
+    validateTossPaymentMethodsOrder(order, request);
+
     // 4. 해당 주문의 기존 APPROVED(승인) 결제 확인
     validateNoApprovePayment(request.getOrderId());
 
@@ -239,6 +301,36 @@ public class UserPayService {
 
     int approvedAmount = order.getTotalPrice();
 
+    String providerPaymentKey = null;
+    OffsetDateTime approvedAt = null;
+
+    // 6-1. 토스페이 간편결제 내역들만 해당 구간 적용(결제수단:card 제외)
+    if(isTossEasyPay(request.getPaymentMethodCode())){
+      
+      // 6-2. 토스페이먼츠로 api 보내주는 작업 실행
+      TossPaymentAuth tossPayment = request.getTossPayment();
+  
+      TossPaymentConfirmRequest tossConfirmRequest = new TossPaymentConfirmRequest();
+  
+      tossConfirmRequest.setPaymentKey(tossPayment.getPaymentKey());
+      tossConfirmRequest.setOrderId(order.getOrderNo());
+      tossConfirmRequest.setAmount((long) order.getTotalPrice());
+  
+      TossPaymentConfirmResponse tossResponse = tossPaymentClient.confirm(
+        tossConfirmRequest,
+        request.getIdempotencyKey()
+      );
+  
+      // 6-2. 토스페이로부터 온 응답을 검증
+      validateTossApprovalResponse(tossResponse, tossConfirmRequest);
+
+
+      providerPaymentKey = tossResponse.getPaymentKey();
+      approvedAt = tossResponse.getApprovedAt();
+    }
+
+
+
     // 7. payment 저장
     PaymentInsertCommand command = new PaymentInsertCommand();
 
@@ -247,10 +339,24 @@ public class UserPayService {
     command.setAmount(approvedAmount);
     command.setIdempotencyKey(request.getIdempotencyKey());
 
+    //토스페이먼츠 결제일 경우에만 저장
+    if(providerPaymentKey != null &&
+        approvedAt != null
+    ){
+      command.setProviderPaymentKey(providerPaymentKey);
+      command.setApprovedAt(approvedAt);
+    }
+
     int inserted = payMapper.insertPayment(command); // 건수 -> 추가성공  0-> 실패
 
     if (inserted != 1 || command.getPaymentId() == null) {
       throw new CustomException(ErrorCode.PAYMENT_CREATE_FAILED);
+    }
+    //주문상태(orderStatus)도 READY → RECEIVED로 바꿔서 보내주기
+    int updated = payMapper.updateOrderStatusToReceived(request.getOrderId());
+
+    if(updated != 1){
+      throw new CustomException(ErrorCode.ORDER_STATUS_CONFLICT);
     }
 
     // 8. paymentId로 결과 조회 후 반환

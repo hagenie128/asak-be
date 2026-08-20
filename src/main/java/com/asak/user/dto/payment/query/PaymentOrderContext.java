@@ -14,5 +14,6 @@ import org.apache.ibatis.type.Alias;
 public class PaymentOrderContext {
 
   private OrderStatus orderStatus;
+  private String orderNo;
   private int totalPrice;
 }

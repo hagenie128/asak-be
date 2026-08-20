@@ -77,7 +77,8 @@
 
         select
             order_status.code AS orderStatus,
-            o.total_price AS totalPrice
+            o.total_price AS totalPrice,
+            o.order_no as orderNo
         from orders o
         join common_code order_status
         on order_status.id = o.status_id
@@ -126,7 +127,7 @@
     
     </select>
 
-    <!-- 승인건 결제 추가 -->
+    <!-- 결제 승인건 추가 -->
     <insert id="insertPayment" 
             useGeneratedKeys = "true"
             keyProperty="paymentId"
@@ -138,7 +139,8 @@
         status_id,
         amount,
         paid_at,
-        idempotency_key
+        idempotency_key,
+        provider_payment_key
     )
     values(
         #{orderId},
@@ -152,11 +154,43 @@
             and payment_status.code = 'APPROVED'
         ),
         #{amount},
-        now(),
-        #{idempotencyKey}
+        <choose>
+            <when test = "approvedAt != null">
+                #{approvedAt}
+            </when>
+            <otherwise>
+                now()
+            </otherwise>
+        
+        </choose>,
+        #{idempotencyKey},
+        #{providerPaymentKey}
     )
     
     </insert>
+
+    <!-- updateOrderStatusToReceived 주문상태 READY → RECEIVED 수정 유무  -->
+
+    <update id="updateOrderStatusToReceived">
+        update order o
+
+        join common_code current_status
+        on current_status.id = o.status_id
+        join code_group current_status_group
+        on current_status.code_grp_id = current_status_group.id
+        join common_code received_status
+        on received_status.code = 'RECEIVED'
+        join code_group received_status_group
+        on received_status.code_grp_id = received_status_group.id
+
+        set o.status_id = received_status.id
+        where o.id = #{orderId}
+        and received_status_group.group_code = 'ORDER_STATUS'
+        and current_status.code = 'READY'
+        and received_status_group.group_code = 'ORDER_STATUS'
+
+    
+    </update>
 
 
 </mapper>

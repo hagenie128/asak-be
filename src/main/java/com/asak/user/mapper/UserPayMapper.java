@@ -27,5 +27,9 @@ public interface UserPayMapper {
   PaymentMethodContext findPaymentMethod(
       @Param("paymentMethodCode") PaymentMethod paymentMethodCode);
 
+  //결제수단 저장
   int insertPayment(PaymentInsertCommand command);
+
+  //orderStatus READY → RECEIVED 수정 반환
+  int updateOrderStatusToReceived(@Param("orderId") Long orderId);
 }
