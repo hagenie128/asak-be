@@ -5,7 +5,7 @@ meta {
 }
 
 get {
-  url: {{baseUrl}}/api/admin/sales/monthly?year={{salesYear}}&month={{salesMonth}}
+  url: {{baseUrl}}/api/admin/sales/monthly?year={{salesYear}}
   body: none
   auth: none
 }
@@ -13,5 +13,7 @@ get {
 docs {
   # API-019
   GET /api/admin/sales/monthly?year
-  SPEC_ONLY: AdminStatsController 클래스 매핑만 있음. 메서드 없음 (TODO-016).
+  SUCCESS: ADMIN_SALES_MONTHLY_SUCCESS
+  data: MonthlySalesResponse
+  해당 연도의 1~12월 행을 반환한다. 범위를 벗어나면 400 SALES_YEAR_INVALID.
 }

@@ -5,13 +5,16 @@ meta {
 }
 
 get {
-  url: {{baseUrl}}/api/admin/sales/daily?date={{salesDate}}&intervalMinutes={{intervalMinutes}}
+  url: {{baseUrl}}/api/admin/sales/daily?from={{startDate}}&to={{endDate}}
   body: none
   auth: none
 }
 
 docs {
   # API-017
-  GET /api/admin/sales/daily?date
-  SPEC_ONLY: AdminStatsController 클래스 매핑만 있음. 메서드 없음 (TODO-017).
+  GET /api/admin/sales/daily?from=YYYY-MM-DD&to=YYYY-MM-DD
+  SUCCESS: ADMIN_SALES_DAILY_SUCCESS
+  data: DailySalesResponse
+  to는 선택이며 생략 시 from과 같은 날짜를 조회한다. from도 생략하면 이번 달 1일~오늘이다.
+  날짜 형식 오류는 400 SALES_DATE_INVALID, 미래·역전 범위는 400 DATE_RANGE_INVALID.
 }

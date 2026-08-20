@@ -13,5 +13,8 @@ get {
 docs {
   # API-020
   GET /api/admin/dashboard
-  SPEC_ONLY: AdminStatsController 클래스 매핑만 있음. 메서드 없음 (TODO-023).
+  SUCCESS: ADMIN_DASHBOARD_SUCCESS
+  data: AdminDashboardResponse
+  현재 매출·주문·품절 데이터를 대시보드 화면용으로 조합한다.
+  DB View 적용 여부에 따라 실제 호출 결과는 달라질 수 있다.
 }
