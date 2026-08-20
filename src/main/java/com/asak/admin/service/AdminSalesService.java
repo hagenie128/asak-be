@@ -59,7 +59,8 @@ public class AdminSalesService {
     Map<String, Object> inventory = adminSalesMapper.getDashboardInventorySummary();
     var recentOrders = adminSalesMapper.getDashboardRecentOrders();
     var statusSummary = adminSalesMapper.getDashboardStatusSummary(today);
-    var weeklySales = adminSalesMapper.getDashboardWeeklySales(dateRange(today.minusDays(6), today));
+    var weeklySales =
+        adminSalesMapper.getDashboardWeeklySales(dateRange(today.minusDays(6), today));
 
     return AdminDashboardResponse.builder()
         .dateLabel(today.toString())
