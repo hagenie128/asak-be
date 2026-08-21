@@ -1,6 +1,6 @@
 # ASAK Bruno API Contract Collection
 
-> Status: PARTIALLY_IMPLEMENTED (2026-08-18)
+> Status: PARTIALLY_IMPLEMENTED (2026-08-20)
 > 경로·요청 본문 정본: 현재 Controller · DTO (`ASAK-back/src`)
 > 비교용 계약: `IMPLEMENTATION_PLAN.md` · Product Bible API Contract
 
@@ -36,7 +36,11 @@ Bruno `api` 폴더는 실행 중인 백엔드와 맞춰 호출하기 위한 요�
 | 옵션 그룹 | `GET /api/admin/opts/groups`, `GET /api/admin/opts/{optionGroupId}` | 구현 |
 | 품절 | `/api/admin/soldOut` | SPEC_ONLY (TODO-007) |
 | 관리자 결제수단 | `/api/admin/paymentMethods` | SPEC_ONLY (TODO-011) |
-| 매출·대시보드 | `/api/admin/sales/**`, `/api/admin/dashboard` | SPEC_ONLY (TODO-015~023) |
+| 대시보드 | `GET /api/admin/dashboard` | 구현 · `ADMIN_DASHBOARD_SUCCESS` |
+| 매출 요약 | `GET /api/admin/sales/summary?period=today\|week\|month` | 구현 · `ADMIN_SALES_SUMMARY_SUCCESS` |
+| 월별 매출 | `GET /api/admin/sales/monthly?year=YYYY` | 구현 · `ADMIN_SALES_MONTHLY_SUCCESS` |
+| 일별 매출 | `GET /api/admin/sales/daily?from&to` | 구현 · `ADMIN_SALES_DAILY_SUCCESS` |
+| 일별 시간대 매출 | `GET /api/admin/sales/daily/time-slots?date&intervalMinutes=30\|60` | 구현 · `ADMIN_SALES_TIME_SLOTS_SUCCESS` |
 | 관리자 로그인 | `POST /api/admin/login` | SPEC_ONLY (TODO-027) |
 
 ## 요청 파일 형식
@@ -92,14 +96,15 @@ JSON body는 camelCase만 사용한다.
 | 14 | update-sold-out | PATCH /api/admin/soldOut (SPEC_ONLY) |
 | 15 | payment-methods | GET /api/admin/paymentMethods (SPEC_ONLY) |
 | 16 | update-payment-method | PATCH /api/admin/paymentMethods/{methodId} (SPEC_ONLY) |
-| 17 | dashboard | GET /api/admin/dashboard (SPEC_ONLY) |
-| 18 | sales-summary | GET /api/admin/sales/summary (SPEC_ONLY) |
-| 19 | sales-monthly | GET /api/admin/sales/monthly (SPEC_ONLY) |
-| 20 | sales-daily | GET /api/admin/sales/daily (SPEC_ONLY) |
+| 17 | dashboard | GET /api/admin/dashboard |
+| 18 | sales-summary | GET /api/admin/sales/summary?period |
+| 19 | sales-monthly | GET /api/admin/sales/monthly?year |
+| 20 | sales-daily | GET /api/admin/sales/daily?from&to |
 | 21 | cancel-order | PATCH /api/admin/orders/{orderId}/cancel |
 | 22 | option-group-list | GET /api/admin/opts/groups |
 | 23 | option-group-detail | GET /api/admin/opts/{optionGroupId} |
 | 24 | login | POST /api/admin/login (SPEC_ONLY) |
+| 25 | sales-daily-time-slots | GET /api/admin/sales/daily/time-slots?date&intervalMinutes |
 
 ## 주의
 
@@ -114,6 +119,7 @@ JSON body는 camelCase만 사용한다.
 - 재료 목록 행 식별자는 `id`다 (`ingredientId` 아님).
 - 메뉴 삭제는 soft delete (`deleted_at`). `ing` 마스터는 지우지 않는다.
 - wiki `rest-api-spec.md` 정본 path는 `/api/kiosk/**`, `/api/admin/**`이다. 구 `/api/menus` 표는 폐기.
+- 매출 View의 DB 적용은 Bruno 요청 파일 생성과 별개다. 현재 DB에 필요한 View가 없으면 해당 매출 요청은 서버에서 실패할 수 있다.
 
 ## 기준 문서
 

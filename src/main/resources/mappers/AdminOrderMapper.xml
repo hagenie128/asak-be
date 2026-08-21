@@ -2,7 +2,7 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.asak.admin.mapper.AdminOrderMapper">
 
-<resultMap id="orderDetailMap" type="com.asak.admin.dto.response.OrderDetailResponse">
+<resultMap id="orderDetailMap" type="com.asak.admin.dto.response.orders.OrderDetailResponse">
   <id column="order_id" property="orderId"/>
   <result column="order_no" property="orderNo"/>
   <result column="order_type_code" property="orderType"/>
@@ -11,7 +11,7 @@
   <result column="payment_method_name" property="paymentMethod"/>
   <result column="total_price" property="totalAmount"/>
   <result column="created_at" property="createdAt"/>
-  <collection property="items" ofType="com.asak.admin.dto.response.OrderItemResponse"
+  <collection property="items" ofType="com.asak.admin.dto.response.orders.OrderItemResponse"
               column="order_id" select="findOrderItems"/>
 </resultMap>
 
@@ -22,7 +22,7 @@
   WHERE order_id = #{orderId}
 </select>
 
-<select id="findOrderItems" resultType="com.asak.admin.dto.response.OrderItemResponse">
+<select id="findOrderItems" resultType="com.asak.admin.dto.response.orders.OrderItemResponse">
   SELECT menu_id AS menuId, menu_name AS menuName, quantity, unit_price AS unitPrice,
          option_items AS optionItems, excluded_ingredients AS excludedIngredients
   FROM vw_order_item_full
@@ -51,7 +51,7 @@
   </where>
 </sql>
 
-<select id="getOrderList" resultType="com.asak.admin.dto.response.OrderListResponse">
+<select id="getOrderList" resultType="com.asak.admin.dto.response.orders.OrderListResponse">
   WITH paged_orders AS (
     SELECT o.id AS order_id,
            o.order_no,
@@ -114,7 +114,7 @@
   <include refid="orderListBaseWhere"/>
 </select>
 
-<select id="getLiveOrders" resultType="com.asak.admin.dto.response.LiveOrderResponse">
+<select id="getLiveOrders" resultType="com.asak.admin.dto.response.orders.LiveOrderResponse">
   SELECT order_id AS orderId,
          order_no AS orderNo,
          order_type_label AS orderTypeLabel,

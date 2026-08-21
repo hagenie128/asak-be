@@ -2,6 +2,7 @@ package com.asak.common.exception;
 
 import org.springframework.http.HttpStatus;
 
+
 /**
  * API business error catalog.
  *
@@ -99,7 +100,36 @@ public enum ErrorCode {
     MENU_DELETE_NOT_FOUND("MENU_DELETE_NOT_FOUND", HttpStatus.NOT_FOUND, "메뉴를 찾을 수 없습니다."),
     MENU_OPTION_GROUP_NOT_FOUND(
             "MENU_OPTION_GROUP_NOT_FOUND", HttpStatus.NOT_FOUND, "옵션 그룹을 찾을 수 없습니다."),
-    MENU_INGREDIENT_NOT_FOUND("MENU_INGREDIENT_NOT_FOUND", HttpStatus.NOT_FOUND, "재료를 찾을 수 없습니다.");
+    MENU_INGREDIENT_NOT_FOUND("MENU_INGREDIENT_NOT_FOUND", HttpStatus.NOT_FOUND, "재료를 찾을 수 없습니다."),
+
+     SALES_SUMMARY_NOT_FOUND("SALES_SUMMARY_NOT_FOUND", HttpStatus.NOT_FOUND, "매출 요약을 찾을 수 없습니다."),
+  DATE_RANGE_INVALID("DATE_RANGE_INVALID", HttpStatus.BAD_REQUEST, "날짜 범위가 유효하지 않습니다."),
+  SALES_MONTHLY_NOT_FOUND("SALES_MONTHLY_NOT_FOUND", HttpStatus.NOT_FOUND, "월별 매출을 찾을 수 없습니다."),
+  SALES_DAILY_NOT_FOUND("SALES_DAILY_NOT_FOUND", HttpStatus.NOT_FOUND, "일별 매출을 찾을 수 없습니다."),
+  SALES_HOURLY_NOT_FOUND("SALES_HOURLY_NOT_FOUND", HttpStatus.NOT_FOUND, "시간별 매출을 찾을 수 없습니다."),
+  SALES_INTERVAL_INVALID(
+      "SALES_INTERVAL_INVALID", HttpStatus.BAD_REQUEST, "시간 단위는 30분 또는 60분만 허용됩니다."),
+  SALES_DASHBOARD_NOT_FOUND(
+      "SALES_DASHBOARD_NOT_FOUND", HttpStatus.NOT_FOUND, "대시보드 매출을 찾을 수 없습니다."),
+  START_DATE_REQUIRED("START_DATE_REQUIRED", HttpStatus.BAD_REQUEST, "시작 날짜를 입력해주세요."),
+  END_DATE_GREATER_THAN_TODAY(
+      "END_DATE_GREATER_THAN_TODAY", HttpStatus.BAD_REQUEST, "종료 날짜는 오늘 이후일 수 없습니다."),
+  START_DATE_GREATER_THAN_TODAY(
+      "START_DATE_GREATER_THAN_TODAY", HttpStatus.BAD_REQUEST, "시작 날짜는 오늘 이후일 수 없습니다."),
+  END_DATE_LESS_THAN_START_DATE(
+      "END_DATE_LESS_THAN_START_DATE", HttpStatus.BAD_REQUEST, "종료 날짜는 시작 날짜보다 이전일 수 없습니다."),
+  YEAR_GREATER_THAN_CURRENT_YEAR(
+      "YEAR_GREATER_THAN_CURRENT_YEAR", HttpStatus.BAD_REQUEST, "현재 연도보다 이후일 수 없습니다."),
+  YEAR_LESS_THAN_MIN_YEAR(
+      "YEAR_LESS_THAN_MIN_YEAR", HttpStatus.BAD_REQUEST, "영업 시작 연도보다 이전일 수 없습니다."),
+  MONTHLY_SALES_SUMMARY_NOT_FOUND(
+      "MONTHLY_SALES_SUMMARY_NOT_FOUND", HttpStatus.NOT_FOUND, "월별 매출을 찾을 수 없습니다."),
+  MONTH_GREATER_THAN_CURRENT_MONTH(
+      "MONTH_GREATER_THAN_CURRENT_MONTH", HttpStatus.BAD_REQUEST, "현재 월보다 이후일 수 없습니다."),
+  SALES_PERIOD_INVALID(
+      "SALES_PERIOD_INVALID", HttpStatus.BAD_REQUEST, "기간은 today, week, month만 허용됩니다."),
+  SALES_DATE_INVALID("SALES_DATE_INVALID", HttpStatus.BAD_REQUEST, "날짜 형식은 yyyy-MM-dd여야 합니다."),
+  SALES_YEAR_INVALID("SALES_YEAR_INVALID", HttpStatus.BAD_REQUEST, "조회 가능한 매출 연도가 아닙니다.");
 
     private final String code;
     private final HttpStatus status;

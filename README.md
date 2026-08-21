@@ -1,4 +1,4 @@
-<div align="center">
+﻿<div align="center">
 
 # 🥗 ASAK Backend
 
@@ -298,7 +298,7 @@ Cloudinary에 이미지 업로드
 | `AdminMenuMapper.xml` | 메뉴 등록·수정 시 `image_asset_id` 저장, 관리자 응답에서 `media_asset.url` JOIN |
 | `UserMenuMapper.xml` | 키오스크 메뉴 목록·상세에서 `media_asset.url AS imageUrl` 조회 |
 | `.env.example` | Cloudinary 자격 증명 변수 형식 (실제 비밀값 커밋 금지) |
-| `docs/MENU_IMAGE_ASSET_FLOW.md` | 전환 근거·데이터 보정·검증 절차 상세 |
+| `docs/menu-image-asset-flow.md` | 전환 근거·데이터 보정·검증 절차 상세 |
 
 ### 중요한 경계
 
@@ -456,9 +456,9 @@ Controller → Service → Mapper interface → Mapper XML → MySQL → Respons
 | [`IMPLEMENTATION_PLAN.md`](IMPLEMENTATION_PLAN.md) | API 정본 목록, 필드 규칙, 구현 순서 |
 | [`api/README.md`](api/README.md) | Bruno 컬렉션 사용법과 요청 형식 |
 | [`docs/guides/README.md`](docs/guides/README.md) | 저장소 보조 가이드 목차 |
-| [`docs/implementation_guide/00-start-here.md`](docs/implementation_guide/00-start-here.md) | 구현 가이드 시작점 |
-| [`docs/implementation_guide/04-api-db-implementation.md`](docs/implementation_guide/04-api-db-implementation.md) | API·DB 구현 규칙 |
-| [`docs/implementation_guide/08-feature-implementation-matrix.md`](docs/implementation_guide/08-feature-implementation-matrix.md) | 기능별 구현 매트릭스 |
-| [`docs/MENU_IMAGE_ASSET_FLOW.md`](docs/MENU_IMAGE_ASSET_FLOW.md) | Cloudinary·`media_asset` 메뉴 이미지 전환 흐름 |
+| [`docs/implementation-guide/00-start-here.md`](docs/implementation-guide/00-start-here.md) | 구현 가이드 시작점 |
+| [`docs/implementation-guide/04-api-db-implementation.md`](docs/implementation-guide/04-api-db-implementation.md) | API·DB 구현 규칙 |
+| [`docs/implementation-guide/08-feature-implementation-matrix.md`](docs/implementation-guide/08-feature-implementation-matrix.md) | 기능별 구현 매트릭스 |
+| [`docs/menu-image-asset-flow.md`](docs/menu-image-asset-flow.md) | Cloudinary·`media_asset` 메뉴 이미지 전환 흐름 |
 
 제품 정책·화면 계약의 정본은 워크스페이스의 `ASAK/docs/product_bible/`입니다. 코드와 문서가 다르면 한쪽을 조용히 맞추지 말고 불일치로 기록한 뒤 팀에서 결정합니다.
