@@ -1,6 +1,34 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<!-- 품절 구현 참고: selectSoldOutCatalog -->
-<!-- 품절 구현 참고: updateSoldOut -->
 <mapper namespace="com.asak.admin.mapper.AdminSoldOutMapper">
+  <select id="getSoldOutCatalog" resultType="com.asak.admin.dto.response.item.SoldOutCatalogItemResponse">
+    SELECT 'MENU' AS targetType, m.id AS targetId, m.name, c.name AS category,
+           m.sold_out AS isSoldOut, ma.url AS imageUrl
+    FROM menu m
+    JOIN category c ON c.id = m.cat_id
+    LEFT JOIN media_asset ma ON ma.id = m.image_asset_id AND ma.deleted_at IS NULL
+    WHERE m.deleted_at IS NULL
+    UNION ALL
+    SELECT 'INGREDIENT' AS targetType, i.id AS targetId, i.name,
+           COALESCE(cc.name, '재료') AS category, i.sold_out AS isSoldOut, ma.url AS imageUrl
+    FROM ingredient i
+    LEFT JOIN common_code cc ON cc.id = i.type_id
+    LEFT JOIN media_asset ma ON ma.id = i.photo_asset_id AND ma.deleted_at IS NULL
+    UNION ALL
+    SELECT 'OPTION_ITEM' AS targetType, oi.id AS targetId, oi.name,
+           og.name AS category, oi.sold_out AS isSoldOut, oi.icon_url AS imageUrl
+    FROM opt_item oi
+    JOIN opt_group og ON og.id = oi.opt_group_id
+    ORDER BY targetType, category, name
+  </select>
+
+  <update id="updateMenuSoldOut">
+    UPDATE menu SET sold_out = #{isSoldOut} WHERE id = #{targetId} AND deleted_at IS NULL
+  </update>
+  <update id="updateIngredientSoldOut">
+    UPDATE ingredient SET sold_out = #{isSoldOut} WHERE id = #{targetId}
+  </update>
+  <update id="updateOptionItemSoldOut">
+    UPDATE opt_item SET sold_out = #{isSoldOut} WHERE id = #{targetId}
+  </update>
 </mapper>

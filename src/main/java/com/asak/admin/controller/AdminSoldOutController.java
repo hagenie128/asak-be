@@ -1,5 +1,12 @@
 package com.asak.admin.controller;
 
+import com.asak.admin.dto.request.item.SoldOutPatchRequest;
+import com.asak.admin.dto.response.item.SoldOutCatalogResponse;
+import com.asak.admin.service.AdminSoldOutService;
+import com.asak.common.response.ApiResponse;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -11,4 +18,22 @@ import org.springframework.web.bind.annotation.RestController;
 // 4) 검증: 메뉴·재료 혼합 변경, 존재하지 않는 target, 0건 갱신, 동시 변경(409)을 API로 확인한다.
 @RestController
 @RequestMapping("/api/admin/soldOut")
-public class AdminSoldOutController {}
+public class AdminSoldOutController {
+  private final AdminSoldOutService adminSoldOutService;
+
+  public AdminSoldOutController(AdminSoldOutService adminSoldOutService) {
+    this.adminSoldOutService = adminSoldOutService;
+  }
+
+  @GetMapping
+  public ApiResponse<SoldOutCatalogResponse> getSoldOutCatalog() {
+    return ApiResponse.success(
+        "ADMIN_SOLD_OUT_CATALOG_SUCCESS", "품절 카탈로그 조회 성공", adminSoldOutService.getSoldOutCatalog());
+  }
+
+  @PatchMapping
+  public ApiResponse<SoldOutCatalogResponse> patchSoldOut(@RequestBody SoldOutPatchRequest request) {
+    return ApiResponse.success(
+        "ADMIN_SOLD_OUT_PATCH_SUCCESS", "품절 상태 저장 성공", adminSoldOutService.patchSoldOut(request));
+  }
+}
