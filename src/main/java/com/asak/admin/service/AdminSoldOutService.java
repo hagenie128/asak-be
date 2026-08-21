@@ -13,7 +13,7 @@ import java.util.Set;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-// TODO-008 (구현 완료): vw_soldout_catalog로 카탈로그를 조회하고 MENU/INGREDIENT/OPTION_ITEM의 sold_out을 저장한다.
+// vw_soldout_catalog로 카탈로그를 조회하고 MENU/INGREDIENT/OPTION_ITEM의 sold_out을 저장한다.
 // targetType/targetId를 검증하고 여러 changes는 @Transactional 전체 롤백으로 처리한다.
 // QA: 실제 DB 저장·복구, 없는 대상이 섞인 복수 변경의 전체 롤백, View와 이미지 보완 조인을 확인한다.
 @Service
@@ -54,7 +54,8 @@ public class AdminSoldOutService {
 
   private int update(SoldOutChangeRequest change) {
     return switch (change.getTargetType()) {
-      case "MENU" -> adminSoldOutMapper.updateMenuSoldOut(change.getTargetId(), change.getIsSoldOut());
+      case "MENU" ->
+          adminSoldOutMapper.updateMenuSoldOut(change.getTargetId(), change.getIsSoldOut());
       case "INGREDIENT" ->
           adminSoldOutMapper.updateIngredientSoldOut(change.getTargetId(), change.getIsSoldOut());
       case "OPTION_ITEM" ->
@@ -74,7 +75,8 @@ public class AdminSoldOutService {
   private SoldOutCatalogResponse splitCatalog(List<SoldOutCatalogItemResponse> rows) {
     List<SoldOutCatalogItemResponse> available =
         rows.stream().filter(row -> !row.isSoldOut()).toList();
-    List<SoldOutCatalogItemResponse> soldOut = rows.stream().filter(SoldOutCatalogItemResponse::isSoldOut).toList();
+    List<SoldOutCatalogItemResponse> soldOut =
+        rows.stream().filter(SoldOutCatalogItemResponse::isSoldOut).toList();
     return SoldOutCatalogResponse.builder().available(available).soldOut(soldOut).build();
   }
 }

@@ -3,14 +3,23 @@
 <mapper namespace="com.asak.admin.mapper.AdminSalesMapper">
 
   <!--
-    TODO-018 (구현 완료): View는 실제 매출 업무 집계만 담당한다.
+    View는 실제 매출 업무 집계만 담당한다.
     summary/monthly/daily DTO 조립과 빈 날짜·영업시간 0-fill은 AdminSalesService가 담당한다.
-    QA: 배포 DB View와 API 응답의 합계를 대조한다.
+    TODO: 배포 DB View와 API 응답의 합계를 대조한다.
   -->
 
+  <!--
+    getMinYear: 이전에는 vw_sales_monthly에서 MIN(year)를 구했는데, 이 뷰는 vw_sales_daily를
+    다시 GROUP BY로 롤업한 것이라 MIN 하나 얻자고 매출 전체를 두 번 집계했다
+    (2026-08-21 실측 ~1.5초. Controller가 연도 검증 때문에 매 요청 호출한다).
+    vw_sales_daily에는 WHERE 절이 없어 orders 전체가 그대로 들어가므로,
+    베이스 테이블에서 같은 식(COALESCE(paid_at, created_at))의 최소 연도를 직접 구하면
+    결과가 동일하다. (2026-08-21 검증: minYear=2025로 뷰 기준과 일치.)
+  -->
   <select id="getMinYear" resultType="int">
-    SELECT COALESCE(MIN(year), YEAR(CURDATE()))
-    FROM vw_sales_monthly
+    SELECT COALESCE(MIN(YEAR(COALESCE(p.paid_at, o.created_at))), YEAR(CURDATE()))
+    FROM orders o
+    LEFT JOIN payment p ON p.order_id = o.id
   </select>
 
 <select id="getDailySalesRows"
@@ -39,14 +48,6 @@
   WHERE sales_date BETWEEN #{startDate} AND #{endDate}
   GROUP BY sales_hour
   ORDER BY sales_hour
-</select>
-
-<select id="getSalesTotals" resultType="map">
-  SELECT
-    COALESCE(SUM(net_sales_amount), 0) AS netSales,
-    COALESCE(SUM(order_count), 0)      AS orderCount
-  FROM vw_sales_daily
-  WHERE sales_date BETWEEN #{startDate} AND #{endDate}
 </select>
 
   <select id="getDailySalesTimeSlots"

@@ -10,8 +10,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-// TODO-007 (구현 완료): GET 카탈로그와 PATCH changes[{targetType,targetId,isSoldOut}] 계약을 제공한다.
-// Service가 대상 검증과 전체 트랜잭션을 맡고, Controller는 ApiResponse 성공·오류 규격을 프런트 TODO-009/010과 연결한다.
+// GET 카탈로그와 PATCH changes[{targetType,targetId,isSoldOut}] 계약을 제공한다.
+// Service가 대상 검증과 전체 트랜잭션을 맡고, Controller는 ApiResponse 성공·오류 규격을 프런트 API와 draft 훅에 연결한다.
 // QA: 빈 changes, 중복·없는 대상, 메뉴·재료 혼합 변경의 Bruno 응답과 동시 변경 정책을 확인한다.
 @RestController
 @RequestMapping("/api/admin/soldOut")
@@ -29,7 +29,8 @@ public class AdminSoldOutController {
   }
 
   @PatchMapping
-  public ApiResponse<SoldOutCatalogResponse> patchSoldOut(@RequestBody SoldOutPatchRequest request) {
+  public ApiResponse<SoldOutCatalogResponse> patchSoldOut(
+      @RequestBody SoldOutPatchRequest request) {
     return ApiResponse.success(
         "ADMIN_SOLD_OUT_PATCH_SUCCESS", "품절 상태 저장 성공", adminSoldOutService.patchSoldOut(request));
   }

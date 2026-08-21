@@ -14,7 +14,7 @@ import java.util.List;
 import java.util.Map;
 import org.apache.ibatis.annotations.Param;
 
-/** TODO-018 (구현 완료): SQL 결과는 행 단위 DTO로만 매핑하고, 빈 구간 0-fill은 Service가 처리한다. */
+/** SQL 결과는 행 단위 DTO로만 매핑하고, 빈 구간 0-fill은 Service가 처리한다. */
 public interface AdminSalesMapper {
 
   int getMinYear();
