@@ -74,8 +74,8 @@ POST /api/kiosk/orders
 
 구현에 필요한 요청 데이터는 `orderType`, `items[].menuId`, `quantity`, `optionItems[]`
 (`optionItemId`, `quantity`), `excludedIngredientIds`다. 서버는 메뉴·옵션·필수 옵션·품절·수량을 다시 검사하고
-`totalAmount`를 계산한다. 현재 DTO 응답에는 최소 `orderId`, `orderNo`, `status`,
-`paymentStatus`, `totalAmount`, `waitingOrderCount`가 필요하다.
+`totalAmount`를 계산한다. 성공 응답 data는 `orderId`, `orderNo`, `totalAmount`,
+`orderStatus: READY`다. API-005는 결제 전 주문을 `READY`로 저장한다.
 
 저장 순서는 **주문 헤더 → 주문 아이템 → 선택 옵션/재료 제외**이며 하나의 transaction으로
 처리한다. 장바구니 합계가 달라졌거나 품절이면 `409`로 중단하고, 프론트가 장바구니를
@@ -105,11 +105,12 @@ POST /api/kiosk/payments
 `tossPayment.orderId`는 토스페이먼츠에 전달한 주문번호다. `tossPayment.amount`는
 `orders.total_price`와 일치해야 한다.
 
-성공 data는 `paymentId`, `orderId`, `orderNo`, `paymentStatus: APPROVED`,
-`approvedAmount`, `waitingOrderCount`, `approvedAt`이다. 실패 data는 주문을 지우지 않고
-`paymentStatus: FAILED`, `failureCode`, `canRetry`를 반환한다. 토스페이먼츠 연동 결제의
-`paymentMethodCode`는 `TOSS_PAY`를 사용한다. `CARD`에는 삼성페이가 포함되고
-`KAKAO_PAY`, `NAVER_PAY`는 비활성 상태여도 목록에는 표시할 수 있다.
+성공 data는 `paymentId`, `orderId`, `orderNo`, `paymentMethodCode`,
+`paymentStatus: APPROVED`, `orderStatus: RECEIVED`, `approvedAmount`,
+`waitingOrderCount`, `approvedAt`이다. 백엔드는 DB 주문 상태가 `READY`인지 확인하고,
+승인 성공 뒤 `READY → RECEIVED`로 변경한다. `CARD`는 내부 mock 승인으로 처리하고,
+`TOSS_PAY`, `KAKAO_PAY`, `NAVER_PAY`는 프론트가 받은 `tossPayment` 인증 결과로 토스페이먼츠
+승인 API를 호출한다. 결제수단은 DB에서 활성 상태여야 한다.
 
 ## 5. Admin: 첫 세로 기능은 실시간 주문 — API-021 + API-008
 

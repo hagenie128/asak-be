@@ -9,7 +9,7 @@ import lombok.Getter;
 //     "orderId":1,
 //     "orderNo":"ASAK20260723000001",
 //     "totalAmount":8900,
-//     "status":"READY"
+//     "orderStatus":"READY"
 // }
 
 @Getter
@@ -19,5 +19,5 @@ public class CreateOrderResponse {
   private Long orderId;
   private String orderNo;
   private Integer totalAmount;
-  private OrderStatus status;
+  private OrderStatus orderStatus;
 }

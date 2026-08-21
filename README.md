@@ -107,7 +107,7 @@ com.asak/
 │   │   └── PageResult.java          # - 목록·페이징 응답 (content, page, size, total)
 │   │
 │   ├── enums/                       # [공통 상태값] API와 DB가 함께 쓰는 코드 정의
-│   │   ├── OrderStatus.java         # - RECEIVED, PREPARING, COMPLETED, CANCELED
+│   │   ├── OrderStatus.java         # - READY, RECEIVED, PREPARING, COMPLETED, CANCELED
 │   │   ├── OrderType.java           # - EAT_IN, TAKE_OUT
 │   │   ├── PaymentStatus.java       # - READY, APPROVED, FAILED, CANCELED, REFUNDED
 │   │   ├── PaymentMethod.java       # - CARD, KAKAO_PAY, NAVER_PAY 등 결제수단

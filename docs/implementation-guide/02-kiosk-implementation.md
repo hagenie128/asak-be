@@ -34,8 +34,8 @@
 
 - `orderType`, `items[].menuId`, `quantity`, `optionItems`, `excludedIngredientIds`가 계약 필드다.
 - 클라이언트의 `totalAmount`나 카드 가격은 신뢰하지 않는다.
-- 주문 생성 뒤 결제/완료 화면까지 연결하는 최소 data는 `orderId`, `orderNo`, `orderStatus`, `paymentStatus`, 서버 계산 `totalAmount`, `waitingOrderCount`다. 결제 승인 완료 예시는 `RECEIVED` + `APPROVED`다.
-- 결제 실패는 Order를 즉시 삭제하지 않는다. 현재 단순 모델에서는 주문을 보존하고 Payment를 `READY` 또는 `FAILED`로 유지한다.
+- API-005 성공 data는 `orderId`, `orderNo`, 서버 계산 `totalAmount`, `orderStatus: READY`다. 결제 승인 성공 data는 `paymentId`, `paymentMethodCode`, `paymentStatus: APPROVED`, `orderStatus: RECEIVED`, `approvedAmount`, `approvedAt`, `waitingOrderCount`을 반환한다.
+- 결제 실패는 Order를 즉시 삭제하지 않는다. 승인 전 실패하면 주문은 `READY`로 남아 재시도할 수 있다.
 - 클라이언트 금액과 DB 재계산 값이 다르면 주문을 중단하고 최신 가격/오류 code를 반환하여 Cart가 변경 안내를 할 수 있게 한다.
 
 ## Mapper/DB 확인 순서

@@ -53,14 +53,14 @@ public class UserPayController {
   //         "methodId": 10829,
   //         "methodCode": "KAKAO_PAY",
   //         "methodName": "카카오페이",
-  //         "active": false,
+  //         "active": true,
   //         "sortOrder": 2
   //       },
   //       {
   //         "methodId": 10830,
   //         "methodCode": "NAVER_PAY",
   //         "methodName": "네이버페이",
-  //         "active": false,
+  //         "active": true,
   //         "sortOrder": 3
   //       }
   //     ]

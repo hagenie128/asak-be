@@ -32,9 +32,11 @@ docs {
   # API-006
   POST /api/kiosk/payments
   응답 code: KIOSK_PAYMENT_APPROVED
-  body: orderId, orderStatus(=RECEIVED), paymentMethodCode(=TOSS_PAY), idempotencyKey, tossPayment
+  CARD 요청: orderId, orderStatus(=RECEIVED), paymentMethodCode(=CARD), idempotencyKey
+  토스 간편결제 요청: orderId, orderStatus(=RECEIVED), paymentMethodCode, idempotencyKey, tossPayment
   tossPayment: paymentKey, orderId(토스페이먼츠 주문번호), amount
   실행 전 idempotencyKey, paymentKey, tossPayment.orderId, amount를 실제 결제값으로 교체
-  data: paymentId, orderId, orderNo, paymentStatus, approvedAmount, approvedAt, waitingOrderCount
+  data: paymentId, orderId, orderNo, paymentMethodCode, paymentStatus(=APPROVED),
+        orderStatus(=RECEIVED), approvedAmount, approvedAt, waitingOrderCount
   레거시 amount/paidAt 사용 금지
 }

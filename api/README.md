@@ -24,7 +24,7 @@ Bruno `api` 폴더는 실행 중인 백엔드와 맞춰 호출하기 위한 요�
 | 키오스크 메뉴 목록 | `GET /api/kiosk/menuList` | 구현. code `OK`. categoryId query 없음 |
 | 키오스크 메뉴 상세 | `GET /api/kiosk/menuDetail/{menuId}` | 구현. code `OK` |
 | 장바구니 검증 | `POST /api/kiosk/cart/validate` | 구현. code `OK` |
-| 주문 생성 | `POST /api/kiosk/orders` | 구현. code `OK`. data.status = OrderStatus |
+| 주문 생성 | `POST /api/kiosk/orders` | 구현. code `OK`. data.orderStatus = `READY` |
 | 결제수단 목록 | `GET /api/kiosk/payment-methods` | 구현. code `KIOSK_PAYMENT_METHOD_LIST_SUCCESS` |
 | 결제 승인 | `POST /api/kiosk/payments` | 구현. code `KIOSK_PAYMENT_APPROVED` |
 | 관리자 주문 목록 | `GET /api/admin/orders` | 구현. code `ADMIN_ORDER_LIST_SUCCESS` |
@@ -109,10 +109,10 @@ JSON body는 camelCase만 사용한다.
 ## 주의
 
 - 성공 응답 assert는 **health**에만 둔다.
-- `KAKAO_PAY`, `NAVER_PAY`는 키오스크 목록에 보이지만 `active: false`다. 결제 승인은 기본 `CARD`를 사용한다. 구 계약명 `isEnabled`는 폐기.
+- 결제 승인은 DB `pay_method_cfg.active = true`인 결제수단만 허용한다. 구 계약명 `isEnabled`는 폐기.
 - 주문/장바구니 요청의 옵션은 `items[].optionItems[]`이며, 각 항목은 `optionItemId`, `quantity`를 가진다. 재료 제외는 `excludedIngredientIds`다.
 - 금액 응답은 `totalAmount`. 장바구니 항목 단가는 현재 DTO가 `unitPrice`다.
-- 주문 생성 DTO의 상태 필드는 `data.status`다. 관리자 목록·상세·Live는 `orderStatus`다. envelope의 HTTP `status`와 혼동하지 않는다.
+- 주문 생성·결제 승인·관리자 주문 API의 주문 상태 필드는 `orderStatus`다. envelope의 HTTP `status`와 혼동하지 않는다.
 - 키오스크 카테고리·메뉴·장바구니·주문 생성은 `ApiResponse.success(data)`라서 code가 `OK`다. 결제·관리자 API는 API별 문자열 code를 쓴다.
 - 메뉴 등록 `unit`은 `G`/`ML` 같은 UNIT_TYPE 코드다. 표시명(그램)은 쓰지 않는다.
 - 메뉴 `imageUrl`은 `media_asset`에 있는 URL만 허용한다. 없으면 생략하고 `mediaAssetId`를 우선한다.
