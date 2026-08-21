@@ -713,17 +713,19 @@ GROUP BY
 -- -----------------------------------------------------------------------------
 CREATE OR REPLACE VIEW `vw_soldout_catalog` AS
 SELECT 'MENU' AS `target_type`,`m`.`id` AS `target_id`,`m`.`name` AS `name`,`c`.`name` AS `category`,
-       `m`.`sold_out` AS `is_sold_out`,`m`.`price` AS `price`
+       `m`.`sold_out` AS `is_sold_out`,`m`.`price` AS `price`,`ma`.`url` AS `image_url`
 FROM (`menu` `m`
-      JOIN `category` `c` on((`c`.`id` = `m`.`cat_id`)))
+       JOIN `category` `c` on((`c`.`id` = `m`.`cat_id`))
+       LEFT JOIN `media_asset` `ma` on((`ma`.`id` = `m`.`image_asset_id`) AND (`ma`.`deleted_at` IS NULL)))
 UNION ALL
 SELECT 'INGREDIENT' AS `target_type`,`i`.`id` AS `target_id`,`i`.`name` AS `name`,`rt`.`name` AS `category`,
-       `i`.`sold_out` AS `is_sold_out`,NULL AS `price`
+       `i`.`sold_out` AS `is_sold_out`,NULL AS `price`,`ia`.`url` AS `image_url`
 FROM (`ing` `i`
-      JOIN `common_code` `rt` on((`rt`.`id` = `i`.`type_id`)))
+       JOIN `common_code` `rt` on((`rt`.`id` = `i`.`type_id`))
+       LEFT JOIN `media_asset` `ia` on((`ia`.`id` = `i`.`photo_asset_id`) AND (`ia`.`deleted_at` IS NULL)))
 UNION ALL
 SELECT 'OPTION_ITEM' AS `target_type`,`oi`.`id` AS `target_id`,`oi`.`name` AS `name`,`og`.`name` AS `category`,
-       `oi`.`sold_out` AS `is_sold_out`,`oi`.`add_price` AS `price`
+       `oi`.`sold_out` AS `is_sold_out`,`oi`.`add_price` AS `price`,`oi`.`icon_url` AS `image_url`
 FROM (`opt_item` `oi`
       JOIN `opt_group` `og` on((`og`.`id` = `oi`.`opt_group_id`)));
 
