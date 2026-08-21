@@ -28,10 +28,11 @@ import java.util.Map;
 import org.springframework.stereotype.Service;
 
 /**
- * TODO-018: View의 업무 데이터를 화면 DTO로 조립한다.
+ * TODO-018 (구현 완료): View의 업무 데이터를 화면 DTO로 조립한다.
  *
  * <p>DB는 실제 매출만 반환한다. 일자·시간대의 빈 구간 0-fill과 표시용 label은 Service 책임이며, chart의 높이·fill 같은 렌더링 값은 반환하지
  * 않는다.
+ * <p>QA: 배포된 View의 실제 행, 10:00~22:00 30/60분 버킷의 0-fill, API와 차트 합계 일치를 확인한다.
  */
 @Service
 public class AdminSalesService {
@@ -152,11 +153,9 @@ public class AdminSalesService {
         .label(periodLabel(period))
         .dateRange(rangeStartDate + " ~ " + rangeEndDate)
         .availablePeriods(List.of("today", "week", "month"))
-        .kpis(
-            List.of(
-                kpi("총매출", netSales, range, period),
-                kpi("주문 수", orderCount, range, period),
-                kpi("평균 객단가", average(netSales, orderCount), range, period)))
+        // 전 기간 값은 KPI 3장이 모두 같은 범위를 쓰므로 한 번만 조회한다.
+        // (이전에는 라벨별로 각각 조회해 vw_sales_daily를 4번 탔다 — 2026-08-21)
+        .kpis(buildSummaryKpis(range, period, netSales, orderCount))
         .hourlySales(hourlySales)
         .dailySales(dailySales)
         .paymentShare(adminSalesMapper.getPaymentShare(range))
@@ -266,9 +265,31 @@ public class AdminSalesService {
     return range;
   }
 
-  private SalesKpiResponse kpi(
-      String label, long value, @Nullable Map<String, Object> range, String period) {
+  /**
+   * Summary KPI 3장을 조립한다. 전 기간(직전 동일 길이 구간) 합계는 세 KPI가 같은 범위를 쓰므로 DB를 한 번만 조회해
+   * 나눠 쓴다.
+   */
+  private List<SalesKpiResponse> buildSummaryKpis(
+      @Nullable Map<String, Object> range, String period, long netSales, long orderCount) {
 
+    Map<String, Object> beforeTotals = adminSalesMapper.getSalesTotals(beforeRange(range));
+    long beforeNetSales = longValue(beforeTotals, "netSales");
+    long beforeOrderCount = longValue(beforeTotals, "orderCount");
+
+    return List.of(
+        buildKpiResponse("총매출", netSales, beforeNetSales, period),
+        buildKpiResponse("주문 수", orderCount, beforeOrderCount, period),
+        // average()가 주문 0건일 때 0을 돌려준다. 이전 코드는 여기서 그대로 나눠
+        // 전 기간 주문이 0건이면 ArithmeticException(500)이 났다.
+        buildKpiResponse(
+            "평균 객단가",
+            average(netSales, orderCount),
+            average(beforeNetSales, beforeOrderCount),
+            period));
+  }
+
+  /** 델타 비교 대상이 되는 직전 구간을 계산한다. */
+  private Map<String, Object> beforeRange(@Nullable Map<String, Object> range) {
     LocalDate startDate;
     LocalDate endDate;
     if (range != null) {
@@ -279,27 +300,10 @@ public class AdminSalesService {
       endDate = LocalDate.now(KOREA_ZONE_ID).minusDays(1);
     }
     long size = endDate.toEpochDay() - startDate.toEpochDay();
-    Map<String, Object> before = new HashMap<>();
     if (size == 0) {
-      before.put("startDate", startDate.minusDays(1));
-      before.put("endDate", endDate.minusDays(1));
-    } else {
-      before.put("startDate", startDate.minusDays(size + 1));
-      before.put("endDate", startDate.minusDays(1));
+      return dateRange(startDate.minusDays(1), endDate.minusDays(1));
     }
-    long beforeValue;
-    if (label.contains("매출")) {
-      beforeValue = adminSalesMapper.getDailySales(before);
-    } else if (label.contains("주문")) {
-      beforeValue = adminSalesMapper.getDailyOrderCount(before);
-    } else if (label.contains("객단가")) {
-      beforeValue =
-          adminSalesMapper.getDailySales(before) / adminSalesMapper.getDailyOrderCount(before);
-    } else {
-      beforeValue = 0;
-    }
-
-    return buildKpiResponse(label, value, beforeValue, period);
+    return dateRange(startDate.minusDays(size + 1), startDate.minusDays(1));
   }
 
   /** delta·표시 문자열 조립만 담당한다. beforeValue 조회는 호출부 책임이다(추가 DB 호출을 피하기 위함). */

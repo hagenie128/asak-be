@@ -26,7 +26,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class AdminDeviceEventController {
   private final DeviceEventService deviceEventService;
 
-  @PostMapping("/api/admin/orders/{orderId}/receipt-print")
+  @PostMapping("/api/admin/orders/{orderId}/receipt-print-text")
   public ApiResponse<DeviceEventResponse> requestReceiptPrint(
       @PathVariable long orderId, @Valid @RequestBody CreateDeviceEventRequest request) {
     DeviceEventResponse response =

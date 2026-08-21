@@ -18,10 +18,13 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
- * TODO-015~018: 매출 API는 화면별 DTO가 아니라 API 책임별 DTO를 반환한다.
+ * TODO-015~018 (구현 완료): 매출 API는 화면별 DTO가 아니라 API 책임별 DTO를 반환한다.
  *
  * <p>순서: dashboard → summary → monthly → daily → daily/time-slots. 시간대 버킷은 daily 응답에 섞지 않고 별도
  * endpoint에서 조회한다.
+ * <p>TODO-015 summary, TODO-016 monthly, TODO-017 daily/time-slots는 이 Controller에서 파라미터를 검증한다.
+ * TODO-018의 실제 매출 조회와 0-fill 조립은 Service/Mapper가 담당한다.
+ * QA: DB View 배포, Bruno 응답, 화면 KPI·차트 합계 대조가 남아 있다.
  */
 @RestController
 @RequestMapping("/api/admin")

@@ -3,8 +3,9 @@
 <mapper namespace="com.asak.admin.mapper.AdminSalesMapper">
 
   <!--
-    TODO-018: View는 업무 집계만 담당한다.
-    summary/monthly/daily DTO 조립, 빈 날짜와 영업시간 0-fill은 AdminSalesService가 담당한다.
+    TODO-018 (구현 완료): View는 실제 매출 업무 집계만 담당한다.
+    summary/monthly/daily DTO 조립과 빈 날짜·영업시간 0-fill은 AdminSalesService가 담당한다.
+    QA: 배포 DB View와 API 응답의 합계를 대조한다.
   -->
 
   <select id="getMinYear" resultType="int">
@@ -38,6 +39,14 @@
   WHERE sales_date BETWEEN #{startDate} AND #{endDate}
   GROUP BY sales_hour
   ORDER BY sales_hour
+</select>
+
+<select id="getSalesTotals" resultType="map">
+  SELECT
+    COALESCE(SUM(net_sales_amount), 0) AS netSales,
+    COALESCE(SUM(order_count), 0)      AS orderCount
+  FROM vw_sales_daily
+  WHERE sales_date BETWEEN #{startDate} AND #{endDate}
 </select>
 
   <select id="getDailySalesTimeSlots"
@@ -296,10 +305,39 @@
     ) daily
     ORDER BY sales_date
   </select>
-  <select id="getDailyOrderCount" resultType="long">
-    SELECT SUM(order_count) FROM vw_sales_daily WHERE sales_date BETWEEN #{startDate} AND #{endDate}
-  </select>
-  <select id="getDailySales" resultType="long">
-    SELECT SUM(net_sales_amount) FROM vw_sales_daily WHERE sales_date BETWEEN #{startDate} AND #{endDate}
+  <!--
+    getSalesTotals: 이전에는 getDailySales/getDailyOrderCount 두 쿼리로 나뉘어 있었고,
+    KPI 3장(총매출·주문 수·평균 객단가)이 같은 전 기간 범위를 각각 조회해서 한 요청에
+    vw_sales_daily를 4번 탔다(2026-08-21). 합계는 한 번만 조회하면 되므로 통합했다.
+    또 vw_sales_daily는 GROUP BY 때문에 뷰 병합이 안 돼 회당 ~1.2초가 걸리므로
+    (getDashboardKpi 주석 참조), 여기서도 뷰를 거치지 않고 베이스 테이블에서 직접 집계한다.
+    o.created_at 범위를 ±1일 여유로 먼저 걸어 조인 전에 행을 줄이고, 정확성을 위해
+    DATE(COALESCE(p.paid_at, o.created_at)) 조건을 함께 유지한다(getDashboardWeeklySales와 동일).
+  -->
+  <select id="getSalesTotals" resultType="map">
+    SELECT
+      COALESCE(SUM(net_sales_amount), 0) AS netSales,
+      COALESCE(SUM(order_count), 0) AS orderCount
+    FROM (
+      SELECT
+        COUNT(DISTINCT CASE
+                WHEN p.paid_at IS NOT NULL AND os.code &lt;> 'CANCELED'
+                     AND ps.code NOT IN ('CANCELED', 'REFUNDED') THEN o.id
+              END) AS order_count,
+        (COALESCE(SUM(CASE WHEN p.paid_at IS NOT NULL THEN p.amount ELSE 0 END), 0)
+         - COALESCE(SUM(CASE
+                          WHEN p.paid_at IS NOT NULL
+                               AND (os.code = 'CANCELED' OR ps.code IN ('CANCELED', 'REFUNDED'))
+                          THEN p.amount ELSE 0
+                        END), 0)) AS net_sales_amount
+      FROM orders o
+      LEFT JOIN payment p ON p.order_id = o.id
+      LEFT JOIN common_code ps ON ps.id = p.status_id
+      LEFT JOIN common_code os ON os.id = o.status_id
+      WHERE o.created_at >= DATE_SUB(#{startDate}, INTERVAL 1 DAY)
+        AND o.created_at &lt; DATE_ADD(#{endDate}, INTERVAL 1 DAY)
+        AND DATE(COALESCE(p.paid_at, o.created_at)) BETWEEN #{startDate} AND #{endDate}
+      GROUP BY DATE(COALESCE(p.paid_at, o.created_at))
+    ) daily
   </select>
 </mapper>

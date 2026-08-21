@@ -1,0 +1,61 @@
+To honour the JVM settings for this build a single-use Daemon process will be forked. For more on this, please refer to https://docs.gradle.org/9.5.1/userguide/gradle_daemon.html#sec:disabling_the_daemon in the Gradle documentation.
+Daemon will be stopped at the end of the build 
+> Task :compileJava
+> Task :processResources UP-TO-DATE
+> Task :spotlessJava
+> Task :spotlessJavaApply
+> Task :spotlessApply
+> Task :classes
+> Task :resolveMainClassName
+
+> Task :bootRun
+
+  .   ____          _            __ _ _
+ /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \
+( ( )\___ | '_ | '_| | '_ \/ _` | \ \ \ \
+ \\/  ___)| |_)| | | | | || (_| |  ) ) ) )
+  '  |____| .__|_| |_|_| |_\__, | / / / /
+ =========|_|==============|___/=/_/_/_/
+
+ :: Spring Boot ::                (v4.0.7)
+
+2026-08-21T14:42:51.383+09:00  INFO 8688 --- [ASAK-backend] [  restartedMain] com.asak.AsakBackendApplication          : Starting AsakBackendApplication using Java 25.0.3 with PID 8688 (C:\ASAK-workspace\ASAK-back\build\classes\java\main started by Administrator in C:\ASAK-workspace\ASAK-back)
+2026-08-21T14:42:51.388+09:00  INFO 8688 --- [ASAK-backend] [  restartedMain] com.asak.AsakBackendApplication          : No active profile set, falling back to 1 default profile: "default"
+2026-08-21T14:42:51.447+09:00  INFO 8688 --- [ASAK-backend] [  restartedMain] .e.DevToolsPropertyDefaultsPostProcessor : Devtools property defaults active! Set 'spring.devtools.add-properties' to 'false' to disable
+2026-08-21T14:42:51.447+09:00  INFO 8688 --- [ASAK-backend] [  restartedMain] .e.DevToolsPropertyDefaultsPostProcessor : For additional web related logging consider setting the 'logging.level.web' property to 'DEBUG'
+2026-08-21T14:42:52.457+09:00  INFO 8688 --- [ASAK-backend] [  restartedMain] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2026-08-21T14:42:52.495+09:00  INFO 8688 --- [ASAK-backend] [  restartedMain] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 27 ms. Found 0 JPA repository interfaces.
+2026-08-21T14:42:53.077+09:00  INFO 8688 --- [ASAK-backend] [  restartedMain] o.s.boot.tomcat.TomcatWebServer          : Tomcat initialized with port 8080 (http)
+2026-08-21T14:42:53.093+09:00  INFO 8688 --- [ASAK-backend] [  restartedMain] o.apache.catalina.core.StandardService   : Starting service [Tomcat]
+2026-08-21T14:42:53.093+09:00  INFO 8688 --- [ASAK-backend] [  restartedMain] o.apache.catalina.core.StandardEngine    : Starting Servlet engine: [Apache Tomcat/11.0.22]
+2026-08-21T14:42:53.156+09:00  INFO 8688 --- [ASAK-backend] [  restartedMain] b.w.c.s.WebApplicationContextInitializer : Root WebApplicationContext: initialization completed in 1708 ms
+2026-08-21T14:42:53.421+09:00  INFO 8688 --- [ASAK-backend] [  restartedMain] org.hibernate.orm.jpa                    : HHH008540: Processing PersistenceUnitInfo [name: default]
+2026-08-21T14:42:53.501+09:00  INFO 8688 --- [ASAK-backend] [  restartedMain] org.hibernate.orm.core                   : HHH000001: Hibernate ORM core version 7.2.19.Final
+2026-08-21T14:42:54.248+09:00  INFO 8688 --- [ASAK-backend] [  restartedMain] o.s.o.j.p.SpringPersistenceUnitInfo      : No LoadTimeWeaver setup: ignoring JPA class transformer
+2026-08-21T14:42:54.330+09:00  INFO 8688 --- [ASAK-backend] [  restartedMain] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Starting...
+2026-08-21T14:42:55.197+09:00  INFO 8688 --- [ASAK-backend] [  restartedMain] com.zaxxer.hikari.pool.HikariPool        : HikariPool-1 - Added connection com.mysql.cj.jdbc.ConnectionImpl@56f5051f
+2026-08-21T14:42:55.199+09:00  INFO 8688 --- [ASAK-backend] [  restartedMain] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Start completed.
+2026-08-21T14:42:55.278+09:00  WARN 8688 --- [ASAK-backend] [  restartedMain] org.hibernate.orm.deprecation            : HHH90000025: MySQLDialect does not need to be specified explicitly using 'hibernate.dialect' (remove the property setting and it will be selected by default)
+2026-08-21T14:42:55.305+09:00  INFO 8688 --- [ASAK-backend] [  restartedMain] org.hibernate.orm.connections.pooling    : HHH10001005: Database info:
+	Database JDBC URL [jdbc:mysql://nam3324.synology.me:33338/asak_db]
+	Database driver: MySQL Connector/J
+	Database dialect: MySQLDialect
+	Database version: 9.6
+	Default catalog/schema: asak_db/undefined
+	Autocommit mode: undefined/unknown
+	Isolation level: REPEATABLE_READ [default REPEATABLE_READ]
+	JDBC fetch size: none
+	Pool: DataSourceConnectionProvider
+	Minimum pool size: undefined/unknown
+	Maximum pool size: undefined/unknown
+2026-08-21T14:42:55.809+09:00  INFO 8688 --- [ASAK-backend] [  restartedMain] org.hibernate.orm.core                   : HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+2026-08-21T14:42:55.817+09:00  INFO 8688 --- [ASAK-backend] [  restartedMain] j.LocalContainerEntityManagerFactoryBean : Initialized JPA EntityManagerFactory for persistence unit 'default'
+2026-08-21T14:42:56.521+09:00  WARN 8688 --- [ASAK-backend] [  restartedMain] JpaBaseConfiguration$JpaWebConfiguration : spring.jpa.open-in-view is enabled by default. Therefore, database queries may be performed during view rendering. Explicitly configure spring.jpa.open-in-view to disable this warning
+2026-08-21T14:42:56.910+09:00  WARN 8688 --- [ASAK-backend] [  restartedMain] o.s.w.s.resource.ResourceHandlerUtils    : Appended trailing slash to static resource location: file:///C:/ASAK-workspace/ASAK-back/uploads/menu/
+2026-08-21T14:42:57.246+09:00  INFO 8688 --- [ASAK-backend] [  restartedMain] o.s.boot.tomcat.TomcatWebServer          : Tomcat started on port 8080 (http) with context path '/'
+2026-08-21T14:42:57.252+09:00  INFO 8688 --- [ASAK-backend] [  restartedMain] com.asak.AsakBackendApplication          : Started AsakBackendApplication in 6.303 seconds (process running for 6.808)
+2026-08-21T14:42:57.256+09:00  WARN 8688 --- [ASAK-backend] [  restartedMain] o.s.core.events.SpringDocAppInitializer  : SpringDoc /v3/api-docs endpoint is enabled by default. To disable it in production, set the property 'springdoc.api-docs.enabled=false'
+2026-08-21T14:42:57.256+09:00  WARN 8688 --- [ASAK-backend] [  restartedMain] o.s.core.events.SpringDocAppInitializer  : SpringDoc /swagger-ui.html endpoint is enabled by default. To disable it in production, set the property 'springdoc.swagger-ui.enabled=false'
+2026-08-21T14:43:02.620+09:00  INFO 8688 --- [ASAK-backend] [nio-8080-exec-1] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring DispatcherServlet 'dispatcherServlet'
+2026-08-21T14:43:02.620+09:00  INFO 8688 --- [ASAK-backend] [nio-8080-exec-1] o.s.web.servlet.DispatcherServlet        : Initializing Servlet 'dispatcherServlet'
+2026-08-21T14:43:02.622+09:00  INFO 8688 --- [ASAK-backend] [nio-8080-exec-1] o.s.web.servlet.DispatcherServlet        : Completed initialization in 2 ms
