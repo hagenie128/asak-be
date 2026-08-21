@@ -313,13 +313,13 @@ public class AdminSalesService {
       delta = Math.round(((double) value - beforeValue) / beforeValue * 100);
     }
 
-    String deltaLabel = "";
-    switch (period) {
-      case "today" -> deltaLabel = "전일 대비";
-      case "week" -> deltaLabel = "전주 대비";
-      case "month" -> deltaLabel = "전월 대비";
-      default -> deltaLabel = "기간 대비";
-    }
+    String deltaLabel =
+        switch (period == null ? "custom" : period) {
+          case "today" -> "전일 대비";
+          case "week" -> "전주 대비";
+          case "month" -> "전월 대비";
+          default -> "기간 대비";
+        };
     return SalesKpiResponse.builder()
         .label(label)
         .value(value)
