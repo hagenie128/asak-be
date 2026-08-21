@@ -172,7 +172,7 @@
     <!-- updateOrderStatusToReceived 주문상태 READY → RECEIVED 수정 유무  -->
 
     <update id="updateOrderStatusToReceived">
-        update order o
+        update orders o
 
         join common_code current_status
         on current_status.id = o.status_id
@@ -187,7 +187,7 @@
         where o.id = #{orderId}
         and received_status_group.group_code = 'ORDER_STATUS'
         and current_status.code = 'READY'
-        and received_status_group.group_code = 'ORDER_STATUS'
+        and current_status_group.group_code = 'ORDER_STATUS'
 
     
     </update>
