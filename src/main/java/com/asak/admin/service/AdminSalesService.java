@@ -353,6 +353,9 @@ public class AdminSalesService {
   }
 
   private String periodLabel(String period) {
+    if (period == null) {
+      return "선택 기간";
+    }
     return switch (period) {
       case "today" -> "오늘";
       case "week" -> "이번 주";
