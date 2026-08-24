@@ -1,31 +1,25 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.asak.admin.mapper.AdminSoldOutMapper">
-  <select id="getSoldOutCatalog"
-    resultType="com.asak.admin.dto.response.item.SoldOutCatalogItemResponse">
+  <select id="getSoldOutCatalog" resultType="com.asak.admin.dto.response.item.SoldOutCatalogItemResponse">
     <!-- vw_soldout_catalog가 카탈로그 공통 필드와 image_url을 모두 제공한다. -->
     SELECT v.target_type AS targetType,
-    v.target_id AS targetId,
-    v.name,
-    v.category,
-    v.is_sold_out AS isSoldOut,
-    v.image_url AS imageUrl
-    FROM
-    vw_soldout_catalog v
-    ORDER BY v.target_type,
-    v.category, v.name
+           v.target_id AS targetId,
+           v.name,
+           v.category,
+           v.is_sold_out AS isSoldOut,
+           v.image_url AS imageUrl
+    FROM vw_soldout_catalog v
+    ORDER BY v.target_type, v.category, v.name
   </select>
 
   <update id="updateMenuSoldOut">
-    UPDATE menu SET sold_out = #{isSoldOut} WHERE id =
-    #{targetId} AND deleted_at IS NULL
+    UPDATE menu SET sold_out = #{isSoldOut} WHERE id = #{targetId} AND deleted_at IS NULL
   </update>
   <update id="updateIngredientSoldOut">
-    UPDATE ingredient SET sold_out = #{isSoldOut} WHERE
-    id = #{targetId}
+    UPDATE ingredient SET sold_out = #{isSoldOut} WHERE id = #{targetId}
   </update>
   <update id="updateOptionItemSoldOut">
-    UPDATE opt_item SET sold_out = #{isSoldOut} WHERE id
-    = #{targetId}
+    UPDATE opt_item SET sold_out = #{isSoldOut} WHERE id = #{targetId}
   </update>
 </mapper>

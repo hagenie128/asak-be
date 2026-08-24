@@ -2,188 +2,162 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.asak.user.mapper.UserMenuMapper">
 
-  <!-- 카테고리 조회 -->
-  <select id="selectCategory" resultType="category">
-    select
-    id as categoryId,
-    name as categoryName,
-    sort_no as sortOrder,
-    active as isActive
-    from
-    category
-    where active = true
-    order by sort_no asc
-  </select>
+    <!-- 카테고리 조회 -->
+    <select id="selectCategory" resultType="category">
+        select 
+            id as categoryId,
+            name as categoryName,
+            sort_no as sortOrder,
+            active as isActive
+        from category
+        where active = true
+        order by sort_no asc
+    </select>
 
-  <!-- 메뉴 조회 -->
-  <select id="selectMenuList" resultType="menuList">
-    SELECT
-    m.id AS menuId,
-    m.cat_id AS categoryId,
-    m.name,
-    m.price,
-    mn.kcal,
-    ma.url AS imageUrl,
-    m.sold_out AS isSoldOut
-    FROM menu m
-    join menu_nutr mn
-    on mn.menu_id =
-    m.id
-    LEFT JOIN media_asset ma
-    ON ma.id = m.image_asset_id
-    AND
-    ma.deleted_at IS NULL
-    WHERE m.deleted_at IS NULL
-    ORDER BY m.cat_id
-    ASC, m.id ASC
-  </select>
+    <!-- 메뉴 조회 -->
+    <select id="selectMenuList" resultType="menuList">
+        SELECT
+            m.id AS menuId,
+            m.cat_id AS categoryId,
+            m.name,
+            m.price,
+            mn.kcal,
+            ma.url AS imageUrl,
+            m.sold_out AS isSoldOut
+        FROM menu m
+        join menu_nutr mn
+        on mn.menu_id = m.id
+        LEFT JOIN media_asset ma
+        ON ma.id = m.image_asset_id
+        AND ma.deleted_at IS NULL
+        WHERE m.deleted_at IS NULL
+        ORDER BY m.cat_id ASC, m.id ASC
+    </select>
 
-  <!-- 메뉴 디테일 -->
-  <select id="selectMenuDetail" resultType="menuDetail">
-    SELECT
-    m.id AS menuId,
-    m.cat_id AS categoryId,
-    m.name,
-    m.price,
-    m.description,
-    ma.url AS
-    imageUrl,
-    m.sold_out AS isSoldOut
-    FROM menu m
-    LEFT JOIN media_asset ma
-    ON ma.id = m.image_asset_id
-    AND ma.deleted_at IS NULL
-    WHERE m.id = #{
-    menuId }
-    AND m.deleted_at IS NULL
-  </select>
+    <!-- 메뉴 디테일 -->
+    <select id="selectMenuDetail" resultType="menuDetail">
+        SELECT
+            m.id AS menuId,
+            m.cat_id AS categoryId,
+            m.name,
+            m.price,
+            m.description,
+            ma.url AS imageUrl,
+            m.sold_out AS isSoldOut
+        FROM menu m
+        LEFT JOIN media_asset ma
+        ON ma.id = m.image_asset_id
+        AND ma.deleted_at IS NULL
+        WHERE m.id = #{ menuId }
+          AND m.deleted_at IS NULL
+    </select>
 
-  <!-- 메뉴 상세 태그 조회 -->
-  <select id="selectTages" resultType="string">
-    SELECT t.name
-    FROM menu_tag
-    mt
-    JOIN tag t ON t.id = mt.tag_id
-    WHERE mt.menu_id = #{menuId}
-    AND
-    t.active = true
-    ORDER BY t.id
-  </select>
+    <!-- 메뉴 상세 태그 조회 -->
+    <select id="selectTages" resultType="string">
+        SELECT t.name
+        FROM menu_tag mt
+        JOIN tag t ON t.id = mt.tag_id
+        WHERE mt.menu_id = #{menuId}
+        AND t.active = true
+        ORDER BY t.id
+    </select>
 
-  <!-- 재료 조회 -->
-  <select id="selectIngredients" resultType="ingredient">
-    SELECT
-    i.id AS
-    ingredientId,
-    i.name AS ingName,
-    role.code AS role,
-    unit.name AS unit,
-    mi.is_default AS isDefault,
-    mi.can_remove AS canRemove
-    FROM menu_ing
-    mi
-    JOIN ing i
-    ON mi.ing_id = i.id
-    JOIN common_code role
-    ON mi.role_id =
-    role.id
-    LEFT JOIN common_code unit
-    ON mi.unit_id = unit.id
-    WHERE
-    mi.menu_id = #{menuId}
-    ORDER BY mi.sort_no
-  </select>
+    <!-- 재료 조회 -->
+    <select id="selectIngredients" resultType="ingredient">
+        SELECT
+            i.id AS ingredientId,
+            i.name AS ingName,
+            role.code AS role,
+            unit.name AS unit,
+            mi.is_default AS isDefault,
+            mi.can_remove AS canRemove
+        FROM menu_ing mi
+        JOIN ing i
+            ON mi.ing_id = i.id
+        JOIN common_code role
+            ON mi.role_id = role.id
+        LEFT JOIN common_code unit
+            ON mi.unit_id = unit.id
+        WHERE mi.menu_id = #{menuId}
+        ORDER BY mi.sort_no
+    </select>
+    
+    <!-- 옵션 그룹 조회 -->
+    <select id="selectOptionGroups" resultType="optionGroup">
+        select
+            op.id AS optionGroupId,
+            og.name as name,
+            groupType.code as groupType,
+            
+            case
+                when op.max_select  = 1 then 'SINGLE'
+                else 'MULTIPLE'
+            end as selectType,
 
-  <!-- 옵션 그룹 조회 -->
-  <select id="selectOptionGroups" resultType="optionGroup">
-    select
-    op.id AS
-    optionGroupId,
-    og.name as name,
-    groupType.code as groupType,
+            op.min_select as minSelect,
+            op.max_select as maxSelect,
 
-    case
-    when
-    op.max_select = 1 then 'SINGLE'
-    else 'MULTIPLE'
-    end as selectType,
+            mop.sort_no AS sortOrder,
+            op.required as isRequired
+                
+        from menu_opt_policy mop
 
-    op.min_select as minSelect,
-    op.max_select as maxSelect,
+        join opt_policy op
+        on mop.policy_id = op.id
 
-    mop.sort_no AS
-    sortOrder,
-    op.required as isRequired
+        join opt_group og
+        on op.opt_group_id = og.id
 
-    from menu_opt_policy mop
-
-    join
-    opt_policy op
-    on mop.policy_id = op.id
-
-    join opt_group og
-    on
-    op.opt_group_id = og.id
-
-    join common_code groupType
-    on og.group_type_id
-    = groupType.id
+        join common_code groupType
+        on og.group_type_id = groupType.id
 
 
-    where mop.menu_id = #{ menuId }
-    and groupType.code !=
-    'REQUEST'
+        where mop.menu_id = #{ menuId }
+        and groupType.code != 'REQUEST'
 
-    order by mop.sort_no asc
+        order by mop.sort_no asc
+        
+    
+    </select>
+    <!-- 옵션 아이템 조회 -->
+    <select id="selectOptionItems" resultType="optionItem">
 
+        select
 
-  </select>
-  <!-- 옵션 아이템 조회 -->
-  <select id="selectOptionItems" resultType="optionItem">
+        oi.id as optionItemId,
+        oi.ing_id as ingredientId,
+        oi.name as name,
+        oi.add_price as extraPrice,
+        oi.list_price as originalPrice,
+        oi.amount as servingAmount,
+        unit.name as servingUnit,
+        opi.recommended as isRecommended,
+        opi.is_default as isDefault,
+        oi.sold_out as isSoldOut,
+        ing.kcal  as kcal
 
-    select
+        from opt_policy op
+        join opt_policy_item opi
+        on op.id = opi.policy_id
 
-    oi.id as
-    optionItemId,
-    oi.ing_id as ingredientId,
-    oi.name as name,
-    oi.add_price
-    as extraPrice,
-    oi.list_price as originalPrice,
-    oi.amount as
-    servingAmount,
-    unit.name as servingUnit,
-    opi.recommended as
-    isRecommended,
-    opi.is_default as isDefault,
-    oi.sold_out as isSoldOut,
-    ing.kcal as kcal
+        join opt_item oi
+        on opi.opt_item_id = oi.id
 
-    from opt_policy op
-    join opt_policy_item opi
-    on op.id =
-    opi.policy_id
+        join common_code unit
+        on oi.unit_id = unit.id
 
-    join opt_item oi
-    on opi.opt_item_id = oi.id
+        join ing
+        on oi.ing_id = ing.id
 
-    join
-    common_code unit
-    on oi.unit_id = unit.id
+        join menu_opt_policy mop
+        on op.id = mop.policy_id
 
-    join ing
-    on oi.ing_id = ing.id
+        where mop.menu_id = #{menuId}
+        and opi.policy_id = #{policyId}
 
-    join menu_opt_policy mop
-    on op.id = mop.policy_id
+        order by opi.sort_no
 
-    where mop.menu_id =
-    #{menuId}
-    and opi.policy_id = #{policyId}
-
-    order by opi.sort_no
-
-  </select>
+    </select>
 
 
 </mapper>
