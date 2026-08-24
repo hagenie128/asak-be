@@ -1,12 +1,5 @@
 package com.asak.admin.service;
 
-import java.time.LocalDate;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import org.springframework.stereotype.Service;
-
 import com.asak.admin.dto.request.orders.OrderListFilter;
 import com.asak.admin.dto.response.orders.LiveOrderListResponse;
 import com.asak.admin.dto.response.orders.LiveOrderResponse;
@@ -16,6 +9,11 @@ import com.asak.admin.mapper.AdminOrderMapper;
 import com.asak.common.exception.ErrorCode;
 import com.asak.common.response.ApiResponse;
 import com.asak.common.response.PageResult;
+import java.time.LocalDate;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import org.springframework.stereotype.Service;
 
 @Service
 public class AdminOrderService {
@@ -54,31 +52,33 @@ public class AdminOrderService {
     int safeSize = Math.min(Math.max(1, size), MAX_ORDER_LIST_SIZE);
     long totalElements;
 
-    OrderListFilter mapperFilter = OrderListFilter.builder()
-        .status(blankToNull(status))
-        .paymentStatus(blankToNull(paymentStatus))
-        .orderType(blankToNull(orderType))
-        .startAt(dateFrom == null ? null : dateFrom.atStartOfDay())
-        .endAt(dateTo == null ? null : dateTo.plusDays(1).atStartOfDay())
-        .keyword(blankToNull(keyword))
-        .limit(safeSize)
-        .offset(0)
-        .build();
+    OrderListFilter mapperFilter =
+        OrderListFilter.builder()
+            .status(blankToNull(status))
+            .paymentStatus(blankToNull(paymentStatus))
+            .orderType(blankToNull(orderType))
+            .startAt(dateFrom == null ? null : dateFrom.atStartOfDay())
+            .endAt(dateTo == null ? null : dateTo.plusDays(1).atStartOfDay())
+            .keyword(blankToNull(keyword))
+            .limit(safeSize)
+            .offset(0)
+            .build();
 
     totalElements = adminOrderMapper.countOrderList(mapperFilter);
     int totalPages = Math.max(1, (int) Math.ceil((double) totalElements / safeSize));
     int safePage = Math.min(Math.max(0, page), totalPages - 1);
 
-    OrderListFilter pagedFilter = OrderListFilter.builder()
-        .status(mapperFilter.getStatus())
-        .paymentStatus(mapperFilter.getPaymentStatus())
-        .orderType(mapperFilter.getOrderType())
-        .startAt(mapperFilter.getStartAt())
-        .endAt(mapperFilter.getEndAt())
-        .keyword(mapperFilter.getKeyword())
-        .limit(safeSize)
-        .offset(safePage * safeSize)
-        .build();
+    OrderListFilter pagedFilter =
+        OrderListFilter.builder()
+            .status(mapperFilter.getStatus())
+            .paymentStatus(mapperFilter.getPaymentStatus())
+            .orderType(mapperFilter.getOrderType())
+            .startAt(mapperFilter.getStartAt())
+            .endAt(mapperFilter.getEndAt())
+            .keyword(mapperFilter.getKeyword())
+            .limit(safeSize)
+            .offset(safePage * safeSize)
+            .build();
 
     List<OrderListResponse> content = adminOrderMapper.getOrderList(pagedFilter);
     return new PageResult<>(content, safePage, safeSize, totalElements);
@@ -93,8 +93,7 @@ public class AdminOrderService {
   }
 
   /**
-   * MVP 허용 전이: RECEIVED→PREPARING, PREPARING→COMPLETED. 규칙 위반은 DB를 치기 전에
-   * INVALID_TRANSITION. 규칙은
+   * MVP 허용 전이: RECEIVED→PREPARING, PREPARING→COMPLETED. 규칙 위반은 DB를 치기 전에 INVALID_TRANSITION. 규칙은
    * 맞는데 UPDATE 0건이면 CONFLICT(다른 요청이 먼저 변경).
    */
   public StatusChangeResult changeOrderStatus(OrderDetailResponse response, String status) {
