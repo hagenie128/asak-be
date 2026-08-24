@@ -64,4 +64,8 @@ spotless {
 		googleJavaFormat()
 		target 'src/*/java/**/*.java'
 	}
+	format 'mapperXml', {
+		target 'src/main/resources/mappers/**/*.xml'
+		eclipseWtp('xml').configFile('config/spotless.xml.prefs')
+	}
 }

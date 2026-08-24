@@ -3,95 +3,115 @@
 <mapper namespace="com.asak.admin.mapper.AdminOptionMapper">
 
   <!-- 카탈로그: opt_group 기준. 메뉴 연결 시 findOptPolicyId 로 policy 를 해석한다. -->
-  <select id="getOptionGroups" resultType="com.asak.admin.dto.response.item.OptionGroupSummaryResponse">
+  <select id="getOptionGroups"
+    resultType="com.asak.admin.dto.response.item.OptionGroupSummaryResponse">
     SELECT
-      og.id AS optionGroupId,
-      og.name AS name,
-      gt.code AS groupType,
-      CASE
-        WHEN og.max_select &lt;= 1 THEN 'SINGLE'
-        ELSE 'MULTIPLE'
-      END AS selectType,
-      og.min_select AS minSelect,
-      og.max_select AS maxSelect,
-      CASE
-        WHEN og.min_select &gt; 0 THEN TRUE
-        ELSE FALSE
-      END AS isRequired,
-      CAST(NULL AS CHAR) AS recommendedLabel
+    og.id AS optionGroupId,
+    og.name AS name,
+    gt.code AS
+    groupType,
+    CASE
+    WHEN og.max_select &lt;= 1 THEN 'SINGLE'
+    ELSE
+    'MULTIPLE'
+    END AS selectType,
+    og.min_select AS minSelect,
+    og.max_select AS maxSelect,
+    CASE
+    WHEN og.min_select &gt; 0 THEN TRUE
+    ELSE FALSE
+    END AS isRequired,
+    CAST(NULL AS CHAR) AS recommendedLabel
     FROM opt_group og
-    JOIN common_code gt ON gt.id = og.group_type_id
+    JOIN common_code gt ON
+    gt.id = og.group_type_id
     ORDER BY og.id
   </select>
 
-  <select id="getOptionGroupDetail" resultType="com.asak.admin.dto.response.item.OptionGroupSummaryResponse">
+  <select id="getOptionGroupDetail"
+    resultType="com.asak.admin.dto.response.item.OptionGroupSummaryResponse">
     SELECT
-      og.id AS optionGroupId,
-      og.name AS name,
-      gt.code AS groupType,
-      CASE
-        WHEN og.max_select &lt;= 1 THEN 'SINGLE'
-        ELSE 'MULTIPLE'
-      END AS selectType,
-      og.min_select AS minSelect,
-      og.max_select AS maxSelect,
-      CASE
-        WHEN og.min_select &gt; 0 THEN TRUE
-        ELSE FALSE
-      END AS isRequired,
-      CAST(NULL AS CHAR) AS recommendedLabel
+    og.id AS optionGroupId,
+    og.name AS name,
+    gt.code AS
+    groupType,
+    CASE
+    WHEN og.max_select &lt;= 1 THEN 'SINGLE'
+    ELSE
+    'MULTIPLE'
+    END AS selectType,
+    og.min_select AS minSelect,
+    og.max_select AS maxSelect,
+    CASE
+    WHEN og.min_select &gt; 0 THEN TRUE
+    ELSE FALSE
+    END AS isRequired,
+    CAST(NULL AS CHAR) AS recommendedLabel
     FROM opt_group og
-    JOIN common_code gt ON gt.id = og.group_type_id
+    JOIN common_code gt ON
+    gt.id = og.group_type_id
     WHERE og.id = #{optionGroupId}
-       OR EXISTS (
-         SELECT 1
-         FROM opt_policy op
-         WHERE op.id = #{optionGroupId}
-           AND op.opt_group_id = og.id
-       )
-    ORDER BY CASE WHEN og.id = #{optionGroupId} THEN 0 ELSE 1 END
+    OR EXISTS (
+    SELECT 1
+    FROM opt_policy op
+    WHERE op.id = #{optionGroupId}
+    AND op.opt_group_id = og.id
+    )
+    ORDER BY
+    CASE WHEN og.id = #{optionGroupId} THEN 0 ELSE 1 END
     LIMIT 1
   </select>
 
   <select id="findOptPolicyId" resultType="java.lang.Long">
     SELECT id
     FROM (
-      SELECT id, 1 AS priority
-      FROM opt_policy
-      WHERE id = #{optionGroupId}
-      UNION ALL
-      SELECT id, 2 AS priority
-      FROM opt_policy
-      WHERE opt_group_id = #{optionGroupId}
+    SELECT
+    id, 1 AS priority
+    FROM opt_policy
+    WHERE id = #{optionGroupId}
+    UNION ALL
+    SELECT id, 2 AS priority
+    FROM opt_policy
+    WHERE opt_group_id =
+    #{optionGroupId}
     ) candidates
     ORDER BY priority
     LIMIT 1
   </select>
 
-  <select id="findOptItemIdsByPolicyId" resultType="java.lang.Long">
+  <select id="findOptItemIdsByPolicyId"
+    resultType="java.lang.Long">
     SELECT opt_item_id
     FROM opt_policy_item
-    WHERE policy_id = #{policyId}
+    WHERE policy_id =
+    #{policyId}
     ORDER BY opt_item_id
   </select>
 
   <insert id="insertMenuOptPolicy" parameterType="map">
-    INSERT INTO menu_opt_policy (menu_id, policy_id, sort_no, required)
-    VALUES (#{menuId}, #{policyId}, #{sortNo}, #{required})
+    INSERT INTO
+    menu_opt_policy (menu_id, policy_id, sort_no, required)
+    VALUES
+    (#{menuId}, #{policyId}, #{sortNo}, #{required})
   </insert>
 
   <insert id="upsertMenuOptOverride" parameterType="map">
-    INSERT INTO menu_opt_override (menu_id, opt_item_id, recommended)
-    VALUES (#{menuId}, #{optionItemId}, #{recommended})
-    ON DUPLICATE KEY UPDATE recommended = VALUES(recommended)
+    INSERT INTO
+    menu_opt_override (menu_id, opt_item_id, recommended)
+    VALUES
+    (#{menuId}, #{optionItemId}, #{recommended})
+    ON DUPLICATE KEY UPDATE
+    recommended = VALUES(recommended)
   </insert>
 
   <delete id="deleteMenuOptionGroups">
-    DELETE FROM menu_opt_policy WHERE menu_id = #{menuId}
+    DELETE FROM menu_opt_policy WHERE menu_id =
+    #{menuId}
   </delete>
 
   <delete id="deleteMenuOptOverrides">
-    DELETE FROM menu_opt_override WHERE menu_id = #{menuId}
+    DELETE FROM menu_opt_override WHERE menu_id =
+    #{menuId}
   </delete>
 
 </mapper>

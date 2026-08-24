@@ -2,5 +2,16 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <!-- 결제수단 구현 참고: selectPaymentMethods -->
 <!-- 결제수단 구현 참고: updatePaymentMethod -->
-<mapper namespace="com.asak.admin.mapper.AdminPaymentMethodMapper">
+<mapper
+  namespace="com.asak.admin.mapper.AdminPaymentMethodMapper">
+
+  <select id="getPaymentMethods"
+    resultType="AdminPaymentMethodResponse"> SELECT pmc.id as methodId,
+    cc.code as methodCode,
+    pmc.name as methodName, ma.url as imageUrl, pmc.description as
+    description, pmc.active as active, pmc.sort_no as sortNo from
+    pay_method_cfg pmc join
+    common_code cc on pmc.method_id = cc.id join
+    media_asset ma on pmc.image_asset_id = ma.id;
+  </select>
 </mapper>
