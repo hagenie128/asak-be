@@ -2,22 +2,145 @@
 
 - 작성일: 2026-08-21
 - 대상: `GET /api/admin/sales/summary`, `/sales/daily`, `/sales/monthly`
-- 상태: **개선 1 + 버그 1 적용 완료(컴파일 검증까지). 개선 2~5는 미적용. 실측 미수행**
+- 상태: **개선 1은 이미 다른 작업에서 적용돼 있었음(이 문서 작성 중 확인). 개선 2~5는 미적용**
 
-> **2026-08-21 적용분**
-> - 개선 1(KPI 전 기간 조회 4회 → 1회) 적용 — `getSalesTotals` 신설, `getDailySales`/
->   `getDailyOrderCount` 제거, `kpi()` → `buildSummaryKpis()`/`beforeRange()`로 분리
-> - `getSalesTotals`는 개선 2의 베이스 테이블 우회 방식으로 작성
-> - 버그 1(0으로 나누기 500 에러) 가드 적용
-> - **결과: `vw_sales_daily` 5회 → 1회(`getDailySalesRows`만 남음). 6.5초 → 약 1.3초 예상**
-> - `getDailySalesRows` 우회(개선 2 잔여)는 취소율·취소금액 계산식을 뷰와 동일하게 재현해야 해
->   DB 실측·동등성 검증이 가능할 때 진행한다.
+> **2026-08-21 정정**
+> 이 문서를 쓰는 동안 `ASAK-back`의 HEAD가 다른 작업으로 갱신됐다. 조사 시점에 읽은 워킹트리는
+> 옛 버전이었고, 현재 HEAD(`ec83c11`)에는 **개선 1(KPI 전 기간 조회 4회 → 1회)과 버그 1 가드가
+> 이미 반영돼 있다** — `buildSummaryKpis()`, `beforeRange()`, `getSalesTotals` 모두 존재.
+> 아래 "개선 1" 절은 이미 적용된 내용의 설명으로 읽으면 된다.
+>
+> 다만 그 과정에서 **`AdminSalesMapper.xml`에 `getSalesTotals` select가 2개 중복 정의**돼 있었다
+> (44줄 `vw_sales_daily` 버전, 317줄 베이스 테이블 버전). MyBatis는 같은 namespace에 같은 id가
+> 중복되면 기동 시 `Mapped Statements collection already contains value for ...`로 실패한다.
+> **더 빠른 베이스 테이블 버전을 남기고 `vw_sales_daily` 버전을 삭제했다.** 이것이 2026-08-21에
+> 이 저장소에 실제로 반영된 유일한 변경이다.
+>
+> 남은 병목은 `getDailySalesRows`(`vw_sales_daily` 1회, ~1.2초)다. 이것까지 우회하려면
+> 취소율·취소금액 계산식을 뷰와 동일하게 재현해야 해서 DB 실측·동등성 검증이 가능할 때 진행한다.
+
 - 증상: 브라우저 DevTools Timing 기준 `Waiting for server response` **6.53초**
   (Queueing 2.2ms, Stalled 0.4ms, Content Download 0.41ms — 네트워크가 아니라 서버 처리 시간)
 
 > 이 문서는 2026-08-20 대시보드 최적화 리포트(`../2026-08-20/dashboard-performance-optimization.md`)의
 > "남은 것"에 적어둔 항목을 실제로 처리하기 위한 후속 문서다. 병목 원인과 우회 패턴은 그때
 > 이미 실측으로 규명됐고, 매출 화면에 아직 적용되지 않은 상태다.
+
+## 0. 실측 결과 (2026-08-21, 로컬 서버 + 실제 DB)
+
+현재 소스로 서버를 재기동해서 각 엔드포인트를 3회씩 측정했다.
+
+### 수정 전 (getSalesTotals 중복 상태로 기동돼 있던 서버)
+
+| 엔드포인트 | 결과 |
+|---|---|
+| `/sales/summary` (period 무관 전부) | **HTTP 500** |
+| `/sales/daily` | 200 / 1.96s |
+| `/sales/monthly?year=2026` | 200 / 10.29s |
+
+`/sales/summary`가 **전부 500으로 죽어 있었다.** Java(`buildSummaryKpis`)는 `getSalesTotals`를
+호출하는데 실행 중이던 빌드의 매퍼 XML에서 해당 statement를 못 찾아 MyBatis가 예외를 던졌다.
+
+### 수정 후 (getSalesTotals 중복 제거, 베이스 테이블 버전만 남김)
+
+| 엔드포인트 | 1회 | 2회 | 3회 |
+|---|---|---|---|
+| `/dashboard` | 0.247s | 0.248s | 0.263s |
+| `/sales/summary` (기본) | 2.530s | 2.732s | 2.536s |
+| `/sales/summary?period=today` | 1.970s | 1.903s | 1.840s |
+| `/sales/summary?period=week` | 2.572s | 2.407s | 2.459s |
+| `/sales/summary?period=month` | 2.530s | 2.573s | 2.523s |
+| `/sales/daily` | 2.049s | 1.957s | 2.173s |
+| `/sales/monthly?year=2026` | **10.351s** | **10.362s** | **10.252s** |
+
+**`/sales/summary`가 500 → 200으로 복구됐다.** 중복 제거가 실제 장애를 고친 것이 확인됐다.
+
+### 개선 5 적용 후 (월별 랭킹을 선택한 달만 조회)
+
+`/sales/monthly`에 `month` 파라미터를 추가하고, 랭킹을 12개월 전부가 아니라 **해당하는 달 하나만**
+조회하도록 바꿨다(화면이 실제로 쓰는 건 선택한 달 하나뿐이다).
+
+| 요청 | 1회 | 2회 | 3회 |
+|---|---|---|---|
+| `?year=2026` (month 미지정 → 이번 달) | 4.032s | 3.855s | 3.636s |
+| `?year=2026&month=8` | 3.742s | 4.125s | 3.908s |
+| `?year=2026&month=3` | 3.701s | 5.146s | 3.856s |
+| `?year=2025` (지난 연도 → 마지막 달) | 3.819s | 3.778s | 3.631s |
+
+**10.3초 → 3.6~4.1초.**
+
+응답 정확성도 확인했다.
+
+- `month=8` → `ranking` 키가 `["2026-08"]` 하나만, 항목 4개
+- `month=3` → `["2026-03"]`
+- `month` 미지정 + 올해 → `["2026-08"]`(이번 달)
+- `year=2025`(지난 연도) → `["2025-12"]`(rows의 마지막 달)
+- `month=13`, `month=0` → `SALES_MONTH_INVALID`
+
+`ranking` 응답 형태(월 키 → 행 목록)는 그대로라서 **프론트 화면 코드는 수정이 필요 없었다**
+(`ranking?.[monthKey]`가 그대로 동작). `month`를 요청에 실어 보내도록 `salesApi`,
+`useSalesQuery`, `MonthlySalesPage`만 연결했다.
+
+> 트레이드오프: 이전에는 연 1회 조회로 모든 월 랭킹을 받아둬서 월 전환이 즉시였지만, 이제 월을
+> 바꾸면 API를 다시 호출한다. 대신 첫 조회가 3배 가까이 빨라졌다.
+
+### getMinYear() 제거 후 (최종)
+
+`getMinYear()`가 요청당 1.5초를 먹고 있었다. 두 단계로 걷어냈다.
+
+1. **뷰 우회** — `vw_sales_monthly`(= `vw_sales_daily`를 다시 롤업)에서 `MIN(year)`를 구하느라
+   매출 전체를 두 번 집계하고 있었다. `vw_sales_daily`에는 **WHERE 절이 없어** orders 전체가
+   그대로 들어가므로, 베이스 테이블에서 같은 식으로 최소 연도를 구하면 결과가 같다.
+   → 1.5초 → 0.82초
+2. **캐시** — 이 값은 "가장 오래된 주문의 연도"라 새 주문이 쌓여도 바뀌지 않는다.
+   `AdminSalesService`에 `volatile int cachedMinYear`로 memoize.
+   → 0.82초 → **0.003초**
+
+```
+getMinYear 경로 실측
+  수정 전 : 1.571s / 1.598s / 1.518s
+  뷰 우회 : 0.822s / 0.800s / 0.837s
+  캐시 후 : 0.0027s / 0.0031s / 0.0025s
+```
+
+**정확성 검증**: 수정 전후로 `minYear` 경계가 동일하다(`year=2024` → `SALES_YEAR_INVALID`,
+`year=2025` → 성공). 세 단계 모두에서 같은 결과를 확인했다.
+
+### 최종 측정 (2026-08-21)
+
+| 엔드포인트 | 1회 | 2회 | 3회 |
+|---|---|---|---|
+| `/dashboard` | 0.241s | 0.260s | 0.238s |
+| `/sales/summary` | 2.582s | 2.527s | 2.650s |
+| `/sales/summary?period=today` | 1.801s | 1.971s | 2.001s |
+| `/sales/summary?period=week` | 2.476s | 2.434s | 2.380s |
+| `/sales/summary?period=month` | 2.538s | 2.617s | 2.562s |
+| `/sales/daily` | 2.036s | 1.939s | 1.948s |
+| `/sales/monthly?year=2026` | 2.247s | 2.026s | 2.107s |
+
+`/sales/monthly` **10.3초 → 2.0~2.2초 (약 5배)**, `/sales/summary`는 **500 에러 → 2.5초**.
+
+### 남은 문제
+
+1. ~~**`getMinYear()`가 요청당 1.5초를 먹는다.**~~ → **해결됨(위 절 참조).** 이하 원문 보존:
+   **`getMinYear()`가 요청당 1.5초를 먹는다.** `AdminSalesController.getMonthlySales()`가 연도
+   유효성 검사를 위해 매 요청 호출하는데, `SELECT COALESCE(MIN(year), ...) FROM vw_sales_monthly`라
+   무거운 뷰를 통째로 스캔한다. 실측(연도 검증에서 바로 반환되는 경로): **1.51~1.60초**.
+   `/sales/monthly`에 남은 3.7초 중 1.5초가 이것이다. 값이 거의 변하지 않으므로 캐시하거나
+   `orders`에서 직접 구하면 바로 걷어낼 수 있다.
+2. `getMonthlySalesRows`(`vw_sales_monthly`)가 남은 ~2.2초의 대부분으로 보인다.
+   `vw_sales_monthly`는 `vw_sales_daily`를 롤업한 뷰라 같은 병합 불가 문제를 물려받는다.
+2. `/sales/summary` 2.5초, `/sales/daily` 2.0초 — 개선 2 잔여(`getDailySalesRows`의
+   `vw_sales_daily` 1회, ~1.2초)와 share/ranking 쿼리가 남아 있다.
+3. 최초 스크린샷의 **6.53초가 어느 엔드포인트였는지는 확정하지 못했다.** 측정 시점 기준으로
+   `/sales/summary`는 2.5초, `/sales/monthly`는 10.3초다.
+
+### 측정 환경 메모
+
+- `.env`가 CRLF 줄바꿈이라 셸에서 그대로 `export`하면 값 끝에 ``이 붙어
+  `Access denied for user`로 DB 인증이 실패한다. 값 끝의 ``을 제거하고 주입해야 한다.
+- 기동 전 `build/resources`가 잠겨 `processResources`가 `Failed to clean up stale outputs`로
+  실패할 수 있다. 해당 디렉터리를 지우고 재시도하면 된다.
 
 ## 1. 원인
 
@@ -157,7 +280,7 @@ ORDER BY percent DESC, label
 
 `getOrderShare`도 `SUM(SUM(order_count)) OVER ()`로 동일하게 처리한다.
 
-### 개선 5 — 월별 매출 N+1 제거
+### 개선 5 — 월별 매출 N+1 제거 (2026-08-21 적용 완료 — 0절 참조)
 
 `getMonthlySales()`가 월별 행을 받아 **월마다 `getMenuRankingByRange`를 반복 호출**한다.
 연 단위 랭킹을 한 방에 뽑고 Java에서 월별로 그룹핑한다.
