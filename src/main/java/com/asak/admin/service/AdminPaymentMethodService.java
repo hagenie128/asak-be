@@ -3,15 +3,17 @@ package com.asak.admin.service;
 import com.asak.admin.dto.request.UpdatePaymentMethodRequest;
 import com.asak.admin.dto.response.AdminPaymentMethodResponse;
 import com.asak.admin.mapper.AdminPaymentMethodMapper;
+import com.asak.common.exception.CustomException;
+import com.asak.common.exception.ErrorCode;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.springframework.stereotype.Service;
 
-// TODO-012: 결제수단 2/4 — Service/Mapper/DTO 구현.
-// 1) 목록 조회(getPaymentMethods)와 PATCH 대상(patchPaymentMethod)을 추가하고 DTO를 Entity/Mapper 결과와 분리한다.
-// 2) 활성/정렬/영수증문구 validation, 존재하지 않는 id, 0건 update, 정렬 충돌 규칙을 Controller ErrorCode와 맞춘다.
-// 3) 순서 변경이 여러 행을 바꾸면 transaction 범위와 동시 변경 정책을 정한 뒤 TODO-011 Controller와 TODO-013 프런트를 연결한다.
+// TODO-012 [구현 완료 · SQL/실 DB 검증 대기]: 목록과 수정은 DTO로 분리했고,
+// PATCH 식별자는 Controller path variable만 사용한다. active·sortNo와 없는 id는 검증한다.
+// 목록 SQL은 sort_no ASC, id ASC 정렬을 보장해야 한다. 현재 SQL의 ORDER BY 및 실제 DB 결과를 확인한 뒤
+// 정렬 완료로 표시한다. 여러 행 재정렬의 충돌 정책·transaction은 별도 범위다.
 @Service
 public class AdminPaymentMethodService {
 
@@ -25,9 +27,15 @@ public class AdminPaymentMethodService {
     return adminPaymentMethodMapper.getPaymentMethods();
   }
 
-  public int updatePaymentMethod(Long paymentMethodId, UpdatePaymentMethodRequest request) {
+  public int updatePaymentMethod(Long methodId, UpdatePaymentMethodRequest request) {
+    if (methodId == null || adminPaymentMethodMapper.findPaymentMethod(methodId) == 0) {
+      throw new CustomException(ErrorCode.PAYMENT_METHOD_NOT_FOUND);
+    }
+    if (request.getActive() == null || request.getSortNo() == null) {
+      throw new CustomException(ErrorCode.INVALID_REQUEST);
+    }
     Map<String, Object> params = new HashMap<>();
-    params.put("id", paymentMethodId);
+    params.put("id", methodId);
     params.put("active", request.getActive());
     params.put("sortNo", request.getSortNo());
     return adminPaymentMethodMapper.updatePaymentMethod(params);

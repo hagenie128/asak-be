@@ -4,24 +4,34 @@
 <!-- 결제수단 구현 참고: updatePaymentMethod -->
 <mapper namespace="com.asak.admin.mapper.AdminPaymentMethodMapper">
   <select id="getPaymentMethods" resultType="com.asak.admin.dto.response.AdminPaymentMethodResponse">
-    SELECT
-      pmc.id as methodId,
-      cc.code as methodCode,
-      pmc.name as methodName,
-      ma.url as imageUrl,      pmc.description as description,
-      pmc.active as active,
-      pmc.sort_no as sortNo
-    from
-      pay_method_cfg pmc
-    join common_code cc onF
-      pmc.method_id = cc.id
-    join media_asset ma on
-      pmc.image_asset_id = ma.id
+      SELECT
+          pmc.id AS methodId,
+          cc.code AS methodCode,
+          pmc.name AS methodName,
+          ma.url AS imageUrl,
+          pmc.description AS description,
+          pmc.active AS active,
+          pmc.sort_no AS sortNo
+      FROM
+          pay_method_cfg pmc
+          JOIN common_code cc ON pmc.method_id = cc.id
+          JOIN media_asset ma ON pmc.image_asset_id = ma.id
   </select>
-  
+
+  <select id="findPaymentMethod" resultType="int">
+      SELECT
+          COUNT(*)
+      FROM
+          pay_method_cfg
+      WHERE
+          id = #{methodId}
+  </select>
   <update id="updatePaymentMethod" parameterType="map">
-    UPDATE pay_method_cfg
-    SET active = #{params.active}, sort_no = #{params.sortNo}
-    WHERE id = #{params.id}
+      UPDATE pay_method_cfg
+      SET
+          active = #{active},
+          sort_no = #{sortNo}
+      WHERE
+          id = #{id}
   </update>
 </mapper>
