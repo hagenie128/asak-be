@@ -18,10 +18,13 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
- * TODO-015~018: 매출 API는 화면별 DTO가 아니라 API 책임별 DTO를 반환한다.
+ * 매출 API는 화면별 DTO가 아니라 API 책임별 DTO를 반환한다.
  *
  * <p>순서: dashboard → summary → monthly → daily → daily/time-slots. 시간대 버킷은 daily 응답에 섞지 않고 별도
  * endpoint에서 조회한다.
+ *
+ * <p>summary, monthly, daily/time-slots는 이 Controller에서 파라미터를 검증한다. 실제 매출 조회와 0-fill 조립은
+ * Service/Mapper가 담당한다. TODO: DB View 배포, Bruno 응답, 화면 KPI·차트 합계 대조가 남아 있다.
  */
 @RestController
 @RequestMapping("/api/admin")
@@ -81,15 +84,22 @@ public class AdminSalesController {
         adminSalesService.getSalesSummary(period, parsedStartDate, parsedEndDate));
   }
 
-  /** Monthly: 선택 연도의 월별 행과 월별 인기 메뉴를 반환한다. */
+  /**
+   * Monthly: 선택 연도의 월별 행과, month로 지정한 한 달의 인기 메뉴를 반환한다. month가 없으면 조회 연도의 최근 달을 쓴다. (화면은 선택한 달의 랭킹
+   * 하나만 쓰므로 12개월치를 미리 조회하지 않는다.)
+   */
   @GetMapping("/sales/monthly")
-  public ApiResponse<MonthlySalesResponse> getMonthlySales(@RequestParam int year) {
+  public ApiResponse<MonthlySalesResponse> getMonthlySales(
+      @RequestParam int year, @RequestParam(required = false) Integer month) {
     int currentYear = LocalDate.now(KOREA_ZONE_ID).getYear();
     if (year < adminSalesService.getMinYear() || year > currentYear) {
       return ApiResponse.error(ErrorCode.SALES_YEAR_INVALID);
     }
+    if (month != null && (month < 1 || month > 12)) {
+      return ApiResponse.error(ErrorCode.SALES_MONTH_INVALID);
+    }
     return ApiResponse.success(
-        "ADMIN_SALES_MONTHLY_SUCCESS", "월별 매출", adminSalesService.getMonthlySales(year));
+        "ADMIN_SALES_MONTHLY_SUCCESS", "월별 매출", adminSalesService.getMonthlySales(year, month));
   }
 
   /** Daily: from~to 일자 행, 선택 종료일의 분해·랭킹 데이터를 반환한다. */

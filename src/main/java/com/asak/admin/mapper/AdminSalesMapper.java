@@ -14,7 +14,7 @@ import java.util.List;
 import java.util.Map;
 import org.apache.ibatis.annotations.Param;
 
-/** TODO-018: SQL 결과는 새 화면 DTO의 행 단위 타입으로만 매핑한다. */
+/** SQL 결과는 행 단위 DTO로만 매핑하고, 빈 구간 0-fill은 Service가 처리한다. */
 public interface AdminSalesMapper {
 
   int getMinYear();
@@ -46,7 +46,6 @@ public interface AdminSalesMapper {
 
   List<DashboardWeeklySalesResponse> getDashboardWeeklySales(Map<String, Object> dateRange);
 
-  long getDailySales(Map<String, Object> dateRange);
-
-  long getDailyOrderCount(Map<String, Object> dateRange);
+  /** 기간 합계(매출·주문 수)를 한 번에 조회한다. KPI 3장이 같은 전 기간 값을 공유하기 위함. */
+  Map<String, Object> getSalesTotals(Map<String, Object> dateRange);
 }

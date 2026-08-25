@@ -1,11 +1,20 @@
 package com.asak.admin.mapper;
 
-// 품절 구현 참고: 카탈로그 SELECT.
-// 1) MENU / INGREDIENT / OPTION_ITEM 대상별로 어떤 테이블/뷰에서 읽을지 확정
-// 2) 화면이 쓰는 공통 row shape(targetType, targetId, name, isSoldOut ...)로 맞춘다
-// 3) SoldOutManagePage/useSoldOutDraft 가 바로 쓸 수 있게 XML SELECT 추가
-// 품절 구현 참고: is_sold_out UPDATE.
-// 1) targetType + targetId 별 분기 방식 결정(case/동적 SQL/쿼리 분리)
-// 2) true/false 토글 UPDATE 추가
-// 3) 변경 건수(0/1)를 Service/Controller가 검증에 쓸 수 있게 반환
-public interface AdminSoldOutMapper {}
+import com.asak.admin.dto.response.item.SoldOutCatalogItemResponse;
+import java.util.List;
+import org.apache.ibatis.annotations.Param;
+
+// vw_soldout_catalog가 공통 카탈로그 필드와 image_url을 모두 제공한다.
+// PATCH는 targetType별 UPDATE를 분리하며, 변경 건수(0/1)는 Service가 대상 검증과 전체 트랜잭션에 사용한다.
+// TODO: 배포 DB View의 image_url 값과 화면의 이미지 fallback을 실제 API로 확인한다.
+public interface AdminSoldOutMapper {
+  List<SoldOutCatalogItemResponse> getSoldOutCatalog();
+
+  int updateMenuSoldOut(@Param("targetId") Long targetId, @Param("isSoldOut") boolean isSoldOut);
+
+  int updateIngredientSoldOut(
+      @Param("targetId") Long targetId, @Param("isSoldOut") boolean isSoldOut);
+
+  int updateOptionItemSoldOut(
+      @Param("targetId") Long targetId, @Param("isSoldOut") boolean isSoldOut);
+}
