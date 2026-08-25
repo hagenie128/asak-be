@@ -134,11 +134,11 @@ public class AdminOrderService {
   }
 
   public ApiResponse<Void> cancelOrder(Long orderId) {
-    // TODO-001: APPROVED 결제 취소 정책을 구체화한다.
-    // 1) 미승인 주문 cancel과 승인 결제 refund를 분리하고, TODO-038 환불 endpoint가 승인 결제만 담당하도록 상태표를
-    // 확정한다.
-    // 2) 결제 상태·주문 상태·외부 결제 취소가 필요하면 TODO-039의 별도 mapper/sql을 하나의 트랜잭션 경계로 연결한다.
-    // 3) 현재 0 반환을 성공으로 감추지 않고, 행 수 0·허용하지 않는 상태·동시 변경을 Controller ErrorCode와 맞춘다.
+    // TODO-001: 승인 결제의 취소 정책.
+    // 1) 미승인 주문은 cancel, APPROVED 결제는 TODO-038 refund로 분리한다. 승인 결제는 이 메서드에서 변경하지 않는다.
+    // 2) 환불은 외부 결제 취소 성공 후 TODO-039의 payment REFUNDED와 order CANCELED 갱신을 하나의 트랜잭션으로 처리한다.
+    // 3) 카드/신용카드는 이번 범위이고, 토스페이는 실제 연동·결제 과정 통합 테스트 성공이 포함 조건이다.
+    // 4) 0건 갱신, 허용하지 않는 상태, 동시 변경은 성공으로 숨기지 않고 ErrorCode로 구분한다.
     // APPROVED·COMPLETED·CANCELED 는 취소 불가
     OrderDetailResponse response = adminOrderMapper.getOrderDetail(orderId);
     if (response == null) {

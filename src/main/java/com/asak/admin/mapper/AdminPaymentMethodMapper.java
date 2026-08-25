@@ -4,17 +4,16 @@ import com.asak.admin.dto.response.AdminPaymentMethodResponse;
 import java.util.List;
 import java.util.Map;
 
-// 결제수단 구현 참고: 목록 SELECT.
-// 1) payment method master + 설정 테이블 기준 조회 SQL 확정
-// 2) 프론트가 쓰는 row shape(methodId, name, isActive, sortOrder, receiptMessage ...)로 맞춘다
-// 3) XML SELECT 추가 후 Controller GET과 연결
-// 결제수단 구현 참고: UPDATE.
-// 1) methodId 기준 활성/정렬/영수증 문구 수정 SQL 추가
-// 2) 변경 건수(0/1) 반환
-// 3) Service/Controller가 저장 성공 여부 판단에 사용
+// 결제수단 Mapper 계약 참고.
+// 1) 목록은 pay_method_cfg와 common_code 기준으로 methodId, methodCode, methodName, imageUrl, description,
+//    active, sortNo를 조회하고 sort_no ASC, id ASC를 적용한다.
+// 2) 현재 PATCH 범위는 methodId 기준 active와 sortNo 한 행 수정이다. receiptMessage는 컬럼·DTO 계약 확정 전에는 추가하지 않는다.
+// 3) UPDATE 변경 건수(0/1)는 Service가 대상 없음과 갱신 실패를 구분하는 근거로 사용한다.
 public interface AdminPaymentMethodMapper {
 
   List<AdminPaymentMethodResponse> getPaymentMethods();
 
   int updatePaymentMethod(Map<String, Object> params);
+
+  int findPaymentMethod(Long methodId);
 }

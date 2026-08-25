@@ -8,6 +8,9 @@ import org.springframework.http.HttpStatus;
  * <p>{@code code} is a stable API contract value; {@code status} is the HTTP response status.
  */
 public enum ErrorCode {
+  INVALID_REQUEST("INVALID_REQUEST", HttpStatus.BAD_REQUEST, "잘못된 요청입니다."),
+  INVALID_STORE_NUMBER("INVALID_STORE_NUMBER", HttpStatus.BAD_REQUEST, "잘못된 매장 번호입니다."),
+  NOT_APPROVED_STORE_NUMBER("NOT_APPROVED_STORE_NUMBER", HttpStatus.BAD_REQUEST, "승인되지 않은 매장입니다."),
 
   // =========================================================
   // 옵션 / 재료 선택
@@ -253,7 +256,8 @@ public enum ErrorCode {
 
   SALES_DAILY_NOT_FOUND("SALES_DAILY_NOT_FOUND", HttpStatus.NOT_FOUND, "일별 매출을 찾을 수 없습니다."),
 
-  SALES_HOURLY_NOT_FOUND("SALES_HOURLY_NOT_FOUND", HttpStatus.NOT_FOUND, "시간별 매출을 찾을 수 없습니다.");
+  SALES_HOURLY_NOT_FOUND("SALES_HOURLY_NOT_FOUND", HttpStatus.NOT_FOUND, "시간별 매출을 찾을 수 없습니다."),
+  ;
 
   private final String code;
   private final HttpStatus status;

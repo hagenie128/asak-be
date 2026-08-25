@@ -103,9 +103,9 @@ public class AdminOrderController {
     return result;
   }
 
-  // TODO-038: 환불은 cancel과 분리한 PATCH /api/admin/orders/{orderId}/refund 계약으로 확정한다.
-  // TODO-001의 승인 결제 취소 정책, TODO-039의 payment/refund SQL, 프런트 TODO-040/042를 함께 확정한
-  // 뒤 구현한다.
-  // request body·멱등키·허용 상태·이미 환불됨(409) ErrorCode를 문서화하고, 상태 전이와 결제 변경은 하나의 트랜잭션으로
-  // 검증한다.
+  // TODO-038: 환불은 cancel과 분리한 PATCH /api/admin/orders/{orderId}/refund 계약으로 구현한다.
+  // 1) 카드/신용카드는 이번 범위에 포함한다. 토스페이는 실제 API 연동·결제 과정 통합 테스트가 성공할 때만 포함한다.
+  // 2) 외부 결제 취소 API 성공 후에만 TODO-039의 payment REFUNDED와 order CANCELED 갱신을 하나의 트랜잭션으로 실행한다.
+  // 3) payment_status가 APPROVED가 아니면 ORDER_REFUND_NOT_ALLOWED(409)로 막는다. 별도 멱등키는 이번 범위에 두지 않는다.
+  // 4) request/response 필드와 외부 API 실패 ErrorCode는 결제사 연동 근거가 확보된 뒤 확정하고, TODO-040/042와 연결한다.
 }
