@@ -184,5 +184,4 @@
   4) 0건·동시 변경·이미 환불됨은 ErrorCode로 구분하고, Spring context와 실제 DB row까지 검증한다.
 -->
 
-
 </mapper>

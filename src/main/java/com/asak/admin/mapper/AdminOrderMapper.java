@@ -1,12 +1,14 @@
 package com.asak.admin.mapper;
 
+import java.util.List;
+import java.util.Map;
+
+import org.apache.ibatis.annotations.Param;
+
 import com.asak.admin.dto.request.orders.OrderListFilter;
 import com.asak.admin.dto.response.orders.LiveOrderResponse;
 import com.asak.admin.dto.response.orders.OrderDetailResponse;
 import com.asak.admin.dto.response.orders.OrderListResponse;
-import java.util.List;
-import java.util.Map;
-import org.apache.ibatis.annotations.Param;
 
 public interface AdminOrderMapper {
 
@@ -24,4 +26,7 @@ public interface AdminOrderMapper {
   int changeOrderStatus(Map<String, Object> map);
 
   int cancelOrder(Map<String, Object> map);
+
+  int refundOrder(Map<String, Object> refundMap);
+
 }
