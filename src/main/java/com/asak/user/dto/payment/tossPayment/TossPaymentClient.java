@@ -1,5 +1,7 @@
 package com.asak.user.dto.payment.tossPayment;
 
+import com.asak.common.exception.CustomException;
+import com.asak.common.exception.ErrorCode;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClient;
@@ -45,7 +47,41 @@ public class TossPaymentClient {
               headers.set("Idempotency-Key", idempotencyKey);
             })
         .body(request)
-        .retrieve()
-        .body(TossPaymentConfirmResponse.class);
+        .exchange(
+            (clientRequest, clientResponse) -> {
+              if (clientResponse.getStatusCode().isError()) {
+                TossErrorResponse error = clientResponse.bodyTo(TossErrorResponse.class);
+                String errorCode = error == null ? null : error.code();
+
+                throw mapTossError(clientResponse.getStatusCode().value(), errorCode);
+              }
+
+              return clientResponse.bodyTo(TossPaymentConfirmResponse.class);
+            });
+  }
+
+  // 토스 HTTP 상태·오류 코드를 우리 서비스 ErrorCode로 변환
+  private CustomException mapTossError(int tossHttpStatus, String tossErrorCode) {
+    if (tossHttpStatus >= 500) {
+      return new CustomException(ErrorCode.PAYMENT_NETWORK_ERROR);
+    }
+
+    String errorCode = tossErrorCode == null ? "" : tossErrorCode;
+
+    return switch (errorCode) {
+      case "REJECT_ACCOUNT_PAYMENT" -> new CustomException(ErrorCode.PAYMENT_INSUFFICIENT_FUNDS);
+      case "REJECT_CARD_PAYMENT", "INVALID_REJECT_CARD" ->
+          new CustomException(ErrorCode.PAYMENT_DECLINED);
+      case "PROVIDER_ERROR",
+          "FAILED_PAYMENT_INTERNAL_SYSTEM_PROCESSING",
+          "FAILED_INTERNAL_SYSTEM_PROCESSING",
+          "UNKNOWN_PAYMENT_ERROR" ->
+          new CustomException(ErrorCode.PAYMENT_NETWORK_ERROR);
+      case "INVALID_API_KEY", "UNAUTHORIZED_KEY", "INCORRECT_BASIC_AUTH_FORMAT" ->
+          new CustomException(ErrorCode.TOSS_PAYMENT_CONFIGURATION_ERROR);
+      case "NOT_FOUND_PAYMENT", "NOT_FOUND_PAYMENT_SESSION", "ALREADY_PROCESSED_PAYMENT" ->
+          new CustomException(ErrorCode.TOSS_PAYMENT_APPROVAL_FAILED);
+      default -> new CustomException(ErrorCode.TOSS_PAYMENT_APPROVAL_FAILED);
+    };
   }
 }

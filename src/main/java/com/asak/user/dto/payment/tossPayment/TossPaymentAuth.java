@@ -1,4 +1,4 @@
-package com.asak.user.dto.payment.query;
+package com.asak.user.dto.payment.tossPayment;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;

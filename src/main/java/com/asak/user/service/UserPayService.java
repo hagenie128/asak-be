@@ -12,14 +12,12 @@ import com.asak.user.dto.payment.command.PaymentInsertCommand;
 import com.asak.user.dto.payment.query.PaymentIdempotencyCheck;
 import com.asak.user.dto.payment.query.PaymentMethodContext;
 import com.asak.user.dto.payment.query.PaymentOrderContext;
-import com.asak.user.dto.payment.query.TossPaymentAuth;
 import com.asak.user.dto.payment.tossPayment.TossErrorResponse;
+import com.asak.user.dto.payment.tossPayment.TossPaymentAuth;
 import com.asak.user.dto.payment.tossPayment.TossPaymentClient;
 import com.asak.user.dto.payment.tossPayment.TossPaymentConfirmRequest;
 import com.asak.user.dto.payment.tossPayment.TossPaymentConfirmResponse;
 import com.asak.user.mapper.UserPayMapper;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.net.SocketTimeoutException;
 import java.net.http.HttpTimeoutException;
 import java.time.OffsetDateTime;
@@ -29,7 +27,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.ResourceAccessException;
-import org.springframework.web.client.RestClientResponseException;
 
 @Service
 @RequiredArgsConstructor
@@ -38,7 +35,6 @@ public class UserPayService {
 
   private final UserPayMapper payMapper;
   private final TossPaymentClient tossPaymentClient;
-  private final ObjectMapper objectMapper;
 
   // --------------- api-014 결제 수단 조회 ------------------------
   public PaymentMethodListResponse getPaymentMethod() {
@@ -227,41 +223,6 @@ public class UserPayService {
     }
   }
 
-  // ------------ 토스 오류 응답 body를 TossErrorResponse DTO로 변환 ------------
-  private TossErrorResponse parseTossError(String responseBody) {
-    try {
-      return objectMapper.readValue(responseBody, TossErrorResponse.class);
-    } catch (JsonProcessingException e) {
-      return new TossErrorResponse("UNKNOWN_TOSS_ERROR", "토스 오류 응답을 해석할 수 없습니다.");
-    }
-  }
-
-  // ------------ 토스 HTTP 상태·오류 코드를 우리 서비스 ErrorCode로 변환 ------------
-  // (토스페이먼츠가 응답 body로 보내는 외부 오류 코드)
-  private CustomException mapTossError(int tossHttpStatus, String tossErrorCode) {
-    if (tossHttpStatus >= 500) {
-      return new CustomException(ErrorCode.PAYMENT_NETWORK_ERROR);
-    }
-
-    String errorCode = tossErrorCode == null ? "" : tossErrorCode;
-
-    return switch (errorCode) {
-      case "REJECT_ACCOUNT_PAYMENT" -> new CustomException(ErrorCode.PAYMENT_INSUFFICIENT_FUNDS);
-      case "REJECT_CARD_PAYMENT", "INVALID_REJECT_CARD" ->
-          new CustomException(ErrorCode.PAYMENT_DECLINED);
-      case "PROVIDER_ERROR",
-          "FAILED_PAYMENT_INTERNAL_SYSTEM_PROCESSING",
-          "FAILED_INTERNAL_SYSTEM_PROCESSING",
-          "UNKNOWN_PAYMENT_ERROR" ->
-          new CustomException(ErrorCode.PAYMENT_NETWORK_ERROR);
-      case "INVALID_API_KEY", "UNAUTHORIZED_KEY", "INCORRECT_BASIC_AUTH_FORMAT" ->
-          new CustomException(ErrorCode.TOSS_PAYMENT_CONFIGURATION_ERROR);
-      case "NOT_FOUND_PAYMENT", "NOT_FOUND_PAYMENT_SESSION", "ALREADY_PROCESSED_PAYMENT" ->
-          new CustomException(ErrorCode.TOSS_PAYMENT_APPROVAL_FAILED);
-      default -> new CustomException(ErrorCode.TOSS_PAYMENT_APPROVAL_FAILED);
-    };
-  }
-
   // ------------ 토스 통신 예외의 원인이 연결·응답 시간 초과인지 확인 ------------
   private boolean isTimeout(ResourceAccessException exception) {
     Throwable cause = exception;
@@ -373,9 +334,6 @@ public class UserPayService {
         providerPaymentKey = tossResponse.getPaymentKey();
         approvedAt = tossResponse.getApprovedAt();
 
-      } catch (RestClientResponseException e) {
-        TossErrorResponse tossError = parseTossError(e.getResponseBodyAsString());
-        throw mapTossError(e.getStatusCode().value(), tossError.code());
       } catch (ResourceAccessException e) {
         if (isTimeout(e)) {
           throw new CustomException(ErrorCode.PAYMENT_TIMEOUT);

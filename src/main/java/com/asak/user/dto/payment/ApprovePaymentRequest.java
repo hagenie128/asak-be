@@ -2,7 +2,8 @@ package com.asak.user.dto.payment;
 
 import com.asak.common.enums.OrderStatus;
 import com.asak.common.enums.PaymentMethod;
-import com.asak.user.dto.payment.query.TossPaymentAuth;
+import com.asak.user.dto.payment.tossPayment.TossPaymentAuth;
+
 import jakarta.validation.Valid;
 import lombok.Getter;
 import lombok.NoArgsConstructor;

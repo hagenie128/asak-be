@@ -5,6 +5,8 @@ import com.asak.user.dto.payment.ApprovePaymentRequest;
 import com.asak.user.dto.payment.ApprovePaymentResponse;
 import com.asak.user.dto.payment.PaymentMethodListResponse;
 import com.asak.user.service.UserPayService;
+
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -85,7 +87,7 @@ public class UserPayController {
   // --------------- api-006 결제 승인 ------------------------
   @PostMapping("/payments")
   public ApiResponse<ApprovePaymentResponse> approvePayment(
-      @RequestBody ApprovePaymentRequest request) {
+      @Valid @RequestBody ApprovePaymentRequest request) {
     ApprovePaymentResponse response = payService.createApprovePayment(request);
 
     return ApiResponse.success("KIOSK_PAYMENT_APPROVED", "결제가 승인되었습니다.", response);
