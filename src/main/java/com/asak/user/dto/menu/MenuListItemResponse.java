@@ -13,7 +13,8 @@ import org.apache.ibatis.type.Alias;
 // "price": 8900,
 // "imageUrl": "/assets/menu/364.png",
 // "isSoldOut": false,
-// "isOrderable": true
+// "isOrderable": true,
+//  "kcal" : 50
 // }
 // ]
 // }

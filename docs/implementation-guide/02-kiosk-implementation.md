@@ -9,8 +9,8 @@
 | API | 경로 | Service 핵심 책임 | 필수 실패 사례 |
 | --- | --- | --- | --- |
 | API-001 | `GET /api/kiosk/categories` | 노출 카테고리를 `sortOrder` 순으로 조회 | 데이터 없음 |
-| API-002 | `GET /api/kiosk/menuList` | 카테고리/검색 조건, 메뉴 품절 표시, 카드 DTO 조립 | 잘못된 categoryId, 빈 목록 |
-| API-003 | `GET /api/kiosk/menuDetail/{menuId}` | 재료·알레르기·옵션·품절을 상세 DTO로 조립 | `MENU_NOT_FOUND` 404 |
+| API-002 | `GET /api/kiosk/menuList` | 카테고리와 전체 메뉴 목록을 함께 조회하고, `menus[]` 카드 DTO(`menuId`, `categoryId`, `name`, `price`, `imageUrl`, `kcal`, `isSoldOut`, `isOrderable`) 조립 | 빈 목록 |
+| API-003 | `GET /api/kiosk/menuDetail/{menuId}` | 메뉴 헤더(`baseKcal` 포함), `ingredients[]`, `optionGroups[].items[]`, `tags[]`를 상세 DTO로 조립 | `MENU_NOT_FOUND` 404 |
 | API-004 | `POST /api/kiosk/cart/validate` | 수량·필수 옵션·품절·서버 가격 재검증 | 400 옵션 오류, 409 품절/가격 변경 |
 | API-005 | `POST /api/kiosk/orders` | 서버 금액 계산, orderNo 생성, 주문·아이템·옵션 저장 | 400 요청 오류, 409 품절/가격 변경 |
 | API-014 | `GET /api/kiosk/payment-methods` | 키오스크에 노출 가능한 결제수단만 반환 | 빈 목록 |

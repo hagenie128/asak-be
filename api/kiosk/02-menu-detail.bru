@@ -13,6 +13,9 @@ get {
 docs {
   # API-003
   GET /api/kiosk/menuDetail/{menuId}
-  응답 code: OK (ApiResponse.success(data) 기본값)
-  data: menuId, categoryId, name, price, imageUrl, description, isSoldOut, ingredients, optionGroups, tags
+  응답: { success: true, status: 200, code: "SUCCESS", message: "OK", data: {...} }
+  data: menuId, categoryId, name, price, imageUrl, description, isSoldOut, baseKcal, ingredients, optionGroups, tags
+  ingredients[]: ingredientId, ingName, role, unit, isDefault, canRemove
+  optionGroups[]: optionGroupId, name, groupType, selectType, minSelect, maxSelect, sortOrder, isRequired, items[]
+  optionGroups[].items[]: optionItemId, ingredientId, name, extraPrice, originalPrice, servingAmount, servingUnit, isRecommended, isDefault, isSoldOut, kcal, protein
 }

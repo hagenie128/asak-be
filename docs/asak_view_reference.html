@@ -366,12 +366,12 @@
 
     <div class="flow-card">
       <h3>키오스크 메뉴 목록</h3>
-      <p class="flow-note">카테고리별</p>
+      <p class="flow-note">카테고리 탭 + 전체 메뉴 목록</p>
       <ol class="flow-steps">
         <li><span class="step-text"><span class="mono">category</span> 단순 조회 (탭 목록, 뷰 불필요)</span></li>
-        <li><a class="step-view" href="#vw_menu_list">vw_menu_list</a><span class="step-text"><span class="mono">WHERE category_id = ?</span> — isSoldOut/hasSoldOutIngredient/isOrderable 포함</span></li>
+        <li><a class="step-view" href="#vw_menu_list">vw_menu_list</a><span class="step-text">DB의 품절 판단용 View — <span class="mono">isSoldOut</span>/<span class="mono">hasSoldOutIngredient</span>/<span class="mono">isOrderable</span>을 제공</span></li>
       </ol>
-      <p class="flow-result"><span class="mono">vw_menu_availability</span>의 원인별 플래그를 SQL에서 조합해 최종 불리언 3개로 미리 만들어둠 — 프론트/자바 계산 없음.</p>
+      <p class="flow-result"><span class="mono">vw_menu_availability</span>의 원인별 플래그를 SQL에서 조합해 최종 불리언 3개를 만든다. 현재 API-002 응답의 <span class="mono">menus[]</span> 필드는 <span class="mono">menuId</span>, <span class="mono">categoryId</span>, <span class="mono">name</span>, <span class="mono">price</span>, <span class="mono">imageUrl</span>, <span class="mono">kcal</span>, <span class="mono">isSoldOut</span>, <span class="mono">isOrderable</span>다.</p>
     </div>
 
     <div class="flow-card">

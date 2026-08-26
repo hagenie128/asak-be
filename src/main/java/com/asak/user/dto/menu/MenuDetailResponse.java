@@ -6,7 +6,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.apache.ibatis.type.Alias;
 
-// 메뉴 디테일
+// 메뉴 디테일 api-003
 
 //   "data": {
 //     "menuId": 364,
@@ -16,6 +16,7 @@ import org.apache.ibatis.type.Alias;
 //     "imageUrl": "/assets/menu/364.png",
 //     "description": "메뉴 설명",
 //     "isSoldOut": false,
+//      "baseKcal" : 50,
 //     "ingredients": [
 //       {
 //         "ingredientId": 1,
@@ -37,18 +38,20 @@ import org.apache.ibatis.type.Alias;
 //         "sortOrder": 1,
 //         "isRequired": true,
 //         "items": [
-//           {
-//             "optionItemId": 269,
-//             "ingredientId": 105,
-//             "name": "크리미칠리",
-//             "extraPrice": 0,
-//             "originalPrice": null,
-//             "servingAmount": 50,
-//             "servingUnit": "g",
-//             "isRecommended": true,
-//             "isDefault": true,
-//             "isSoldOut": false
-//           }
+//          {
+//            "optionItemId": 269,
+//            "ingredientId": 105,
+//            "name": "크리미칠리",
+//            "extraPrice": 0,
+//            "originalPrice": null,
+//            "servingAmount": 50,
+//            "servingUnit": "g",
+//            "isRecommended": true,
+//            "isDefault": true,
+//            "isSoldOut": false
+//             "kcal" : 50 -> 옵션 칼로리 추가시
+//             "protein" : 50; -> 단백질 추가
+//          }
 //         ]
 //       }
 //     ],
@@ -68,6 +71,7 @@ public class MenuDetailResponse {
   private Integer price;
   private String imageUrl;
   private String description;
+  private Double baseKcal;
   private Boolean isSoldOut;
   private List<IngredientResponse> ingredients;
   private List<OptionGroupResponse> optionGroups;

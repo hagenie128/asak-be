@@ -25,6 +25,7 @@ import lombok.Setter;
 //         "imageUrl": "/assets/menu/364.png",
 //         "isSoldOut": false,
 //         "isOrderable": true
+//          "kcal" : 50
 //       }
 //     ]
 //   }

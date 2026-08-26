@@ -47,11 +47,14 @@
             m.cat_id AS categoryId,
             m.name,
             m.price,
+            mn.kcal AS baseKcal,
             m.description,
             ma.url AS imageUrl,
             m.sold_out AS isSoldOut
         FROM
             menu m
+        LEFT JOIN menu_nutr mn ON
+            mn.menu_id = m.id
         LEFT JOIN media_asset ma ON
             ma.id = m.image_asset_id
             AND ma.deleted_at IS NULL
@@ -140,7 +143,8 @@
             opi.recommended as isRecommended,
             opi.is_default as isDefault,
             oi.sold_out as isSoldOut,
-            ing.kcal as kcal
+            ing.kcal as kcal,
+            ing.protein_g as protein
         from
             opt_policy op
         join opt_policy_item opi on

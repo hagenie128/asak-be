@@ -159,76 +159,125 @@
   </div>
 
   <div class="code-card" id="MenuListResponse">
-    <div class="code-card-head"><span class="code-name">MenuListResponse</span><span class="tag tag-live">신규</span></div>
-    <p class="code-note">사용: <b>메뉴 목록</b> — <span class="mono">vw_menu_list WHERE category_id = ?</span></p>
-    <pre class="code"><span class="kw">package</span> com.asak.user.dto.response;
+    <div class="code-card-head"><span class="code-name">MenuListResponse / MenuListItemResponse</span><span class="tag tag-live">LIVE</span></div>
+    <p class="code-note">사용: <b>메뉴 목록</b> — 카테고리와 전체 메뉴 목록을 함께 반환한다. 메뉴 항목은 <span class="mono">MenuListItemResponse</span>로 조립한다.</p>
+    <pre class="code"><span class="kw">package</span> com.asak.user.dto.menu;
 
-<span class="kw">import</span> lombok.AllArgsConstructor;
-<span class="kw">import</span> lombok.Builder;
 <span class="kw">import</span> lombok.Getter;
 <span class="kw">import</span> lombok.NoArgsConstructor;
+<span class="kw">import</span> lombok.Setter;
+<span class="kw">import</span> java.util.List;
 
-<span class="kw">@Getter</span> <span class="kw">@Builder</span> <span class="kw">@NoArgsConstructor</span> <span class="kw">@AllArgsConstructor</span>
+<span class="kw">@Getter</span> <span class="kw">@Setter</span> <span class="kw">@NoArgsConstructor</span>
 <span class="kw">public class</span> <span class="ty">MenuListResponse</span> {
+  <span class="kw">private</span> <span class="ty">List</span>&lt;<span class="ty">CategoryResponse</span>&gt; categories;
+  <span class="kw">private</span> <span class="ty">List</span>&lt;<span class="ty">MenuListItemResponse</span>&gt; menus;
+}
+
+<span class="kw">@Getter</span> <span class="kw">@Setter</span> <span class="kw">@NoArgsConstructor</span>
+<span class="kw">public class</span> <span class="ty">MenuListItemResponse</span> {
   <span class="kw">private</span> <span class="ty">Long</span> menuId;
   <span class="kw">private</span> <span class="ty">Long</span> categoryId;
   <span class="kw">private</span> <span class="ty">String</span> name;
-  <span class="kw">private</span> <span class="kw">int</span> price;
+  <span class="kw">private</span> <span class="ty">Integer</span> price;
   <span class="kw">private</span> <span class="ty">String</span> imageUrl;
-  <span class="kw">private</span> <span class="ty">Double</span> baseKcal;
-  <span class="kw">private</span> <span class="kw">boolean</span> isSoldOut;
-  <span class="kw">private</span> <span class="kw">boolean</span> hasSoldOutIngredient;
+  <span class="kw">private</span> <span class="ty">Double</span> kcal;
+  <span class="kw">private</span> <span class="ty">Boolean</span> isSoldOut;
+  <span class="kw">private</span> <span class="ty">Boolean</span> isOrderable;
+}</pre>
+  </div>
+
+  <div class="code-card">
+    <div class="code-card-head"><span class="code-name">API-003 Response</span><span class="tag tag-live">CANONICAL</span></div>
+    <p class="code-note"><b>GET /api/kiosk/menuDetail/{menuId}</b> 성공 응답. <span class="mono">data</span>의 필드와 중첩 구조는 아래 DTO 정의를 따른다.</p>
+    <pre class="code">{
+  <span class="str">"success"</span>: <span class="kw">true</span>,
+  <span class="str">"status"</span>: 200,
+  <span class="str">"code"</span>: <span class="str">"SUCCESS"</span>,
+  <span class="str">"message"</span>: <span class="str">"OK"</span>,
+  <span class="str">"data"</span>: {
+    <span class="str">"menuId"</span>: 364, <span class="str">"categoryId"</span>: 1, <span class="str">"name"</span>: <span class="str">"Menu"</span>,
+    <span class="str">"price"</span>: 8900, <span class="str">"imageUrl"</span>: <span class="str">"/assets/menu/364.png"</span>,
+    <span class="str">"description"</span>: <span class="str">"메뉴 설명"</span>, <span class="str">"isSoldOut"</span>: <span class="kw">false</span>, <span class="str">"baseKcal"</span>: 50,
+    <span class="str">"ingredients"</span>: [], <span class="str">"optionGroups"</span>: [], <span class="str">"tags"</span>: []
+  }
 }</pre>
   </div>
 
   <div class="code-card" id="IngredientResponse">
-    <div class="code-card-head"><span class="code-name">IngredientResponse</span><span class="tag tag-live">신규</span></div>
-    <p class="code-note">사용: <b>메뉴 상세</b> 재료 목록 (Admin보다 얇은 shape — quantity/role/unit 없음)</p>
-    <pre class="code"><span class="kw">package</span> com.asak.user.dto.response;
+    <div class="code-card-head"><span class="code-name">IngredientResponse</span><span class="tag tag-live">LIVE</span></div>
+    <p class="code-note">사용: <b>API-003 메뉴 상세</b>의 <span class="mono">ingredients[]</span>.</p>
+    <pre class="code"><span class="kw">package</span> com.asak.user.dto.menu;
 
-<span class="kw">import</span> lombok.AllArgsConstructor;
-<span class="kw">import</span> lombok.Builder;
 <span class="kw">import</span> lombok.Getter;
 <span class="kw">import</span> lombok.NoArgsConstructor;
+<span class="kw">import</span> lombok.Setter;
 
-<span class="kw">@Getter</span> <span class="kw">@Builder</span> <span class="kw">@NoArgsConstructor</span> <span class="kw">@AllArgsConstructor</span>
+<span class="kw">@Getter</span> <span class="kw">@Setter</span> <span class="kw">@NoArgsConstructor</span>
 <span class="kw">public class</span> <span class="ty">IngredientResponse</span> {
   <span class="kw">private</span> <span class="ty">Long</span> ingredientId;
-  <span class="kw">private</span> <span class="ty">String</span> name;
-  <span class="kw">private</span> <span class="kw">boolean</span> canRemove;
-  <span class="kw">private</span> <span class="kw">boolean</span> isSoldOut;
+  <span class="kw">private</span> <span class="ty">String</span> ingName;
+  <span class="kw">private</span> <span class="ty">String</span> role;
+  <span class="kw">private</span> <span class="ty">String</span> unit;
+  <span class="kw">private</span> <span class="ty">Boolean</span> isDefault;
+  <span class="kw">private</span> <span class="ty">Boolean</span> canRemove;
 }</pre>
   </div>
 
   <div class="code-card" id="MenuDetailResponse">
-    <div class="code-card-head"><span class="code-name">MenuDetailResponse</span><span class="tag tag-live">신규</span></div>
-    <p class="code-note">사용: <b>메뉴 상세</b> 헤더+재료. 옵션은 별도 API(<span class="mono">getMenuOptions</span>)라 여기 없음. <span class="mono">allergens</span>는 <span class="mono">@JsonRawValue</span>로 그대로 통과.</p>
-    <pre class="code"><span class="kw">package</span> com.asak.user.dto.response;
+    <div class="code-card-head"><span class="code-name">MenuDetailResponse</span><span class="tag tag-live">LIVE</span></div>
+    <p class="code-note">사용: <b>API-003 메뉴 상세</b> — 헤더, 재료, 옵션 그룹·항목, 태그를 한 응답에 담는다.</p>
+    <pre class="code"><span class="kw">package</span> com.asak.user.dto.menu;
 
 <span class="kw">import</span> java.util.List;
-<span class="kw">import</span> com.fasterxml.jackson.annotation.JsonRawValue;
-<span class="kw">import</span> lombok.AllArgsConstructor;
-<span class="kw">import</span> lombok.Builder;
 <span class="kw">import</span> lombok.Getter;
 <span class="kw">import</span> lombok.NoArgsConstructor;
+<span class="kw">import</span> lombok.Setter;
 
-<span class="kw">@Getter</span> <span class="kw">@Builder</span> <span class="kw">@NoArgsConstructor</span> <span class="kw">@AllArgsConstructor</span>
+<span class="kw">@Getter</span> <span class="kw">@Setter</span> <span class="kw">@NoArgsConstructor</span>
 <span class="kw">public class</span> <span class="ty">MenuDetailResponse</span> {
   <span class="kw">private</span> <span class="ty">Long</span> menuId;
   <span class="kw">private</span> <span class="ty">Long</span> categoryId;
   <span class="kw">private</span> <span class="ty">String</span> name;
-  <span class="kw">private</span> <span class="kw">int</span> price;
+  <span class="kw">private</span> <span class="ty">Integer</span> price;
   <span class="kw">private</span> <span class="ty">String</span> imageUrl;
   <span class="kw">private</span> <span class="ty">String</span> description;
   <span class="kw">private</span> <span class="ty">Double</span> baseKcal;
-  <span class="kw">private</span> <span class="kw">boolean</span> isSoldOut;
-  <span class="kw">private</span> <span class="kw">boolean</span> hasSoldOutIngredient;
-  <span class="kw">private</span> <span class="kw">boolean</span> isOrderable;
-  <span class="kw">private</span> <span class="ty">String</span> allergyText;
+  <span class="kw">private</span> <span class="ty">Boolean</span> isSoldOut;
   <span class="kw">private</span> <span class="ty">List</span>&lt;<span class="ty">IngredientResponse</span>&gt; ingredients;
+  <span class="kw">private</span> <span class="ty">List</span>&lt;<span class="ty">OptionGroupResponse</span>&gt; optionGroups;
+  <span class="kw">private</span> <span class="ty">List</span>&lt;<span class="ty">String</span>&gt; tags;
+}</pre>
+  </div>
 
-  <span class="kw">@JsonRawValue</span>
-  <span class="kw">private</span> <span class="ty">String</span> allergens;
+  <div class="code-card">
+    <div class="code-card-head"><span class="code-name">OptionGroupResponse / OptionItemResponse</span><span class="tag tag-live">LIVE</span></div>
+    <p class="code-note">사용: <b>API-003 메뉴 상세</b>의 <span class="mono">optionGroups[]</span>와 각 그룹의 <span class="mono">items[]</span>.</p>
+    <pre class="code"><span class="kw">public class</span> <span class="ty">OptionGroupResponse</span> {
+  <span class="kw">private</span> <span class="ty">Long</span> optionGroupId;
+  <span class="kw">private</span> <span class="ty">String</span> name;
+  <span class="kw">private</span> <span class="ty">String</span> groupType;
+  <span class="kw">private</span> <span class="ty">String</span> selectType;
+  <span class="kw">private</span> <span class="ty">Integer</span> minSelect;
+  <span class="kw">private</span> <span class="ty">Integer</span> maxSelect;
+  <span class="kw">private</span> <span class="ty">Integer</span> sortOrder;
+  <span class="kw">private</span> <span class="ty">Boolean</span> isRequired;
+  <span class="kw">private</span> <span class="ty">List</span>&lt;<span class="ty">OptionItemResponse</span>&gt; items;
+}
+
+<span class="kw">public class</span> <span class="ty">OptionItemResponse</span> {
+  <span class="kw">private</span> <span class="ty">Long</span> optionItemId;
+  <span class="kw">private</span> <span class="ty">Long</span> ingredientId;
+  <span class="kw">private</span> <span class="ty">String</span> name;
+  <span class="kw">private</span> <span class="ty">Integer</span> extraPrice;
+  <span class="kw">private</span> <span class="ty">Integer</span> originalPrice;
+  <span class="kw">private</span> <span class="ty">BigDecimal</span> servingAmount;
+  <span class="kw">private</span> <span class="ty">String</span> servingUnit;
+  <span class="kw">private</span> <span class="ty">BigDecimal</span> kcal;
+  <span class="kw">private</span> <span class="ty">BigDecimal</span> protein;
+  <span class="kw">private</span> <span class="ty">Boolean</span> isRecommended;
+  <span class="kw">private</span> <span class="ty">Boolean</span> isDefault;
+  <span class="kw">private</span> <span class="ty">Boolean</span> isSoldOut;
 }</pre>
   </div>
 
@@ -374,13 +423,13 @@
 <span class="kw">import</span> java.util.List;
 <span class="kw">import</span> org.apache.ibatis.annotations.Param;
 <span class="kw">import</span> com.asak.admin.dto.response.MenuOptPolicyResponse;
-<span class="kw">import</span> com.asak.user.dto.response.CategoryResponse;
-<span class="kw">import</span> com.asak.user.dto.response.MenuDetailResponse;
-<span class="kw">import</span> com.asak.user.dto.response.MenuListResponse;
+<span class="kw">import</span> com.asak.user.dto.menu.CategoryResponse;
+<span class="kw">import</span> com.asak.user.dto.menu.MenuDetailResponse;
+<span class="kw">import</span> com.asak.user.dto.menu.MenuListItemResponse;
 
 <span class="kw">public interface</span> <span class="ty">UserMenuMapper</span> {
   <span class="ty">List</span>&lt;<span class="ty">CategoryResponse</span>&gt; getCategories();
-  <span class="ty">List</span>&lt;<span class="ty">MenuListResponse</span>&gt; getMenuList(<span class="kw">@Param</span>(<span class="str">"categoryId"</span>) <span class="ty">Long</span> categoryId);
+  <span class="ty">List</span>&lt;<span class="ty">MenuListItemResponse</span>&gt; selectMenuList();
   <span class="ty">MenuDetailResponse</span> getMenuDetail(<span class="kw">@Param</span>(<span class="str">"menuId"</span>) <span class="ty">Long</span> menuId);
   <span class="ty">List</span>&lt;<span class="ty">MenuOptPolicyResponse</span>&gt; getMenuOptions(<span class="kw">@Param</span>(<span class="str">"menuId"</span>) <span class="ty">Long</span> menuId);
 }</pre>
@@ -400,77 +449,38 @@
     <span class="kw">ORDER BY</span> sort_no
   &lt;/select&gt;
 
-  &lt;select id=<span class="str">"getMenuList"</span> resultType=<span class="str">"com.asak.user.dto.response.MenuListResponse"</span>&gt;
-    <span class="kw">SELECT</span> menu_id <span class="kw">AS</span> menuId, category_id <span class="kw">AS</span> categoryId, name, price, image_url <span class="kw">AS</span> imageUrl,
-           base_kcal <span class="kw">AS</span> baseKcal, is_sold_out <span class="kw">AS</span> isSoldOut, has_sold_out_ingredient <span class="kw">AS</span> hasSoldOutIngredient
-    <span class="kw">FROM</span> vw_menu_list
-    <span class="kw">WHERE</span> category_id = #{categoryId}
-  &lt;/select&gt;
-
-  &lt;resultMap id=<span class="str">"menuDetailMap"</span> type=<span class="str">"com.asak.user.dto.response.MenuDetailResponse"</span>&gt;
-    &lt;id column=<span class="str">"menu_id"</span> property=<span class="str">"menuId"</span>/&gt;
-    &lt;result column=<span class="str">"category_id"</span> property=<span class="str">"categoryId"</span>/&gt;
-    &lt;result column=<span class="str">"name"</span> property=<span class="str">"name"</span>/&gt;
-    &lt;result column=<span class="str">"price"</span> property=<span class="str">"price"</span>/&gt;
-    &lt;result column=<span class="str">"image_url"</span> property=<span class="str">"imageUrl"</span>/&gt;
-    &lt;result column=<span class="str">"description"</span> property=<span class="str">"description"</span>/&gt;
-    &lt;result column=<span class="str">"base_kcal"</span> property=<span class="str">"baseKcal"</span>/&gt;
-    &lt;result column=<span class="str">"is_sold_out"</span> property=<span class="str">"isSoldOut"</span>/&gt;
-    &lt;result column=<span class="str">"has_sold_out_ingredient"</span> property=<span class="str">"hasSoldOutIngredient"</span>/&gt;
-    &lt;result column=<span class="str">"is_orderable"</span> property=<span class="str">"isOrderable"</span>/&gt;
-    &lt;result column=<span class="str">"allergy_text"</span> property=<span class="str">"allergyText"</span>/&gt;
-    &lt;result column=<span class="str">"allergens"</span> property=<span class="str">"allergens"</span>/&gt;
-    &lt;collection property=<span class="str">"ingredients"</span> ofType=<span class="str">"com.asak.user.dto.response.IngredientResponse"</span>
-                column=<span class="str">"menu_id"</span> select=<span class="str">"findKioskIngredients"</span>/&gt;
-  &lt;/resultMap&gt;
-
-  &lt;select id=<span class="str">"getMenuDetail"</span> resultMap=<span class="str">"menuDetailMap"</span>&gt;
-    <span class="kw">SELECT</span> m.id <span class="kw">AS</span> menu_id, m.cat_id <span class="kw">AS</span> category_id, m.name, m.price, m.image_url,
-           m.description, mn.kcal <span class="kw">AS</span> base_kcal,
-           va.direct_sold_out <span class="kw">AS</span> is_sold_out,
-           (va.has_core_sold_out <span class="kw">OR</span> va.base_ing_exhausted <span class="kw">OR</span> va.base_opt_exhausted <span class="kw">OR</span> va.has_blocking_standard) <span class="kw">AS</span> has_sold_out_ingredient,
-           <span class="kw">NOT</span> (va.direct_sold_out <span class="kw">OR</span> va.has_core_sold_out <span class="kw">OR</span> va.base_ing_exhausted <span class="kw">OR</span> va.base_opt_exhausted
-                <span class="kw">OR</span> va.has_blocking_standard <span class="kw">OR</span> va.has_exhausted_required_group) <span class="kw">AS</span> is_orderable,
-           <span class="kw">COALESCE</span>(ag.allergy_text, <span class="str">''</span>) <span class="kw">AS</span> allergy_text,
-           <span class="kw">COALESCE</span>(ag.allergens, <span class="kw">JSON_ARRAY</span>()) <span class="kw">AS</span> allergens
+  &lt;select id=<span class="str">"selectMenuList"</span> resultType=<span class="str">"menuList"</span>&gt;
+    <span class="kw">SELECT</span> m.id <span class="kw">AS</span> menuId, m.cat_id <span class="kw">AS</span> categoryId, m.name, m.price,
+           mn.kcal, ma.url <span class="kw">AS</span> imageUrl, m.sold_out <span class="kw">AS</span> isSoldOut
     <span class="kw">FROM</span> menu m
-    <span class="kw">JOIN</span> vw_menu_availability va <span class="kw">ON</span> va.menu_id = m.id
+    <span class="kw">JOIN</span> menu_nutr mn <span class="kw">ON</span> mn.menu_id = m.id
+    <span class="kw">LEFT JOIN</span> media_asset ma <span class="kw">ON</span> ma.id = m.image_asset_id <span class="kw">AND</span> ma.deleted_at <span class="kw">IS NULL</span>
+    <span class="kw">WHERE</span> m.deleted_at <span class="kw">IS NULL</span>
+    <span class="kw">ORDER BY</span> m.cat_id <span class="kw">ASC</span>, m.id <span class="kw">ASC</span>
+  &lt;/select&gt;
+
+  <span class="cm">&lt;!-- API-003: Service가 헤더 → 재료 → 옵션 그룹별 항목 → 태그 순으로 조립 --&gt;</span>
+  &lt;select id=<span class="str">"selectMenuDetail"</span> resultType=<span class="str">"menuDetail"</span>&gt;
+    <span class="kw">SELECT</span> m.id <span class="kw">AS</span> menuId, m.cat_id <span class="kw">AS</span> categoryId, m.name, m.price,
+           mn.kcal <span class="kw">AS</span> baseKcal, m.description, ma.url <span class="kw">AS</span> imageUrl,
+           m.sold_out <span class="kw">AS</span> isSoldOut
+    <span class="kw">FROM</span> menu m
     <span class="kw">LEFT JOIN</span> menu_nutr mn <span class="kw">ON</span> mn.menu_id = m.id
-    <span class="kw">LEFT JOIN</span> (
-        <span class="kw">SELECT</span> menu_id,
-               <span class="kw">JSON_ARRAYAGG</span>(name) <span class="kw">AS</span> allergens,
-               <span class="kw">GROUP_CONCAT</span>(name <span class="kw">ORDER BY</span> name <span class="kw">SEPARATOR</span> <span class="str">', '</span>) <span class="kw">AS</span> allergy_text
-        <span class="kw">FROM</span> (
-            <span class="kw">SELECT DISTINCT</span> mi.menu_id, a.name
-            <span class="kw">FROM</span> menu_ing mi
-            <span class="kw">JOIN</span> ing_allergen ia <span class="kw">ON</span> ia.ing_id = mi.ing_id
-            <span class="kw">JOIN</span> allergen a <span class="kw">ON</span> a.id = ia.allergen_id
-            <span class="kw">UNION</span>
-            <span class="kw">SELECT DISTINCT</span> mop.menu_id, a.name
-            <span class="kw">FROM</span> menu_opt_policy mop
-            <span class="kw">JOIN</span> opt_policy_item opi <span class="kw">ON</span> opi.policy_id = mop.policy_id
-            <span class="kw">JOIN</span> opt_item oi <span class="kw">ON</span> oi.id = opi.opt_item_id
-            <span class="kw">JOIN</span> ing_allergen ia <span class="kw">ON</span> ia.ing_id = oi.ing_id
-            <span class="kw">JOIN</span> allergen a <span class="kw">ON</span> a.id = ia.allergen_id
-        ) all_allerg
-        <span class="kw">GROUP BY</span> menu_id
-    ) ag <span class="kw">ON</span> ag.menu_id = m.id
-    <span class="kw">WHERE</span> m.id = #{menuId}
+    <span class="kw">LEFT JOIN</span> media_asset ma <span class="kw">ON</span> ma.id = m.image_asset_id <span class="kw">AND</span> ma.deleted_at <span class="kw">IS NULL</span>
+    <span class="kw">WHERE</span> m.id = #{menuId} <span class="kw">AND</span> m.deleted_at <span class="kw">IS NULL</span>
   &lt;/select&gt;
 
-  &lt;select id=<span class="str">"findKioskIngredients"</span> resultType=<span class="str">"com.asak.user.dto.response.IngredientResponse"</span>&gt;
-    <span class="kw">SELECT DISTINCT</span> ingredient_id <span class="kw">AS</span> ingredientId, ing_name <span class="kw">AS</span> name, can_remove <span class="kw">AS</span> canRemove, ing_sold_out <span class="kw">AS</span> isSoldOut
-    <span class="kw">FROM</span> vw_menu_ing_json
-    <span class="kw">WHERE</span> menu_id = #{menuId}
+  &lt;select id=<span class="str">"selectIngredients"</span> resultType=<span class="str">"ingredient"</span>&gt;
+    <span class="kw">SELECT</span> i.id <span class="kw">AS</span> ingredientId, i.name <span class="kw">AS</span> ingName, role.code <span class="kw">AS</span> role,
+           unit.name <span class="kw">AS</span> unit, mi.is_default <span class="kw">AS</span> isDefault, mi.can_remove <span class="kw">AS</span> canRemove
+    <span class="kw">FROM</span> menu_ing mi <span class="kw">JOIN</span> ing i <span class="kw">ON</span> mi.ing_id = i.id
+    <span class="kw">JOIN</span> common_code role <span class="kw">ON</span> mi.role_id = role.id
+    <span class="kw">LEFT JOIN</span> common_code unit <span class="kw">ON</span> mi.unit_id = unit.id
+    <span class="kw">WHERE</span> mi.menu_id = #{menuId} <span class="kw">ORDER BY</span> mi.sort_no
   &lt;/select&gt;
 
-  &lt;select id=<span class="str">"getMenuOptions"</span> resultType=<span class="str">"com.asak.admin.dto.response.MenuOptPolicyResponse"</span>&gt;
-    <span class="kw">SELECT</span> option_group_id <span class="kw">AS</span> optionGroupId, name, group_type <span class="kw">AS</span> groupType, select_type <span class="kw">AS</span> selectType,
-           min_select <span class="kw">AS</span> minSelect, max_select <span class="kw">AS</span> maxSelect, sort_order <span class="kw">AS</span> sortOrder,
-           is_required <span class="kw">AS</span> isRequired, items
-    <span class="kw">FROM</span> vw_menu_opt_policy_json
-    <span class="kw">WHERE</span> menu_id = #{menuId}
-  &lt;/select&gt;
+  <span class="cm">&lt;!-- selectOptionGroups + selectOptionItems(menuId, policyId)가 optionGroups[].items[]을 조립한다. --&gt;</span>
+  <span class="cm">&lt;!-- selectTages(menuId)가 tags[]를 조립한다. --&gt;</span>
 
 &lt;/mapper&gt;</pre>
   </div>
