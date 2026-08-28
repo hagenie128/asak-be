@@ -16,6 +16,40 @@
           pay_method_cfg pmc
           JOIN common_code cc ON pmc.method_id = cc.id
           JOIN media_asset ma ON pmc.image_asset_id = ma.id
+      ORDER BY
+          pmc.sort_no ASC,
+          pmc.id ASC
+  </select>
+
+  <select id="findPaymentMethodStatusId" resultType="long">
+      SELECT
+          cc.id
+      FROM
+          common_code cc
+          JOIN code_group cg ON cg.id = cc.code_grp_id
+      WHERE
+          cg.group_code = 'PAYMENT_STATUS'
+          AND cc.code = #{statusCode}
+  </select>
+
+  <select id="findPaymentMethodByCode"
+          resultType="com.asak.admin.dto.response.AdminPaymentMethodResponse">
+      SELECT
+          pmc.id AS methodId,
+          cc.code AS methodCode,
+          pmc.name AS methodName,
+          ma.url AS imageUrl,
+          pmc.description AS description,
+          pmc.active AS active,
+          pmc.sort_no AS sortNo
+      FROM
+          pay_method_cfg pmc
+          JOIN common_code cc ON pmc.method_id = cc.id
+          JOIN media_asset ma ON pmc.image_asset_id = ma.id
+      WHERE
+          cc.code = #{methodCode}
+      LIMIT
+          1
   </select>
 
   <select id="findPaymentMethod" resultType="int">

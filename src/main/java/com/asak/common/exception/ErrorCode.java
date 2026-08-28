@@ -159,6 +159,10 @@ public enum ErrorCode {
     ONLY_APPROVED_PAYMENT_CAN_BE_REFUNDED("ONLY_APPROVED_PAYMENT_CAN_BE_REFUNDED", HttpStatus.CONFLICT,
             "승인된 결제만 환불 가능합니다."),
     CANCELED_ORDER_CANNOT_BE_REFUNDED("CANCELED_ORDER_CANNOT_BE_REFUNDED", HttpStatus.CONFLICT, "취소된 주문은 환불할 수 없습니다."),
+    INVALID_REFUND_REASON("INVALID_REFUND_REASON", HttpStatus.BAD_REQUEST, "유효하지 않은 환불 사유입니다."),
+    REFUND_REASON_DETAIL_REQUIRED(
+            "REFUND_REASON_DETAIL_REQUIRED", HttpStatus.BAD_REQUEST, "기타 환불 사유를 입력해주세요."),
+
     PAYMENT_METHOD_NOT_SUPPORTED_FOR_REFUND("PAYMENT_METHOD_NOT_SUPPORTED_FOR_REFUND", HttpStatus.BAD_REQUEST,
             "환불 가능한 결제 수단이 아닙니다."),
     // =========================================================

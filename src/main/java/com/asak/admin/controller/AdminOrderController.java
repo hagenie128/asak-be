@@ -15,7 +15,7 @@ import com.asak.admin.dto.response.orders.LiveOrderListResponse;
 import com.asak.admin.dto.response.orders.OrderDetailResponse;
 import com.asak.admin.dto.response.orders.OrderListResponse;
 import com.asak.admin.service.AdminOrderService;
-import com.asak.admin.service.AdminPaymentMethodService;
+import com.asak.admin.service.AdminRefundReasonService;
 import com.asak.common.exception.CustomException;
 import com.asak.common.exception.ErrorCode;
 import com.asak.common.response.ApiResponse;
@@ -27,12 +27,13 @@ import jakarta.validation.Valid;
 @RequestMapping("api/admin/orders")
 public class AdminOrderController {
   private final AdminOrderService adminOrderService;
-  private final AdminPaymentMethodService adminPaymentMethodService;
+  private final AdminRefundReasonService adminRefundReasonService;
 
-  public AdminOrderController(AdminOrderService adminOrderService,
-      AdminPaymentMethodService adminPaymentMethodService) {
+  public AdminOrderController(
+      AdminOrderService adminOrderService,
+      AdminRefundReasonService adminRefundReasonService) {
     this.adminOrderService = adminOrderService;
-    this.adminPaymentMethodService = adminPaymentMethodService;
+    this.adminRefundReasonService = adminRefundReasonService;
   }
 
   // 조회 조건:
@@ -125,9 +126,11 @@ public class AdminOrderController {
       @PathVariable(name = "orderId") Long orderId,
       @RequestBody @Valid OrderRefundRequest request) {
 
-    OrderDetailResponse result = adminOrderService.refundOrder(
-        orderId,
-        request.getRefundReason());
+    String refundReasonText =
+        adminRefundReasonService.resolveRefundReasonText(
+            request.getRefundReasonCode(), request.getRefundReasonDetail());
+
+    OrderDetailResponse result = adminOrderService.refundOrder(orderId, refundReasonText);
 
     return ApiResponse.success(
         "ADMIN_ORDER_REFUND_SUCCESS",
