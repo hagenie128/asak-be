@@ -37,7 +37,7 @@ public class OptionItemResponse {
   private BigDecimal servingAmount;
   private String servingUnit;
   private BigDecimal kcal;
-  private BigDecimal protein; //단백질
+  private BigDecimal protein; // 단백질
   private Boolean isRecommended;
   private Boolean isDefault;
   private Boolean isSoldOut;
