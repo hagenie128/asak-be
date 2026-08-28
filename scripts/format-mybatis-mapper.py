@@ -43,6 +43,25 @@ CLAUSE_RE = re.compile(
 )
 
 
+def sanitize_text(text: str) -> str:
+    """Remove lone UTF-16 surrogates that Node/Cursor may pass via stdin."""
+    return "".join(ch for ch in text if not (0xD800 <= ord(ch) <= 0xDFFF))
+
+
+def read_stdin_text() -> str:
+    raw = sys.stdin.buffer.read()
+    return sanitize_text(raw.decode("utf-8", errors="replace"))
+
+
+def write_stdout_text(text: str) -> None:
+    sys.stdout.buffer.write(text.encode("utf-8"))
+
+
+def is_inside_mybatis_expr(text: str, pos: int) -> bool:
+    segment = text[:pos]
+    return segment.count("#{") > segment.count("}")
+
+
 def local_tag(element: etree._Element) -> str:
     tag = element.tag
     if isinstance(tag, str) and "}" in tag:
@@ -216,7 +235,11 @@ def format_sql_text(text: str) -> list[str]:
     if not normalized:
         return []
 
-    matches = list(CLAUSE_RE.finditer(normalized))
+    matches = [
+        match
+        for match in CLAUSE_RE.finditer(normalized)
+        if not is_inside_mybatis_expr(normalized, match.start())
+    ]
     if not matches:
         return [f"{SQL_BASE}{normalized}"]
 
@@ -381,6 +404,7 @@ def format_mapper_tree(root: etree._Element, tree: etree._ElementTree) -> str:
 
 
 def format_mapper_text(content: str) -> str:
+    content = sanitize_text(content)
     parser = etree.XMLParser(remove_blank_text=False)
     try:
         tree = etree.ElementTree(etree.fromstring(content.encode("utf-8"), parser))
@@ -404,8 +428,8 @@ def format_mapper_file(path: Path) -> bool:
 
 def main() -> int:
     if len(sys.argv) == 2 and sys.argv[1] == "--stdin":
-        formatted = format_mapper_text(sys.stdin.read())
-        sys.stdout.write(formatted)
+        formatted = format_mapper_text(read_stdin_text())
+        write_stdout_text(formatted)
         return 0
 
     if len(sys.argv) != 2:

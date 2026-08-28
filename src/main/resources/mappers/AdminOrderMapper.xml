@@ -95,13 +95,9 @@
       ORDER BY
           o.created_at DESC
       LIMIT
-          #{filter.
-      LIMIT
-          }
+          #{filter.limit}
       OFFSET
-          #{filter.
-      OFFSET
-          } ), item_summary AS (
+          #{filter.offset} ), item_summary AS (
       SELECT
           oi.order_id,
           COUNT(*) AS line_count,
