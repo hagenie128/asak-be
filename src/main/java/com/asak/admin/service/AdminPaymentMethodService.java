@@ -1,14 +1,16 @@
 package com.asak.admin.service;
 
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import org.springframework.stereotype.Service;
+
 import com.asak.admin.dto.request.UpdatePaymentMethodRequest;
 import com.asak.admin.dto.response.AdminPaymentMethodResponse;
 import com.asak.admin.mapper.AdminPaymentMethodMapper;
 import com.asak.common.exception.CustomException;
 import com.asak.common.exception.ErrorCode;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import org.springframework.stereotype.Service;
 
 // TODO-012 [구현 완료 · SQL/실 DB 검증 대기]: 목록과 수정은 DTO로 분리했고,
 // PATCH 식별자는 Controller path variable만 사용한다. active·sortNo와 없는 id는 검증한다.
@@ -39,5 +41,13 @@ public class AdminPaymentMethodService {
     params.put("active", request.getActive());
     params.put("sortNo", request.getSortNo());
     return adminPaymentMethodMapper.updatePaymentMethod(params);
+  }
+
+  public AdminPaymentMethodResponse getPaymentMethodByCode(String methodCode) {
+    AdminPaymentMethodResponse paymentMethod = adminPaymentMethodMapper.findPaymentMethodByCode(methodCode);
+    if (paymentMethod.getMethodId() == null) {
+      throw new CustomException(ErrorCode.PAYMENT_METHOD_NOT_FOUND);
+    }
+    return paymentMethod;
   }
 }

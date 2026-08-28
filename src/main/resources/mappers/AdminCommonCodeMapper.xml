@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.asak.admin.mapper.AdminCommonCodeMapper">
+  <select id="findActiveCodesByGroup"
+          resultType="com.asak.admin.dto.response.orders.RefundReasonResponse">
+      SELECT
+          cc.code AS code,
+          cc.name AS name,
+          cc.sort_no AS sortNo,
+          CASE
+              WHEN cc.code = 'OTHER' THEN TRUE
+              ELSE FALSE
+          END AS requiresDetail
+      FROM
+          common_code cc
+          JOIN code_group cg ON cg.id = cc.code_grp_id
+      WHERE
+          cg.group_code = #{groupCode}
+          AND cc.active = 1
+      ORDER BY
+          cc.sort_no ASC,
+          cc.id ASC
+  </select>
+
+  <select id="findActiveCodeByGroupAndCode"
+          resultType="com.asak.admin.dto.response.orders.RefundReasonResponse">
+      SELECT
+          cc.code AS code,
+          cc.name AS name,
+          cc.sort_no AS sortNo,
+          CASE
+              WHEN cc.code = 'OTHER' THEN TRUE
+              ELSE FALSE
+          END AS requiresDetail
+      FROM
+          common_code cc
+          JOIN code_group cg ON cg.id = cc.code_grp_id
+      WHERE
+          cg.group_code = #{groupCode}
+          AND cc.code = #{code}
+          AND cc.active = 1
+      LIMIT
+          1
+  </select>
+</mapper>
