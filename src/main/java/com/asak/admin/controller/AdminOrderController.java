@@ -1,15 +1,5 @@
 package com.asak.admin.controller;
 
-import java.time.LocalDate;
-
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PatchMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
-
 import com.asak.admin.dto.request.orders.OrderRefundRequest;
 import com.asak.admin.dto.response.orders.LiveOrderListResponse;
 import com.asak.admin.dto.response.orders.OrderDetailResponse;
@@ -20,8 +10,15 @@ import com.asak.common.exception.CustomException;
 import com.asak.common.exception.ErrorCode;
 import com.asak.common.response.ApiResponse;
 import com.asak.common.response.PageResult;
-
 import jakarta.validation.Valid;
+import java.time.LocalDate;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("api/admin/orders")
@@ -30,8 +27,7 @@ public class AdminOrderController {
   private final AdminRefundReasonService adminRefundReasonService;
 
   public AdminOrderController(
-      AdminOrderService adminOrderService,
-      AdminRefundReasonService adminRefundReasonService) {
+      AdminOrderService adminOrderService, AdminRefundReasonService adminRefundReasonService) {
     this.adminOrderService = adminOrderService;
     this.adminRefundReasonService = adminRefundReasonService;
   }
@@ -56,8 +52,9 @@ public class AdminOrderController {
       @RequestParam(name = "dateFrom", required = false) LocalDate dateFrom,
       @RequestParam(name = "dateTo", required = false) LocalDate dateTo,
       @RequestParam(name = "keyword", required = false) String keyword) {
-    PageResult<OrderListResponse> result = adminOrderService.getOrderList(
-        page, size, orderStatus, paymentStatus, orderType, dateFrom, dateTo, keyword);
+    PageResult<OrderListResponse> result =
+        adminOrderService.getOrderList(
+            page, size, orderStatus, paymentStatus, orderType, dateFrom, dateTo, keyword);
     return ApiResponse.success("ADMIN_ORDER_LIST_SUCCESS", "관리자 주문 목록 조회 성공", result);
   }
 
@@ -92,7 +89,7 @@ public class AdminOrderController {
     // Service가 규칙 위반 / 동시성 충돌을 구분해 돌려준다.
     return switch (adminOrderService.changeOrderStatus(response, status)) {
       case SUCCESS ->
-        ApiResponse.success("ADMIN_ORDER_STATUS_CHANGE_SUCCESS", "관리자 주문 상태 변경 성공", null);
+          ApiResponse.success("ADMIN_ORDER_STATUS_CHANGE_SUCCESS", "관리자 주문 상태 변경 성공", null);
       case INVALID_TRANSITION -> ApiResponse.error(ErrorCode.INVALID_ORDER_STATUS_TRANSITION);
       case CONFLICT -> ApiResponse.error(ErrorCode.ORDER_STATUS_CONFLICT);
     };
@@ -132,10 +129,7 @@ public class AdminOrderController {
 
     OrderDetailResponse result = adminOrderService.refundOrder(orderId, refundReasonText);
 
-    return ApiResponse.success(
-        "ADMIN_ORDER_REFUND_SUCCESS",
-        "관리자 주문 환불 성공",
-        result);
+    return ApiResponse.success("ADMIN_ORDER_REFUND_SUCCESS", "관리자 주문 환불 성공", result);
   }
 
   // TODO-040/042와 연결한다.

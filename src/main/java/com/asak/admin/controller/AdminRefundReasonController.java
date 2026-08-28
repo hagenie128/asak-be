@@ -21,7 +21,6 @@ public class AdminRefundReasonController {
   @GetMapping
   public ApiResponse<List<RefundReasonResponse>> getRefundReasons() {
     List<RefundReasonResponse> reasons = adminRefundReasonService.getRefundReasons();
-    return ApiResponse.success(
-        "ADMIN_REFUND_REASON_LIST_SUCCESS", "환불 사유 목록 조회 성공", reasons);
+    return ApiResponse.success("ADMIN_REFUND_REASON_LIST_SUCCESS", "환불 사유 목록 조회 성공", reasons);
   }
 }

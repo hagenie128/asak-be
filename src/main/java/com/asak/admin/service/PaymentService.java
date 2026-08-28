@@ -1,13 +1,11 @@
 package com.asak.admin.service;
 
-import java.util.UUID;
-
-import org.springframework.stereotype.Service;
-
 import com.asak.admin.dto.RefundTarget;
 import com.asak.common.enums.PaymentMethod;
 import com.asak.common.exception.CustomException;
 import com.asak.common.exception.ErrorCode;
+import java.util.UUID;
+import org.springframework.stereotype.Service;
 
 @Service
 public class PaymentService {
@@ -15,15 +13,12 @@ public class PaymentService {
   public String cardRefund(RefundTarget target) {
 
     if (target.getPaymentMethod() != PaymentMethod.CARD) {
-      throw new CustomException(
-          ErrorCode.PAYMENT_METHOD_NOT_SUPPORTED_FOR_REFUND);
+      throw new CustomException(ErrorCode.PAYMENT_METHOD_NOT_SUPPORTED_FOR_REFUND);
     }
 
-    if (target.getProviderPaymentKey() == null
-        || target.getProviderPaymentKey().isBlank()) {
+    if (target.getProviderPaymentKey() == null || target.getProviderPaymentKey().isBlank()) {
 
-      throw new CustomException(
-          ErrorCode.ORDER_REFUND_FAILED);
+      throw new CustomException(ErrorCode.ORDER_REFUND_FAILED);
     }
 
     // 가상 카드 취소 성공
