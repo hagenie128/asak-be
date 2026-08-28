@@ -19,7 +19,9 @@ import com.asak.user.dto.payment.tossPayment.TossPaymentConfirmResponse;
 import com.asak.user.mapper.UserPayMapper;
 import java.net.SocketTimeoutException;
 import java.net.http.HttpTimeoutException;
+import java.time.LocalDate;
 import java.time.OffsetDateTime;
+import java.time.ZoneId;
 import java.util.List;
 import java.util.concurrent.TimeoutException;
 import lombok.RequiredArgsConstructor;
@@ -34,6 +36,7 @@ public class UserPayService {
 
   private final UserPayMapper payMapper;
   private final TossPaymentClient tossPaymentClient;
+  private static final ZoneId WATTING_NUMBER_ZONE_ID = ZoneId.of("Asia/Seoul");
 
   // --------------- api-014 결제 수단 조회 ------------------------
   public PaymentMethodListResponse getPaymentMethod() {
@@ -267,7 +270,7 @@ public class UserPayService {
   //     "paymentStatus": "APPROVED",
   //     "approvedAmount": 8900,
   //     "approvedAt": "2026-07-23T12:00:00",
-  //     "waitingOrderCount": 0
+  //     "waitingOrderNo": 0
   //   }
   // }
 
@@ -360,12 +363,29 @@ public class UserPayService {
     if (inserted != 1 || command.getPaymentId() == null) {
       throw new CustomException(ErrorCode.PAYMENT_CREATE_FAILED);
     }
+    
+    //고정 대기 번호 생성
+    LocalDate watingDate = LocalDate.now(WATTING_NUMBER_ZONE_ID);
+    
+    payMapper.increaseDailyWaitingSequence(watingDate);
+    
+    Integer waitingOrderNo = payMapper.findDailyWaitingOrderNo(watingDate);
+    
+    if(waitingOrderNo == null){
+      throw new CustomException(ErrorCode.PAYMENT_CREATE_FAILED);
+    }
+    
     // 주문상태(orderStatus)도 READY → RECEIVED로 바꿔서 보내주기
-    int updated = payMapper.updateOrderStatusToReceived(request.getOrderId());
-
+    int updated = payMapper.updateOrderStatusToReceived(
+      request.getOrderId(),
+      watingDate,
+      waitingOrderNo
+    );
+    
     if (updated != 1) {
       throw new CustomException(ErrorCode.ORDER_STATUS_CONFLICT);
     }
+
 
     // 8. paymentId로 결과 조회 후 반환
     return getRequiredPaymentResult(command.getPaymentId());
