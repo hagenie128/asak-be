@@ -8,9 +8,11 @@
   <result column="order_type_code" property="orderType"/>
   <result column="status_code" property="orderStatus"/>
   <result column="payment_status_code" property="paymentStatus"/>
-  <result column="payment_method_name" property="paymentMethod"/>
   <result column="total_price" property="totalAmount"/>
   <result column="created_at" property="createdAt"/>
+  <association property="paymentMethod" javaType="com.asak.admin.dto.response.AdminPaymentMethodResponse">
+    <result column="payment_method_name" property="methodName"/>
+  </association>
   <collection property="items" ofType="com.asak.admin.dto.response.orders.OrderItemResponse"
               column="order_id" select="findOrderItems"/>
 </resultMap>
