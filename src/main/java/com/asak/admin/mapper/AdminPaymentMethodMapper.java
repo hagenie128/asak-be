@@ -1,9 +1,8 @@
 package com.asak.admin.mapper;
 
+import com.asak.admin.dto.response.AdminPaymentMethodResponse;
 import java.util.List;
 import java.util.Map;
-
-import com.asak.admin.dto.response.AdminPaymentMethodResponse;
 
 // 결제수단 Mapper 계약 참고.
 // 1) 목록은 pay_method_cfg와 common_code 기준으로 methodId, methodCode, methodName, imageUrl, description,
