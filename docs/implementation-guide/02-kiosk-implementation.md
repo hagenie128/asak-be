@@ -14,7 +14,7 @@
 | API-004 | `POST /api/kiosk/cart/validate` | 수량·필수 옵션·품절·서버 가격 재검증 | 400 옵션 오류, 409 품절/가격 변경 |
 | API-005 | `POST /api/kiosk/orders` | 서버 금액 계산, orderNo 생성, 주문·아이템·옵션 저장 | 400 요청 오류, 409 품절/가격 변경 |
 | API-014 | `GET /api/kiosk/payment-methods` | 키오스크에 노출 가능한 결제수단만 반환 | 빈 목록 |
-| API-006 | `POST /api/kiosk/payments` | 결제수단 활성화, 멱등성, 승인/실패 상태와 대기 주문 수 처리 | 400 입력, 409 이미 승인/수단 비활성 |
+| API-006 | `POST /api/kiosk/payments` | 결제수단 활성화, 멱등성, 승인/실패 상태와 일별 고정 대기번호 처리 | 400 입력, 409 이미 승인/수단 비활성 |
 
 ## 주문 생성 request 기준
 
@@ -34,7 +34,7 @@
 
 - `orderType`, `items[].menuId`, `quantity`, `optionItems`, `excludedIngredientIds`가 계약 필드다.
 - 클라이언트의 `totalAmount`나 카드 가격은 신뢰하지 않는다.
-- API-005 성공 data는 `orderId`, `orderNo`, 서버 계산 `totalAmount`, `orderStatus: READY`다. 결제 승인 성공 data는 `paymentId`, `paymentMethodCode`, `paymentStatus: APPROVED`, `orderStatus: RECEIVED`, `approvedAmount`, `approvedAt`, `waitingOrderCount`을 반환한다.
+- API-005 성공 data는 `orderId`, `orderNo`, 서버 계산 `totalAmount`, `orderStatus: READY`다. 결제 승인 성공 data는 `paymentId`, `paymentMethodCode`, `paymentStatus: APPROVED`, `orderStatus: RECEIVED`, `approvedAmount`, `approvedAt`, `waitingOrderNo`를 반환한다. `waitingOrderNo`는 결제 완료 시 발급되어 `orders.waiting_order_no`에 저장되는 일별 고정 대기번호다.
 - 결제 실패는 Order를 즉시 삭제하지 않는다. 승인 전 실패하면 주문은 `READY`로 남아 재시도할 수 있다.
 - 클라이언트 금액과 DB 재계산 값이 다르면 주문을 중단하고 최신 가격/오류 code를 반환하여 Cart가 변경 안내를 할 수 있게 한다.
 
@@ -44,6 +44,7 @@
 2. 메뉴 상세는 `menu_opt_policy → opt_policy → opt_policy_item → opt_item` 조인을 기준으로 설계한다.
 3. 주문 저장은 주문 헤더 → 주문 아이템 → 선택 옵션/재료 제외 순으로 트랜잭션 처리한다.
 4. 결제는 주문 상태와 결제수단 설정을 재확인하고 중복 승인 방지 키를 처리한다.
+5. 결제 저장 후 한국 날짜의 `daily_waiting_sequence`를 증가시키고, 발급 번호와 날짜를 주문의 `waiting_order_no`, `waiting_date`에 저장하면서 `READY → RECEIVED` 상태를 한 번에 변경한다.
 
 ## 완료 조건
 

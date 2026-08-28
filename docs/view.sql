@@ -3,7 +3,15 @@
 -- Source: 운영 DB(asak_db) SHOW CREATE VIEW 실측
 -- Synced: 2026-08-11
 -- Verified: 2026-08-19 (뷰 22개, 실제 DB와 의미 동일 확인)
+-- Rechecked: 2026-08-29 (운영 DB 뷰 24개)
 -- =============================================
+--
+-- 재검증 결과 (2026-08-29)
+--  * 운영 DB 24개 중 18개 정의 일치, 3개는 괄호 표기만 다르고 실행 결과 동일.
+--  * vw_sales_30min, vw_sales_daily, vw_sales_monthly 3개는 운영 DB와 정의가 다르며
+--    이번 API-006 문서 최신화 범위 밖이므로 별도 동기화가 필요하다.
+--  * vw_payment_result는 운영 DB의 레거시 waiting_order_count 정의와 일치한다.
+--    현재 API-006은 이 뷰를 사용하지 않고 orders.waiting_order_no를 직접 조회한다.
 --
 -- 검증 방법과 결과 (2026-08-19)
 --  * 22개 전부 실제 DB에 존재하고, 문서에만 있거나 빠진 뷰는 없다.
@@ -423,6 +431,9 @@ ORDER BY `o`.`created_at` DESC;
 -- -----------------------------------------------------------------------------
 -- vw_payment_result
 -- -----------------------------------------------------------------------------
+-- 레거시 뷰: 운영 DB에는 조회 시점 대기 건수(waiting_order_count) 정의로 남아 있다.
+-- API-006의 현재 UserPayMapper.getPaymentResult는 이 뷰를 사용하지 않고
+-- orders.waiting_order_no를 인라인 조인으로 직접 조회한다.
 CREATE OR REPLACE VIEW `vw_payment_result` AS
 SELECT `p`.`id` AS `payment_id`,`p`.`order_id` AS `order_id`,`o`.`order_no` AS `order_no`,`ps`.`code` AS `payment_status`,
        `p`.`amount` AS `approved_amount`,`p`.`paid_at` AS `approved_at`,
