@@ -12,7 +12,6 @@ import com.asak.user.dto.payment.command.PaymentInsertCommand;
 import com.asak.user.dto.payment.query.PaymentIdempotencyCheck;
 import com.asak.user.dto.payment.query.PaymentMethodContext;
 import com.asak.user.dto.payment.query.PaymentOrderContext;
-import com.asak.user.dto.payment.tossPayment.TossErrorResponse;
 import com.asak.user.dto.payment.tossPayment.TossPaymentAuth;
 import com.asak.user.dto.payment.tossPayment.TossPaymentClient;
 import com.asak.user.dto.payment.tossPayment.TossPaymentConfirmRequest;

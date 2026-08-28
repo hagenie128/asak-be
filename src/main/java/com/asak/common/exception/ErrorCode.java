@@ -8,7 +8,6 @@ import org.springframework.http.HttpStatus;
  * <p>{@code code} is a stable API contract value; {@code status} is the HTTP response status.
  */
 public enum ErrorCode {
-
   INVALID_REQUEST("INVALID_REQUEST", HttpStatus.BAD_REQUEST, "잘못된 요청입니다."),
 
   INVALID_STORE_NUMBER("INVALID_STORE_NUMBER", HttpStatus.BAD_REQUEST, "잘못된 매장 번호입니다."),
