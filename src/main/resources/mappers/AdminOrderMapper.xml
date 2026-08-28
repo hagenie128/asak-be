@@ -1,22 +1,27 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.asak.admin.mapper.AdminOrderMapper">
-
-  <resultMap id="orderDetailMap" type="com.asak.admin.dto.response.orders.OrderDetailResponse">
-    <id column="order_id" property="orderId"/>
-    <result column="order_no" property="orderNo"/>
-    <result column="order_type_code" property="orderType"/>
-    <result column="status_code" property="orderStatus"/>
-    <result column="payment_status_code" property="paymentStatus"/>
-    <result column="total_price" property="totalAmount"/>
-    <result column="created_at" property="createdAt"/>
-    <association property="paymentMethod" javaType="com.asak.admin.dto.response.AdminPaymentMethodResponse">
-      <result column="payment_method_name" property="methodName"/>
-    </association>
-    <collection property="items" ofType="com.asak.admin.dto.response.orders.OrderItemResponse"
-                column="order_id" select="findOrderItems"/>
-  </resultMap>
-
+  <resultmap id="orderDetailMap"
+          type="com.asak.admin.dto.response.orders.OrderDetailResponse">
+    <id column="order_id"
+          property="orderId" />
+    <result column="order_no"
+          property="orderNo" />
+    <result column="order_type_code"
+          property="orderType" />
+    <result column="status_code"
+          property="orderStatus" />
+    <result column="payment_status_code"
+          property="paymentStatus" />
+    <result column="total_price"
+          property="totalAmount" />
+    <result column="created_at"
+          property="createdAt" />
+    <association property="paymentMethod"
+          javaType="com.asak.admin.dto.response.AdminPaymentMethodResponse" />
+    <collection property="items"
+                ofType="com.asak.admin.dto.response.orders.OrderItemResponse" column="order_id" select="findOrderItems"/>
+  </resultmap>
   <select id="getOrderDetail"
           resultMap="orderDetailMap">
       SELECT
@@ -33,7 +38,6 @@
       WHERE
           order_id = #{orderId}
   </select>
-
   <select id="findOrderItems"
           resultType="com.asak.admin.dto.response.orders.OrderItemResponse">
       SELECT
@@ -48,16 +52,14 @@
       WHERE
           order_id = #{orderId}
   </select>
-
   <sql id="orderListBaseWhere">
     <where>
       <if test="filter.status != null">AND st.code = #{filter.status}</if>
       <if test="filter.paymentStatus != null">AND ps.code = #{filter.paymentStatus}</if>
       <if test="filter.orderType != null">AND ot.code = #{filter.orderType}</if>
-      <if test="filter.startAt != null">AND o.created_at &gt;= #{filter.startAt}</if>
-      <if test="filter.endAt != null">AND o.created_at &lt; #{filter.endAt}</if>
-      <if test="filter.keyword != null">
-        AND (
+      <if test="filter.startAt != null">AND o.created_at >= #{filter.startAt}</if>
+      <if test="filter.endAt != null">AND o.created_at < #{filter.endAt}</if>
+      <if test="filter.keyword != null">AND (
           o.order_no LIKE CONCAT('%', #{filter.keyword}, '%')
           OR EXISTS (
             SELECT 1
@@ -66,51 +68,53 @@
             WHERE oi.order_id = o.id
               AND m.name LIKE CONCAT('%', #{filter.keyword}, '%')
           )
-        )
-      </if>
+        )</if>
     </where>
   </sql>
-
   <select id="getOrderList"
           resultType="com.asak.admin.dto.response.orders.OrderListResponse">
-      WITH paged_orders AS (
-          SELECT
-              o.id AS order_id,
-              o.order_no,
-              o.created_at,
-              o.total_price,
-              ot.code AS order_type_code,
-              st.code AS status_code,
-              ps.code AS payment_status_code
-          FROM
-              orders o
-              JOIN common_code ot ON ot.id = o.order_type_id
-              JOIN common_code st ON st.id = o.status_id
-              LEFT JOIN payment p ON p.order_id = o.id
-              LEFT JOIN common_code ps ON ps.id = p.status_id
-          <include refid="orderListBaseWhere"/>
-          ORDER BY
-              o.created_at DESC
-          LIMIT
-              #{filter.limit} OFFSET #{filter.offset}
-      ),
-      item_summary AS (
-          SELECT
-              oi.order_id,
-              COUNT(*) AS line_count,
-              SUM(oi.quantity) AS item_count,
-              SUBSTRING_INDEX(
-                  GROUP_CONCAT(m.name ORDER BY oi.id SEPARATOR '||'),
-                  '||',
-                  1
-              ) AS first_menu_name
-          FROM
-              order_item oi
-              JOIN menu m ON m.id = oi.menu_id
-              JOIN paged_orders po ON po.order_id = oi.order_id
-          GROUP BY
-              oi.order_id
-      )
+      WITH
+      paged_orders AS (
+      SELECT
+          o.id AS order_id,
+          o.order_no,
+          o.created_at,
+          o.total_price,
+          ot.code AS order_type_code,
+          st.code AS status_code,
+          ps.code AS payment_status_code
+      FROM
+          orders o
+          JOIN common_code ot ON ot.id = o.order_type_id
+          JOIN common_code st ON st.id = o.status_id
+      LEFT JOIN
+          payment p ON p.order_id = o.id
+      LEFT JOIN
+          common_code ps ON ps.id = p.status_id
+      <include refid="orderListBaseWhere"/>
+      ORDER BY
+          o.created_at DESC
+      LIMIT
+          #{filter.
+      LIMIT
+          }
+      OFFSET
+          #{filter.
+      OFFSET
+          } ), item_summary AS (
+      SELECT
+          oi.order_id,
+          COUNT(*) AS line_count,
+          SUM(oi.quantity) AS item_count,
+          SUBSTRING_INDEX( GROUP_CONCAT(m.name
+      ORDER BY
+          oi.id SEPARATOR '||'), '||', 1 ) AS first_menu_name
+      FROM
+          order_item oi
+          JOIN menu m ON m.id = oi.menu_id
+          JOIN paged_orders po ON po.order_id = oi.order_id
+      GROUP BY
+          oi.order_id )
       SELECT
           po.order_id AS orderId,
           po.order_no AS orderNo,
@@ -121,11 +125,7 @@
           po.created_at AS createdAt,
           item_summary.item_count AS itemCount,
           CASE
-              WHEN item_summary.line_count > 1 THEN CONCAT(
-                  item_summary.first_menu_name,
-                  ' 외 ',
-                  item_summary.line_count - 1
-              )
+              WHEN item_summary.line_count > 1 THEN CONCAT( item_summary.first_menu_name, ' 외 ', item_summary.line_count - 1 )
               ELSE item_summary.first_menu_name
           END AS menuSummary
       FROM
@@ -134,7 +134,6 @@
       ORDER BY
           po.created_at DESC
   </select>
-
   <select id="countOrderList"
           resultType="long">
       SELECT
@@ -143,11 +142,12 @@
           orders o
           JOIN common_code ot ON ot.id = o.order_type_id
           JOIN common_code st ON st.id = o.status_id
-          LEFT JOIN payment p ON p.order_id = o.id
-          LEFT JOIN common_code ps ON ps.id = p.status_id
+      LEFT JOIN
+          payment p ON p.order_id = o.id
+      LEFT JOIN
+          common_code ps ON ps.id = p.status_id
       <include refid="orderListBaseWhere"/>
   </select>
-
   <select id="getLiveOrders"
           resultType="com.asak.admin.dto.response.orders.LiveOrderResponse">
       SELECT
@@ -164,7 +164,6 @@
       ORDER BY
           created_at ASC
   </select>
-
   <!-- 기대 status_id일 때만 갱신. 0건이면 다른 요청이 먼저 바꾼 것(동시성 충돌) -->
   <select id="findOrderStatusId"
           resultType="java.lang.Long">
@@ -177,18 +176,18 @@
           cg.group_code = 'ORDER_STATUS'
           AND cc.code = #{code}
   </select>
-
   <update id="changeOrderStatus">
-      UPDATE orders
+      UPDATE
+          orders
       SET
           status_id = #{statusId}
       WHERE
           id = #{orderId}
           AND status_id = #{expectedStatusId}
   </update>
-
   <update id="cancelOrder">
-      UPDATE orders
+      UPDATE
+          orders
       SET
           status_id = #{canceledStatusId},
           canceled_at = NOW()
@@ -201,5 +200,4 @@
     3) 카드/신용카드는 이번 범위이며, 토스페이 SQL 연결은 실제 연동·결제 과정 통합 테스트 성공 뒤에만 포함한다.
     4) 0건·동시 변경·이미 환불됨은 ErrorCode로 구분하고, Spring context와 실제 DB row까지 검증한다.
   -->
-
 </mapper>

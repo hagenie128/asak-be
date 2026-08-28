@@ -380,11 +380,22 @@ def format_mapper_tree(root: etree._Element, tree: etree._ElementTree) -> str:
     return "\n".join(output) + "\n"
 
 
-def format_mapper_file(path: Path) -> bool:
+def format_mapper_text(content: str) -> str:
     parser = etree.XMLParser(remove_blank_text=False)
-    tree = etree.parse(str(path), parser)
-    formatted = format_mapper_tree(tree.getroot(), tree)
+    try:
+        tree = etree.ElementTree(etree.fromstring(content.encode("utf-8"), parser))
+    except etree.XMLSyntaxError as error:
+        raise ValueError(
+            "XML parse failed. Escape comparison operators in mapper text "
+            "(use &lt; and &gt;= instead of < and >=). "
+            f"{error}"
+        ) from error
+    return format_mapper_tree(tree.getroot(), tree)
+
+
+def format_mapper_file(path: Path) -> bool:
     original = path.read_text(encoding="utf-8")
+    formatted = format_mapper_text(original)
     if formatted == original:
         return False
     path.write_text(formatted, encoding="utf-8", newline="\n")
@@ -392,8 +403,13 @@ def format_mapper_file(path: Path) -> bool:
 
 
 def main() -> int:
+    if len(sys.argv) == 2 and sys.argv[1] == "--stdin":
+        formatted = format_mapper_text(sys.stdin.read())
+        sys.stdout.write(formatted)
+        return 0
+
     if len(sys.argv) != 2:
-        print("Usage: format-mybatis-mapper.py <mapper.xml>", file=sys.stderr)
+        print("Usage: format-mybatis-mapper.py <mapper.xml>|--stdin", file=sys.stderr)
         return 1
 
     path = Path(sys.argv[1])
