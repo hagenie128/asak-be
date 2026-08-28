@@ -36,6 +36,11 @@ out/
 /nbdist/
 /.nb-gradle/
 
+### Python ###
+__pycache__/
+*.pyc
+.tmp-*.xml
+
 ### VS Code ###
 .vscode/
 # Added by code-review-graph
