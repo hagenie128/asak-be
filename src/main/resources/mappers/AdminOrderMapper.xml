@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.asak.admin.mapper.AdminOrderMapper">
-  <resultmap id="orderDetailMap"
+  <resultMap id="orderDetailMap"
           type="com.asak.admin.dto.response.orders.OrderDetailResponse">
     <id column="order_id"
           property="orderId" />
@@ -21,7 +21,7 @@
           javaType="com.asak.admin.dto.response.AdminPaymentMethodResponse" />
     <collection property="items"
                 ofType="com.asak.admin.dto.response.orders.OrderItemResponse" column="order_id" select="findOrderItems"/>
-  </resultmap>
+  </resultMap>
   <select id="getOrderDetail"
           resultMap="orderDetailMap">
       SELECT
@@ -58,7 +58,7 @@
       <if test="filter.paymentStatus != null">AND ps.code = #{filter.paymentStatus}</if>
       <if test="filter.orderType != null">AND ot.code = #{filter.orderType}</if>
       <if test="filter.startAt != null">AND o.created_at >= #{filter.startAt}</if>
-      <if test="filter.endAt != null">AND o.created_at < #{filter.endAt}</if>
+      <if test="filter.endAt != null">AND o.created_at &lt; #{filter.endAt}</if>
       <if test="filter.keyword != null">AND (
           o.order_no LIKE CONCAT('%', #{filter.keyword}, '%')
           OR EXISTS (
