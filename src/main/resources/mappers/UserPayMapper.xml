@@ -58,13 +58,8 @@
             order_status.code AS orderStatus,
             p.amount AS approvedAmount,
             p.paid_at AS approvedAt,
-            (
-                select COUNT(*)
-                from orders waiting_order
-                join common_code waiting_status
-                    ON waiting_status.id = waiting_order.status_id
-                where waiting_status.code IN ('RECEIVED', 'PREPARING')
-            ) AS waitingOrderCount
+            o.waiting_order_no AS waitingOrderNo
+            
         from payment p
         join orders o
             ON o.id = p.order_id
@@ -192,7 +187,11 @@
         join code_group received_status_group
         on received_status.code_grp_id = received_status_group.id
 
-        set o.status_id = received_status.id
+        set 
+            o.status_id = received_status.id,
+            o.waiting_date = #{watingDate},
+            o.waiting_order_no = #{waitingOrderNo}
+            
         where o.id = #{orderId}
         and received_status_group.group_code = 'ORDER_STATUS'
         and current_status.code = 'READY'
@@ -201,5 +200,36 @@
     
     </update>
 
+    <!-- 대기 고정 번호 증감 -->
+    <insert id = "increaseDailyWaitingSequence">
+
+        insert into daily_waiting_sequence (
+            waiting_date,
+            last_waiting_order_no
+        )values(
+            #{watingDate},
+            1
+        )on DUPLICATE KEY update
+            last_waiting_order_no = last_waiting_order_no + 1
+    
+    </insert>
+
+    <!-- 동일한 주문번호(대기번호) 찾기 -->
+    <select id="findDailyWaitingOrderNo" resultType="java.lang.Integer">
+
+    select last_waiting_order_no
+    from daily_waiting_sequence
+    where waiting_date = #{watingDate}
+    
+    </select>
+
+    <select id="findDailyWaitingOrderNoByOrderId" resultType="java.lang.Integer">
+    
+        select waiting_order_no
+        from orders
+        where id = ${orderId}
+
+
+    </select>
 
 </mapper>
