@@ -842,24 +842,61 @@
       <span class="view-name">vw_soldout_catalog</span>
       <span class="tag tag-live">LIVE</span>
     </div>
-    <p class="view-purpose">메뉴/재료/옵션 3종을 <span class="mono">target_type</span>/<span class="mono">target_id</span> 공통 shape로 <span class="mono">UNION ALL</span>. 화면 탭 3개가 이 뷰 하나에서 <span class="mono">WHERE target_type = ?</span>로 갈림.</p>
+    <p class="view-purpose">메뉴/재료/옵션 3종을 <span class="mono">target_type</span>/<span class="mono">target_id</span> 공통 shape로 <span class="mono">UNION ALL</span>. 2026-09-01 운영 범위: soft-delete 메뉴 제외 · 재료는 <span class="mono">vw_menu_availability</span>와 동일 역할(CORE/BASE/제거불가 DEFAULT) + 이름 노이즈(`미포함`, `N배`, `xN`) 제외 · 옵션은 REQUEST 그룹(<span class="mono">group_type_id=25</span>) 제외 + INGREDIENT 중복 <span class="mono">ing_id</span> 제외 · image fallback.</p>
     <p class="view-used-by">사용: <b>품절 관리</b> (메뉴/재료/옵션 탭)</p>
-    <pre class="sql"><span class="kw">SELECT</span> <span class="str">'MENU'</span> <span class="kw">AS</span> target_type, m.id <span class="kw">AS</span> target_id, m.name,
-       c.name <span class="kw">AS</span> category, m.sold_out <span class="kw">AS</span> is_sold_out, m.price
+    <pre class="sql"><span class="kw">SELECT</span> <span class="str">'MENU'</span> <span class="kw">AS</span> target_type, m.id, m.name, c.name <span class="kw">AS</span> category,
+       m.sold_out, m.price, ma.url <span class="kw">AS</span> image_url
 <span class="kw">FROM</span> menu m
 <span class="kw">JOIN</span> category c <span class="kw">ON</span> c.id = m.cat_id
+<span class="kw">LEFT JOIN</span> media_asset ma <span class="kw">ON</span> ma.id = m.image_asset_id <span class="kw">AND</span> ma.deleted_at <span class="kw">IS NULL</span>
+<span class="kw">WHERE</span> m.deleted_at <span class="kw">IS NULL</span>
 
 <span class="kw">UNION ALL</span>
 
-<span class="kw">SELECT</span> <span class="str">'INGREDIENT'</span>, i.id, i.name, rt.name <span class="kw">AS</span> category, i.sold_out, <span class="kw">NULL</span>
+<span class="kw">SELECT</span> <span class="str">'INGREDIENT'</span>, i.id, i.name, rt.name, i.sold_out, <span class="kw">NULL</span>,
+       <span class="kw">COALESCE</span>(ia_photo.url, ia_icon.url)
 <span class="kw">FROM</span> ing i
 <span class="kw">JOIN</span> common_code rt <span class="kw">ON</span> rt.id = i.type_id
+<span class="kw">LEFT JOIN</span> media_asset ia_photo <span class="kw">ON</span> ia_photo.id = i.photo_asset_id <span class="kw">AND</span> ia_photo.deleted_at <span class="kw">IS NULL</span>
+<span class="kw">LEFT JOIN</span> media_asset ia_icon <span class="kw">ON</span> ia_icon.id = i.icon_asset_id <span class="kw">AND</span> ia_icon.deleted_at <span class="kw">IS NULL</span>
+<span class="kw">WHERE</span> i.name <span class="kw">NOT LIKE</span> <span class="str">'%미포함%'</span>
+  <span class="kw">AND</span> i.name <span class="kw">NOT REGEXP</span> <span class="str">'[0-9]+배'</span>
+  <span class="kw">AND</span> i.name <span class="kw">NOT REGEXP</span> <span class="str">'[xX×][0-9]+'</span>
+  <span class="kw">AND EXISTS</span> (
+  <span class="kw">SELECT</span> 1 <span class="kw">FROM</span> menu_ing mi
+  <span class="kw">JOIN</span> menu m <span class="kw">ON</span> m.id = mi.menu_id <span class="kw">AND</span> m.deleted_at <span class="kw">IS NULL</span>
+  <span class="kw">JOIN</span> common_code rc <span class="kw">ON</span> rc.id = mi.role_id
+  <span class="kw">WHERE</span> mi.ing_id = i.id
+    <span class="kw">AND</span> (
+      rc.code = <span class="str">'CORE'</span>
+      <span class="kw">OR</span> (rc.code = <span class="str">'DEFAULT'</span> <span class="kw">AND</span> mi.can_remove = 0)
+      <span class="kw">OR</span> rc.code = <span class="str">'BASE'</span>
+    )
+)
 
 <span class="kw">UNION ALL</span>
 
-<span class="kw">SELECT</span> <span class="str">'OPTION_ITEM'</span>, oi.id, oi.name, og.name <span class="kw">AS</span> category, oi.sold_out, oi.add_price
+<span class="kw">SELECT</span> <span class="str">'OPTION_ITEM'</span>, oi.id, oi.name, og.name, oi.sold_out, oi.add_price,
+       <span class="kw">COALESCE</span>(oi.icon_url, ia_photo.url, ia_icon.url)
 <span class="kw">FROM</span> opt_item oi
-<span class="kw">JOIN</span> opt_group og <span class="kw">ON</span> og.id = oi.opt_group_id;</pre>
+<span class="kw">JOIN</span> opt_group og <span class="kw">ON</span> og.id = oi.opt_group_id
+<span class="kw">LEFT JOIN</span> ing i <span class="kw">ON</span> i.id = oi.ing_id
+<span class="kw">LEFT JOIN</span> media_asset ia_photo <span class="kw">ON</span> ia_photo.id = i.photo_asset_id <span class="kw">AND</span> ia_photo.deleted_at <span class="kw">IS NULL</span>
+<span class="kw">LEFT JOIN</span> media_asset ia_icon <span class="kw">ON</span> ia_icon.id = i.icon_asset_id <span class="kw">AND</span> ia_icon.deleted_at <span class="kw">IS NULL</span>
+<span class="kw">WHERE</span> og.group_type_id &lt;&gt; 25
+  <span class="kw">AND EXISTS</span> (
+  <span class="kw">SELECT</span> 1 <span class="kw">FROM</span> opt_policy_item opi
+  <span class="kw">JOIN</span> menu_opt_policy mop <span class="kw">ON</span> mop.policy_id = opi.policy_id
+  <span class="kw">JOIN</span> menu m <span class="kw">ON</span> m.id = mop.menu_id <span class="kw">AND</span> m.deleted_at <span class="kw">IS NULL</span>
+  <span class="kw">WHERE</span> opi.opt_item_id = oi.id
+)
+  <span class="kw">AND NOT EXISTS</span> (
+  <span class="kw">SELECT</span> 1 <span class="kw">FROM</span> menu_ing mi
+  <span class="kw">JOIN</span> menu m2 <span class="kw">ON</span> m2.id = mi.menu_id <span class="kw">AND</span> m2.deleted_at IS NULL
+  <span class="kw">JOIN</span> common_code rc <span class="kw">ON</span> rc.id = mi.role_id
+  <span class="kw">WHERE</span> mi.ing_id = oi.ing_id
+    <span class="kw">AND</span> (rc.code IN (<span class="str">'CORE'</span>,<span class="str">'BASE'</span>) OR (rc.code=<span class="str">'DEFAULT'</span> <span class="kw">AND</span> mi.can_remove=0))
+);</pre>
   </div>
 
   <div class="view-card">
