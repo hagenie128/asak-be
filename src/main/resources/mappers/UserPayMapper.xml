@@ -223,13 +223,5 @@
     
     </select>
 
-    <select id="findDailyWaitingOrderNoByOrderId" resultType="java.lang.Integer">
-    
-        select waiting_order_no
-        from orders
-        where id = ${orderId}
-
-
-    </select>
 
 </mapper>
