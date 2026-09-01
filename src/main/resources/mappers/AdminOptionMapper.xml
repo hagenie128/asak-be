@@ -140,4 +140,75 @@
         menu_id = #{menuId}
   </delete>
 
+  <select id="findOptionItemsByGroupId"
+          resultType="com.asak.admin.dto.response.item.OptionItemSummaryResponse">
+    SELECT
+        oi.id AS optionItemId,
+        oi.name AS name,
+        oi.add_price AS extraPrice,
+        oi.sold_out AS isSoldOut,
+        opi.recommended AS isRecommended
+    FROM
+        opt_policy op
+        JOIN opt_policy_item opi ON opi.policy_id = op.id
+        JOIN opt_item oi ON oi.id = opi.opt_item_id
+    WHERE
+        op.id = (
+            SELECT
+                id
+            FROM
+                (
+                    SELECT
+                        id,
+                        1 AS priority
+                    FROM
+                        opt_policy
+                    WHERE
+                        id = #{optionGroupId}
+                    UNION ALL
+                    SELECT
+                        id,
+                        2 AS priority
+                    FROM
+                        opt_policy
+                    WHERE
+                        opt_group_id = #{optionGroupId}
+                ) candidates
+            ORDER BY
+                priority
+            LIMIT
+                1
+        )
+    ORDER BY
+        opi.sort_no,
+        oi.id
+  </select>
+
+  <select id="findMenuOptionItems"
+          resultType="com.asak.admin.dto.response.item.OptionItemSummaryResponse">
+    SELECT
+        oi.id AS optionItemId,
+        oi.name AS name,
+        oi.add_price AS extraPrice,
+        oi.sold_out AS isSoldOut,
+        COALESCE(moo.recommended, opi.recommended) AS isRecommended
+    FROM
+        menu_opt_policy mop
+        JOIN opt_policy op ON op.id = mop.policy_id
+        JOIN opt_policy_item opi ON opi.policy_id = op.id
+        JOIN opt_item oi ON oi.id = opi.opt_item_id
+        LEFT JOIN menu_opt_override moo
+            ON moo.menu_id = mop.menu_id
+            AND moo.opt_item_id = oi.id
+    WHERE
+        mop.menu_id = #{menuId}
+        AND (
+            op.opt_group_id = #{optionGroupId}
+            OR op.id = #{optionGroupId}
+        )
+    ORDER BY
+        opi.sort_no,
+        oi.id
+  </select>
+
 </mapper>

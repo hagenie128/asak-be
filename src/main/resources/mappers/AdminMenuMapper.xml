@@ -285,14 +285,15 @@
 
 <insert id="insertMenu" parameterType="map" useGeneratedKeys="true" keyProperty="menuId" keyColumn="id">
   INSERT INTO
-      menu (cat_id, name, price, image_asset_id, description)
+      menu (cat_id, name, price, image_asset_id, description, sold_out)
   VALUES
       (
           #{categoryId},
           #{name},
           #{price},
           #{mediaAssetId},
-          #{description}
+          #{description},
+          #{soldOut}
       )
 </insert>
 
@@ -454,6 +455,9 @@
       price = #{request.price, jdbcType=INTEGER},
       image_asset_id = #{mediaAssetId, jdbcType=BIGINT},
       description = #{request.description, jdbcType=VARCHAR}
+      <if test="request.isSoldOut != null">
+          , sold_out = #{request.isSoldOut}
+      </if>
   WHERE
       id = #{menuId}
       AND deleted_at IS NULL

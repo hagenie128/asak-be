@@ -32,9 +32,6 @@ public class AdminPaymentMethodController {
   @GetMapping
   public ApiResponse<List<AdminPaymentMethodResponse>> getPaymentMethods() {
     List<AdminPaymentMethodResponse> response = adminPaymentMethodService.getPaymentMethods();
-    if (response.isEmpty()) {
-      return ApiResponse.error(ErrorCode.PAYMENT_METHOD_NOT_FOUND);
-    }
     return ApiResponse.success(response);
   }
 

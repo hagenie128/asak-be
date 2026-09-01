@@ -17,4 +17,7 @@ public class SoldOutCatalogItemResponse {
   private String category;
   private boolean isSoldOut;
   private String imageUrl;
+
+  /** 이 대상을 품절하면 영향 받는 판매 중 메뉴 수. MVP는 count만 제공한다. */
+  private int affectedMenuCount;
 }

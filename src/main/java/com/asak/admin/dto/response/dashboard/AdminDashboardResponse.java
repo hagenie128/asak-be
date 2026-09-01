@@ -26,4 +26,7 @@ public class AdminDashboardResponse {
   private List<DashboardInventoryAlertResponse> inventoryAlerts;
 
   private List<DashboardWeeklySalesResponse> weeklySales;
+
+  /** 직전 7일 순매출. 대시보드 전주 대비 계산용. */
+  private Long previousWeekNetSales;
 }

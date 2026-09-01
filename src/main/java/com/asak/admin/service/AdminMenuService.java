@@ -50,7 +50,11 @@ public class AdminMenuService {
   }
 
   public MenuDetailResponse getMenuDetail(Long menuId) {
-    return adminMenuMapper.getMenuDetail(menuId);
+    MenuDetailResponse detail = adminMenuMapper.getMenuDetail(menuId);
+    if (detail != null) {
+      adminOptionService.attachMenuOptionItems(detail.getMenuId(), detail.getOptionGroups());
+    }
+    return detail;
   }
 
   public List<AdminCategoryResponse> getCategories() {
@@ -75,6 +79,7 @@ public class AdminMenuService {
     map.put("price", request.getPrice());
     map.put("mediaAssetId", resolveMediaAssetId(request.getMediaAssetId(), request.getImageUrl()));
     map.put("description", request.getDescription());
+    map.put("soldOut", Boolean.TRUE.equals(request.getIsSoldOut()));
 
     int inserted = adminMenuMapper.insertMenu(map);
     Object generatedId = map.get("menuId");

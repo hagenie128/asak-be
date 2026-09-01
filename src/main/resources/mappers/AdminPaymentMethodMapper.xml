@@ -15,7 +15,7 @@
       FROM
           pay_method_cfg pmc
           JOIN common_code cc ON pmc.method_id = cc.id
-          JOIN media_asset ma ON pmc.image_asset_id = ma.id
+          LEFT JOIN media_asset ma ON pmc.image_asset_id = ma.id
       ORDER BY
           pmc.sort_no ASC,
           pmc.id ASC
@@ -45,7 +45,7 @@
       FROM
           pay_method_cfg pmc
           JOIN common_code cc ON pmc.method_id = cc.id
-          JOIN media_asset ma ON pmc.image_asset_id = ma.id
+          LEFT JOIN media_asset ma ON pmc.image_asset_id = ma.id
       WHERE
           cc.code = #{methodCode}
       LIMIT

@@ -21,7 +21,9 @@ public class AdminOptionService {
   }
 
   public List<OptionGroupSummaryResponse> getOptionGroups() {
-    return adminOptionMapper.getOptionGroups();
+    List<OptionGroupSummaryResponse> groups = adminOptionMapper.getOptionGroups();
+    attachCatalogItems(groups);
+    return groups;
   }
 
   public OptionGroupSummaryResponse getOptionGroupDetail(Long optionGroupId) {
@@ -32,7 +34,32 @@ public class AdminOptionService {
     if (detail == null) {
       throw new CustomException(ErrorCode.MENU_OPTION_GROUP_NOT_FOUND);
     }
+    attachCatalogItems(List.of(detail));
     return detail;
+  }
+
+  public void attachMenuOptionItems(Long menuId, List<OptionGroupSummaryResponse> groups) {
+    if (menuId == null || groups == null || groups.isEmpty()) {
+      return;
+    }
+    for (OptionGroupSummaryResponse group : groups) {
+      if (group == null || group.getOptionGroupId() == null) {
+        continue;
+      }
+      group.setItems(adminOptionMapper.findMenuOptionItems(menuId, group.getOptionGroupId()));
+    }
+  }
+
+  private void attachCatalogItems(List<OptionGroupSummaryResponse> groups) {
+    if (groups == null || groups.isEmpty()) {
+      return;
+    }
+    for (OptionGroupSummaryResponse group : groups) {
+      if (group == null || group.getOptionGroupId() == null) {
+        continue;
+      }
+      group.setItems(adminOptionMapper.findOptionItemsByGroupId(group.getOptionGroupId()));
+    }
   }
 
   /** 메뉴 생성/수정 검증용. opt_group 또는 opt_policy id 모두 허용. */

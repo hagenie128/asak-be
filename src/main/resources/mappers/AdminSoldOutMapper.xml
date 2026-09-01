@@ -8,7 +8,24 @@
            v.name,
            v.category,
            v.is_sold_out AS isSoldOut,
-           v.image_url AS imageUrl
+           v.image_url AS imageUrl,
+           CASE v.target_type
+               WHEN 'MENU' THEN 1
+               WHEN 'INGREDIENT' THEN (
+                   SELECT COUNT(DISTINCT mi.menu_id)
+                   FROM menu_ing mi
+                   JOIN menu m ON m.id = mi.menu_id AND m.deleted_at IS NULL
+                   WHERE mi.ing_id = v.target_id
+               )
+               WHEN 'OPTION_ITEM' THEN (
+                   SELECT COUNT(DISTINCT mop.menu_id)
+                   FROM opt_policy_item opi
+                   JOIN menu_opt_policy mop ON mop.policy_id = opi.policy_id
+                   JOIN menu m ON m.id = mop.menu_id AND m.deleted_at IS NULL
+                   WHERE opi.opt_item_id = v.target_id
+               )
+               ELSE 0
+           END AS affectedMenuCount
     FROM vw_soldout_catalog v
     ORDER BY v.name
   </select>

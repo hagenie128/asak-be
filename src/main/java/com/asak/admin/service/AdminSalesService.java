@@ -69,6 +69,10 @@ public class AdminSalesService {
     var statusSummary = adminSalesMapper.getDashboardStatusSummary(today);
     var weeklySales =
         adminSalesMapper.getDashboardWeeklySales(dateRange(today.minusDays(6), today));
+    long previousWeekNetSales =
+        longValue(
+            adminSalesMapper.getSalesTotals(dateRange(today.minusDays(13), today.minusDays(7))),
+            "netSales");
 
     return AdminDashboardResponse.builder()
         .dateLabel(today.toString())
@@ -109,6 +113,7 @@ public class AdminSalesService {
                 inventoryAlert("재료 품절", longValue(inventory, "ingredientSoldOut")),
                 inventoryAlert("옵션 품절", longValue(inventory, "optionSoldOut"))))
         .weeklySales(weeklySales)
+        .previousWeekNetSales(previousWeekNetSales)
         .build();
   }
 

@@ -30,6 +30,10 @@ public class CreateMenuRequest {
   private String imageUrl;
 
   private String description;
+
+  /** 메뉴 직접 품절. 비어 있으면 생성 시 false, 수정 시 기존 값을 유지한다. */
+  private Boolean isSoldOut;
+
   private List<CreateMenuIngredientRequest> ingredients;
   private List<CreateMenuOptionGroupRequest> optionGroups;
   private CreateMenuNutritionRequest nutrition;
