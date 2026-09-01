@@ -102,7 +102,9 @@ public class AdminSalesController {
     }
     return ResponseEntity.ok(
         ApiResponse.success(
-            "ADMIN_SALES_MONTHLY_SUCCESS", "월별 매출", adminSalesService.getMonthlySales(year, month)));
+            "ADMIN_SALES_MONTHLY_SUCCESS",
+            "월별 매출",
+            adminSalesService.getMonthlySales(year, month)));
   }
 
   /** Daily: from~to 일자 행, 선택 종료일의 분해·랭킹 데이터를 반환한다. */
@@ -134,7 +136,9 @@ public class AdminSalesController {
 
     return ResponseEntity.ok(
         ApiResponse.success(
-            "ADMIN_SALES_DAILY_SUCCESS", "일별 매출", adminSalesService.getDailySales(startDate, endDate)));
+            "ADMIN_SALES_DAILY_SUCCESS",
+            "일별 매출",
+            adminSalesService.getDailySales(startDate, endDate)));
   }
 
   /** Daily Time Slots: 30분 또는 60분 버킷은 영업시간(10:00~22:00) 안에서만 반환한다. */
