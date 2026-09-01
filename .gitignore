@@ -37,6 +37,7 @@ out/
 /.nb-gradle/
 
 ### Python ###
+.venv/
 __pycache__/
 *.pyc
 .tmp-*.xml

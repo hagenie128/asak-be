@@ -44,5 +44,5 @@ public class ApprovePaymentResponse {
   private OrderStatus orderStatus;
   private int approvedAmount;
   private LocalDateTime approvedAt;
-  private int waitingOrderNo; //고정 대기 번호
+  private int waitingOrderNo; // 고정 대기 번호
 }

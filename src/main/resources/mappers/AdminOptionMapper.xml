@@ -9,7 +9,7 @@
         og.name AS name,
         gt.code AS groupType,
         CASE
-            WHEN og.max_select &lt; = 1 THEN 'SINGLE'
+            WHEN og.max_select &lt;= 1 THEN 'SINGLE'
             ELSE 'MULTIPLE'
         END AS selectType,
         og.min_select AS minSelect,
@@ -32,7 +32,7 @@
         og.name AS name,
         gt.code AS groupType,
         CASE
-            WHEN og.max_select &lt; = 1 THEN 'SINGLE'
+            WHEN og.max_select &lt;= 1 THEN 'SINGLE'
             ELSE 'MULTIPLE'
         END AS selectType,
         og.min_select AS minSelect,

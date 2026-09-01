@@ -363,29 +363,25 @@ public class UserPayService {
     if (inserted != 1 || command.getPaymentId() == null) {
       throw new CustomException(ErrorCode.PAYMENT_CREATE_FAILED);
     }
-    
-    //고정 대기 번호 생성
+
+    // 고정 대기 번호 생성
     LocalDate watingDate = LocalDate.now(WATTING_NUMBER_ZONE_ID);
-    
+
     payMapper.increaseDailyWaitingSequence(watingDate);
-    
+
     Integer waitingOrderNo = payMapper.findDailyWaitingOrderNo(watingDate);
-    
-    if(waitingOrderNo == null){
+
+    if (waitingOrderNo == null) {
       throw new CustomException(ErrorCode.PAYMENT_CREATE_FAILED);
     }
-    
+
     // 주문상태(orderStatus)도 READY → RECEIVED로 바꿔서 보내주기
-    int updated = payMapper.updateOrderStatusToReceived(
-      request.getOrderId(),
-      watingDate,
-      waitingOrderNo
-    );
-    
+    int updated =
+        payMapper.updateOrderStatusToReceived(request.getOrderId(), watingDate, waitingOrderNo);
+
     if (updated != 1) {
       throw new CustomException(ErrorCode.ORDER_STATUS_CONFLICT);
     }
-
 
     // 8. paymentId로 결과 조회 후 반환
     return getRequiredPaymentResult(command.getPaymentId());
