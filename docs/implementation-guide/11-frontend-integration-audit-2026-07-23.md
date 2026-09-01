@@ -2,6 +2,8 @@
 
 > 확인일: 2026-07-23
 > 범위: `ASAK-Admin`, `ASAK-Kiosk`의 현재 소스·mock. 이 문서는 소스 변경 지시가 아니라 백엔드 API 연결 전 확인표다.
+>
+> 2026-08-29 최신화: API-006의 조회 시점 대기 건수 `waitingOrderCount` 계약은 폐기되었고, 결제 완료 시 확정되는 일별 고정 대기번호 `waitingOrderNo`로 변경되었다.
 
 ## 결론
 
@@ -18,13 +20,13 @@
 | 결제수단 | Admin label에 `CASH`, mock 결제수단에는 `zero` | `CARD`, `KAKAO_PAY`, `NAVER_PAY` | `CASH`/`zero` 지원 여부와 methodId 타입을 별도 합의. 현재 백엔드는 임의 추가하지 않음 |
 | Admin 품절 경로 | `/api/admin/sold-out-items` hint | `GET/PATCH /api/admin/soldOut` | API client 상수를 정본 경로로 교체할 때 연결 |
 | 주문 금액 필드 | Kiosk/Admin mock/store: `totalPrice` | `totalAmount` | 정본 계약이 adapter 변환을 명시. 주문 요청의 금액은 서버 정본이 아님 |
-| 완료 대기 수 | Kiosk mock: `waitingCount` | `waitingOrderCount` | Kiosk `orderAdapter`에서 변환 |
+| 고정 대기번호 | Kiosk mock: `waitingCount` | `waitingOrderNo` | 결제 완료 화면과 주문번호 출력에서 동일한 고정 번호 사용 |
 | 결제 승인 값 | Kiosk mock: `amount`, `paidAt` | `approvedAmount`, `approvedAt` | payment adapter에서 변환 |
 
 ## 이미 준비된 좋은 경계
 
 - Admin `src/api/client.js`는 `{ success, status, code, message, data }` envelope를 한 곳에서 풀도록 되어 있다. 백엔드는 이 구조를 유지한다.
-- Kiosk `src/adapters/orderAdapter.js`와 type 주석은 `totalPrice → totalAmount`, `waitingCount → waitingOrderCount` 변환 위치를 명시한다. 단, 현재 adapter는 payload를 그대로 반환하는 상태다.
+- Kiosk `src/adapters/orderAdapter.js`와 type 주석의 기존 `waitingCount → waitingOrderCount` 매핑은 `waitingOrderNo` 기준으로 변경해야 한다. 현재 백엔드 저장소에서는 실제 프론트 수정 여부를 확인하지 못했다.
 - Admin mock README는 Live 카드의 `menus[]`/`tone`과 주문 목록·상세의 `items[]`/`optionItems[]`를 구분한다. 실제 API도 화면 전용 Live DTO와 관리용 목록/상세 DTO의 목적을 분리한다.
 - Admin의 `orderLabels.js`는 코드값과 한국어 라벨을 분리해 두었다. 백엔드는 한국어 라벨 대신 코드값을 내려도 된다.
 
@@ -38,7 +40,7 @@
 | 화면별 사용자 문구 매핑 | Frontend | code를 toast/empty/error 문구로 변환 |
 | 최종 가격·품절·상태 | Backend | 서버 계산 `totalAmount`, 실제 `isSoldOut`, 주문/결제 상태 |
 
-Kiosk `EmptyState`, `ErrorMessage`, 수량 제한 toast 문구는 현재 화면용 하드코딩이다. 이는 백엔드 메시지로 복제하지 않는다. 다만 수량 제한 `메뉴당 9개`, `장바구니 전체 30개`는 현재 프론트 로컬 규칙만 확인됐으므로, 주문 API에서 동일하게 강제할지는 Product Bible/팀 정책으로 확정한 뒤 Service 검증과 오류 code를 추가한다. 주문 생성 성공 응답은 주문 아키텍처의 최소 완료 data(`orderId`, `orderNo`, `RECEIVED`, `APPROVED`, `totalAmount`, `waitingOrderCount`)를 충족해야 한다.
+Kiosk `EmptyState`, `ErrorMessage`, 수량 제한 toast 문구는 현재 화면용 하드코딩이다. 이는 백엔드 메시지로 복제하지 않는다. 다만 수량 제한 `메뉴당 9개`, `장바구니 전체 30개`는 현재 프론트 로컬 규칙만 확인됐으므로, 주문 API에서 동일하게 강제할지는 Product Bible/팀 정책으로 확정한 뒤 Service 검증과 오류 code를 추가한다. 결제 승인 성공 응답은 `waitingOrderNo`를 포함하며, 프론트는 이 값을 완료 화면과 주문번호 출력에 사용해야 한다.
 
 ## 연동 전 체크리스트
 

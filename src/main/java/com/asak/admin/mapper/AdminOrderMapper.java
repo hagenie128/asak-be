@@ -24,4 +24,6 @@ public interface AdminOrderMapper {
   int changeOrderStatus(Map<String, Object> map);
 
   int cancelOrder(Map<String, Object> map);
+
+  int refundOrder(Map<String, Object> refundMap);
 }

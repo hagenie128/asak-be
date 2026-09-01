@@ -338,7 +338,7 @@
       <tr><td><a href="#vw_order_item_base_dressing">vw_order_item_base_dressing</a></td><td class="idx-purpose">품목별 베이스/드레싱 pivot</td><td class="idx-screen">Live 주문 보드</td></tr>
       <tr><td><a href="#vw_order_item_tag">vw_order_item_tag</a></td><td class="idx-purpose">옵션+제외재료를 tone 태그로 통합</td><td class="idx-screen">Live 주문 보드</td></tr>
       <tr><td><a href="#vw_soldout_catalog">vw_soldout_catalog</a></td><td class="idx-purpose">메뉴/재료/옵션 통합 품절 카탈로그</td><td class="idx-screen">품절 관리</td></tr>
-      <tr><td><a href="#vw_payment_result">vw_payment_result</a></td><td class="idx-purpose">결제 승인 응답 (대기건수 포함)</td><td class="idx-screen">키오스크 결제</td></tr>
+      <tr><td><a href="#vw_payment_result">vw_payment_result</a></td><td class="idx-purpose">레거시 실시간 대기 건수 뷰 (현재 API-006 미사용)</td><td class="idx-screen">참고용</td></tr>
       <tr><td><a href="#vw_order_status_summary">vw_order_status_summary</a></td><td class="idx-purpose">일자·유형·상태별 주문 건수</td><td class="idx-screen">대시보드</td></tr>
       <tr><td><a href="#vw_sales_daily">vw_sales_daily</a></td><td class="idx-purpose">일별 매출 집계</td><td class="idx-screen">대시보드, 일별 매출</td></tr>
       <tr><td><a href="#vw_sales_hourly">vw_sales_hourly</a></td><td class="idx-purpose">시간대별 매출 집계</td><td class="idx-screen">일별 매출 상세</td></tr>
@@ -379,9 +379,9 @@
       <p class="flow-note">결제 승인 후 대기 순번 표시</p>
       <ol class="flow-steps">
         <li><span class="step-text"><span class="mono">pay_method_cfg</span>+<span class="mono">common_code</span> 인라인 — 결제수단 목록 (뷰 아님 · [17])</span></li>
-        <li><a class="step-view" href="#vw_payment_result">vw_payment_result</a><span class="step-text">승인 응답 — approvedAmount/approvedAt/waitingOrderCount</span></li>
+        <li><span class="step-text"><span class="mono">UserPayMapper.getPaymentResult</span> 인라인 조인 — approvedAmount/approvedAt/waitingOrderNo</span></li>
       </ol>
-      <p class="flow-result"><span class="mono">waitingOrderCount</span>는 결제 시점이 아니라 조회 시점 <span class="mono">RECEIVED/PREPARING</span> 건수. 레거시 <span class="mono">amount</span>/<span class="mono">paidAt</span> 대신 정본 필드명 사용.</p>
+      <p class="flow-result"><span class="mono">waitingOrderNo</span>는 결제 완료 시 <span class="mono">orders.waiting_order_no</span>에 확정 저장되는 일별 고정 번호다. 조회 시점의 진행 주문 건수를 다시 세지 않는다.</p>
     </div>
 
     <div class="flow-card">
@@ -914,8 +914,8 @@
       <span class="view-name">vw_payment_result</span>
       <span class="tag tag-live">LIVE</span>
     </div>
-    <p class="view-purpose">결제 승인 응답용(<span class="mono">PAYMENT_API_CONTRACT.md</span>). <span class="mono">waitingOrderCount</span>는 상관 서브쿼리라 조회 시점마다 재계산 — 결제 시점이 아니라 "지금" 대기 건수.</p>
-    <p class="view-used-by">사용: <b>키오스크 결제 승인</b></p>
+    <p class="view-purpose">운영 DB에 남아 있는 레거시 결제 결과 뷰. <span class="mono">waiting_order_count</span>는 조회 시점의 진행 주문 건수이므로 현재 일별 고정 대기번호 계약과 다르다.</p>
+    <p class="view-used-by">현재 API-006은 이 뷰를 사용하지 않고 <b>orders.waiting_order_no를 인라인 조회</b>한다.</p>
     <pre class="sql"><span class="kw">SELECT</span>
     p.id <span class="kw">AS</span> payment_id, p.order_id, o.order_no,
     ps.code <span class="kw">AS</span> payment_status,

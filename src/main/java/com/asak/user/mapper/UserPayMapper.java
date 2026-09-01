@@ -7,6 +7,7 @@ import com.asak.user.dto.payment.command.PaymentInsertCommand;
 import com.asak.user.dto.payment.query.PaymentIdempotencyCheck;
 import com.asak.user.dto.payment.query.PaymentMethodContext;
 import com.asak.user.dto.payment.query.PaymentOrderContext;
+import java.time.LocalDate;
 import java.util.List;
 import org.apache.ibatis.annotations.Param;
 
@@ -31,5 +32,16 @@ public interface UserPayMapper {
   int insertPayment(PaymentInsertCommand command);
 
   // orderStatus READY → RECEIVED 수정 반환
-  int updateOrderStatusToReceived(@Param("orderId") Long orderId);
+  int updateOrderStatusToReceived(
+      @Param("orderId") Long orderId,
+      @Param("watingDate") LocalDate watingDate,
+      @Param("waitingOrderNo") Integer waitingOrderNo);
+
+  // 대기 고정 번호 +1 증감
+  void increaseDailyWaitingSequence(@Param("watingDate") LocalDate watingDate);
+
+  // 동일 고정 대기번호 찾기
+  Integer findDailyWaitingOrderNo(@Param("watingDate") LocalDate watingDate);
+
+  Integer findDailyWaitingOrderNoByOrderId(@Param("orderId") long orderId);
 }

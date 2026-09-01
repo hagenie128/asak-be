@@ -99,7 +99,8 @@
 - 실제 옵션 경로는 `menu_opt_policy → opt_policy → opt_policy_item → opt_item`이다. `menu_option`은 레거시 이름이다.
 - `item_exclusion`, `order_item`, `order_item_option`은 재료 제외와 선택 옵션을 저장한다.
 - `pay_method_cfg`, `common_code`는 결제수단과 상태 코드를 관리한다.
-- `vw_payment_result`를 결제 승인 응답 읽기 원본으로 사용한다. (`paymentId`, `orderId`, `orderNo`, `paymentStatus`, `approvedAmount`, `approvedAt`, `waitingOrderCount`)
+- 현재 `UserPayMapper.getPaymentResult`는 `payment`와 `orders`를 인라인 조인해 결제 승인 결과를 읽는다. 응답 필드는 `paymentId`, `orderId`, `orderNo`, `paymentStatus`, `approvedAmount`, `approvedAt`, `waitingOrderNo`이며, `waitingOrderNo`는 결제 완료 시 `orders.waiting_order_no`에 저장된 일별 고정 대기번호다.
+- `daily_waiting_sequence`는 날짜별 마지막 대기번호를 원자적으로 증가시키는 쓰기용 테이블이며, 결제 결과 조회 시 조인하지 않는다. `orders`의 `(waiting_date, waiting_order_no)` 복합 UNIQUE가 같은 날짜의 번호 중복을 최종 방지한다.
 - 결제수단 목록·품절 영향 메뉴 수는 뷰가 아니라 매퍼 인라인 쿼리다. (`view.sql` [17]·[18])
 - `vw_sales_daily`, `vw_sales_hourly`, `vw_top_menu_daily`, `vw_top_menu_hourly`를 매출 API의 읽기 원본으로 사용한다.
 - `payment.paid_at`이 있는 원결제 금액은 gross sales에 유지한다.

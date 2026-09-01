@@ -16,4 +16,8 @@ public interface AdminPaymentMethodMapper {
   int updatePaymentMethod(Map<String, Object> params);
 
   int findPaymentMethod(Long methodId);
+
+  Long findPaymentMethodStatusId(String statusCode);
+
+  AdminPaymentMethodResponse findPaymentMethodByCode(String methodCode);
 }

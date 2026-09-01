@@ -107,10 +107,16 @@ POST /api/kiosk/payments
 
 성공 data는 `paymentId`, `orderId`, `orderNo`, `paymentMethodCode`,
 `paymentStatus: APPROVED`, `orderStatus: RECEIVED`, `approvedAmount`,
-`waitingOrderCount`, `approvedAt`이다. 백엔드는 DB 주문 상태가 `READY`인지 확인하고,
+`waitingOrderNo`, `approvedAt`이다. `waitingOrderNo`는 결제 완료 시 발급되는 일별 고정 대기번호다.
+백엔드는 DB 주문 상태가 `READY`인지 확인하고,
 승인 성공 뒤 `READY → RECEIVED`로 변경한다. `CARD`는 내부 mock 승인으로 처리하고,
 `TOSS_PAY`, `KAKAO_PAY`, `NAVER_PAY`는 프론트가 받은 `tossPayment` 인증 결과로 토스페이먼츠
 승인 API를 호출한다. 결제수단은 DB에서 활성 상태여야 한다.
+
+대기번호 발급 기준일은 `Asia/Seoul`의 오늘 날짜다. `daily_waiting_sequence`는 날짜별 마지막
+번호를 관리하고, `orders.waiting_date`와 `orders.waiting_order_no`는 실제 주문에 확정된 날짜와
+번호를 저장한다. `(waiting_date, waiting_order_no)` 복합 UNIQUE로 같은 날짜의 번호 중복을 막는다.
+결제 결과와 멱등성 재응답은 시퀀스 테이블이 아니라 주문에 저장된 `waiting_order_no`를 읽는다.
 
 ## 5. Admin: 첫 세로 기능은 실시간 주문 — API-021 + API-008
 
@@ -200,7 +206,7 @@ ID 타입을 별도 결정하기 전 API에 추가하지 않는다. 설정 API�
 | `totalPrice` | `totalAmount` | API adapter/repository |
 | `CANCELLED` | `CANCELED` | API adapter/repository |
 | `PAID` | `APPROVED` | Admin 표시 adapter 또는 화면 코드 통일 |
-| `waitingCount` | `waitingOrderCount` | Kiosk `orderAdapter` |
+| `waitingCount` | `waitingOrderNo` | Kiosk 결제 완료·주문번호 출력 화면 |
 | `amount`, `paidAt` | `approvedAmount`, `approvedAt` | payment adapter |
 | `/api/admin/sold-out-items` | `/api/admin/soldOut` | API client 상수 |
 

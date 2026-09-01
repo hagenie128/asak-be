@@ -8,11 +8,8 @@ import org.springframework.http.HttpStatus;
  * <p>{@code code} is a stable API contract value; {@code status} is the HTTP response status.
  */
 public enum ErrorCode {
-
   INVALID_REQUEST("INVALID_REQUEST", HttpStatus.BAD_REQUEST, "잘못된 요청입니다."),
-
   INVALID_STORE_NUMBER("INVALID_STORE_NUMBER", HttpStatus.BAD_REQUEST, "잘못된 매장 번호입니다."),
-
   NOT_APPROVED_STORE_NUMBER("NOT_APPROVED_STORE_NUMBER", HttpStatus.BAD_REQUEST, "승인되지 않은 매장입니다."),
 
   // =========================================================
@@ -49,6 +46,12 @@ public enum ErrorCode {
   INVALID_ORDER_REQUEST("INVALID_ORDER_REQUEST", HttpStatus.BAD_REQUEST, "주문 요청이 올바르지 않습니다."),
 
   INVALID_ORDER_TYPE("INVALID_ORDER_TYPE", HttpStatus.BAD_REQUEST, "올바른 주문 유형이 아닙니다."),
+
+  INVALID_ORDER_QUERY("INVALID_ORDER_QUERY", HttpStatus.BAD_REQUEST, "잘못된 조회 조건입니다."),
+
+  ORDER_AMOUNT_MISMATCH("ORDER_AMOUNT_MISMATCH", HttpStatus.CONFLICT, "주문 금액이 일치하지 않습니다."),
+
+  ORDER_PRICE_CHANGED("ORDER_PRICE_CHANGED", HttpStatus.CONFLICT, "주문 가격이 변경되었습니다."),
 
   // =========================================================
   // 주문 - 조회 / 생성
@@ -140,6 +143,33 @@ public enum ErrorCode {
 
   PAYMENT_TIMEOUT("PAYMENT_TIMEOUT", HttpStatus.GATEWAY_TIMEOUT, "결제 응답 시간이 초과되었습니다."),
 
+  PAYMENT_METHOD_NOT_SUPPORTED(
+      "PAYMENT_METHOD_NOT_SUPPORTED", HttpStatus.BAD_REQUEST, "지원하지 않는 결제 수단입니다."),
+
+  PAYMENT_METHOD_STATUS_NOT_FOUND(
+      "PAYMENT_METHOD_STATUS_NOT_FOUND", HttpStatus.NOT_FOUND, "결제 상태를 찾을 수 없습니다."),
+
+  PAYMENT_METHOD_STATUS_UPDATE_FAILED(
+      "PAYMENT_METHOD_STATUS_UPDATE_FAILED", HttpStatus.INTERNAL_SERVER_ERROR, "결제 상태 수정에 실패했습니다."),
+
+  TOSS_PAYMENT_CONFIGURATION_ERROR(
+      "TOSS_PAYMENT_CONFIGURATION_ERROR", HttpStatus.BAD_GATEWAY, "결제 연동 설정 오류가 발생했습니다."),
+
+  AMOUNT_INVALID_NOT_ALLOWED(
+      "AMOUNT_INVALID_NOT_ALLOWED", HttpStatus.BAD_REQUEST, "결제 금액이 유효하지 않습니다."),
+  ORDER_REFUND_FAILED("ORDER_REFUND_FAILED", HttpStatus.INTERNAL_SERVER_ERROR, "주문 환불에 실패했습니다."),
+  PAYMENT_IN_PROGRESS("PAYMENT_IN_PROGRESS", HttpStatus.CONFLICT, "결제가 진행 중입니다."),
+  PAYMENT_FAILED("PAYMENT_FAILED", HttpStatus.CONFLICT, "결제에 실패했습니다."),
+  ONLY_APPROVED_PAYMENT_CAN_BE_REFUNDED(
+      "ONLY_APPROVED_PAYMENT_CAN_BE_REFUNDED", HttpStatus.CONFLICT, "승인된 결제만 환불 가능합니다."),
+  CANCELED_ORDER_CANNOT_BE_REFUNDED(
+      "CANCELED_ORDER_CANNOT_BE_REFUNDED", HttpStatus.CONFLICT, "취소된 주문은 환불할 수 없습니다."),
+  INVALID_REFUND_REASON("INVALID_REFUND_REASON", HttpStatus.BAD_REQUEST, "유효하지 않은 환불 사유입니다."),
+  REFUND_REASON_DETAIL_REQUIRED(
+      "REFUND_REASON_DETAIL_REQUIRED", HttpStatus.BAD_REQUEST, "기타 환불 사유를 입력해주세요."),
+
+  PAYMENT_METHOD_NOT_SUPPORTED_FOR_REFUND(
+      "PAYMENT_METHOD_NOT_SUPPORTED_FOR_REFUND", HttpStatus.BAD_REQUEST, "환불 가능한 결제 수단이 아닙니다."),
   // =========================================================
   // 결제 - Toss Payments
   // =========================================================
@@ -151,9 +181,6 @@ public enum ErrorCode {
 
   TOSS_PAYMENT_AMOUNT_MISMATCH(
       "TOSS_PAYMENT_AMOUNT_MISMATCH", HttpStatus.BAD_REQUEST, "토스 결제 금액이 주문 금액과 일치하지 않습니다."),
-
-  TOSS_PAYMENT_CONFIGURATION_ERROR(
-      "TOSS_PAYMENT_CONFIGURATION_ERROR", HttpStatus.BAD_GATEWAY, "결제 연동 설정 오류가 발생했습니다."),
 
   TOSS_PAYMENT_KEY_MISMATCH(
       "TOSS_PAYMENT_KEY_MISMATCH", HttpStatus.CONFLICT, "토스 결제 키가 요청 정보와 일치하지 않습니다."),

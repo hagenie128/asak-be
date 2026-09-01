@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!-- 결제수단 구현 참고: selectPaymentMethods -->
+<!-- 결제수단 구현 참고: updatePaymentMethod -->
+<mapper namespace="com.asak.admin.mapper.AdminPaymentMapper">
+
+  <select id="findRefundTarget"
+          resultType="com.asak.admin.dto.RefundTarget">
+      SELECT
+          o.id AS orderId,
+          p.id AS paymentId,
+          os.code AS orderStatus,
+          ps.code AS paymentStatus,
+          pm.code AS paymentMethod,
+          p.amount AS approvedAmount
+      FROM
+          orders o
+          JOIN payment p ON p.order_id = o.id
+          JOIN common_code os ON os.id = o.status_id
+          JOIN common_code ps ON ps.id = p.status_id
+          JOIN common_code pm ON pm.id = p.method_id
+      WHERE
+          o.id = #{orderId}
+          AND ps.code = 'APPROVED'
+      ORDER BY
+          p.paid_at DESC,
+          p.id DESC
+      LIMIT
+          1
+  </select>
+
+  <insert id="insertPaymentRefund"
+          parameterType="map">
+      INSERT INTO
+          payment_refund (
+              payment_id,
+              amount,
+              reason,
+              refunded_at,
+              provider_cancel_transaction_key
+          )
+      VALUES
+          (
+              #{paymentId},
+              #{amount},
+              #{refundReason},
+              #{refundedAt},
+              #{cancelTransactionKey}
+          )
+  </insert>
+
+  <update id="markPaymentRefunded"
+          parameterType="map">
+      UPDATE payment
+      SET
+          status_id = #{refundedStatusId}
+      WHERE
+          id = #{paymentId}
+          AND status_id = #{approvedStatusId}
+  </update>
+
+  <update id="cancelOrderForRefund"
+          parameterType="map">
+      UPDATE orders
+      SET
+          status_id = #{canceledStatusId},
+          canceled_at = NOW()
+      WHERE
+          id = #{orderId}
+          AND status_id != #{canceledStatusId}
+  </update>
+
+</mapper>

@@ -300,9 +300,9 @@
 }</pre>
   </div>
 
-  <div class="code-card" id="PaymentResultResponse">
-    <div class="code-card-head"><span class="code-name">PaymentResultResponse</span><span class="tag tag-live">신규</span></div>
-    <p class="code-note">사용: <b>결제 승인 응답</b> — <span class="mono">waitingOrderCount</span>는 조회 시점 실시간 값</p>
+  <div class="code-card" id="ApprovePaymentResponse">
+    <div class="code-card-head"><span class="code-name">ApprovePaymentResponse</span><span class="tag tag-live">구현</span></div>
+    <p class="code-note">사용: <b>결제 승인 응답</b> — <span class="mono">waitingOrderNo</span>는 결제 완료 시 주문에 저장되는 일별 고정 대기번호</p>
     <pre class="code"><span class="kw">package</span> com.asak.user.dto.response;
 
 <span class="kw">import</span> java.time.LocalDateTime;
@@ -312,14 +312,14 @@
 <span class="kw">import</span> lombok.NoArgsConstructor;
 
 <span class="kw">@Getter</span> <span class="kw">@Builder</span> <span class="kw">@NoArgsConstructor</span> <span class="kw">@AllArgsConstructor</span>
-<span class="kw">public class</span> <span class="ty">PaymentResultResponse</span> {
+<span class="kw">public class</span> <span class="ty">ApprovePaymentResponse</span> {
   <span class="kw">private</span> <span class="ty">Long</span> paymentId;
   <span class="kw">private</span> <span class="ty">Long</span> orderId;
   <span class="kw">private</span> <span class="ty">String</span> orderNo;
   <span class="kw">private</span> <span class="ty">String</span> paymentStatus;
   <span class="kw">private</span> <span class="kw">int</span> approvedAmount;
   <span class="kw">private</span> <span class="ty">LocalDateTime</span> approvedAt;
-  <span class="kw">private</span> <span class="kw">int</span> waitingOrderCount;
+  <span class="kw">private</span> <span class="kw">int</span> waitingOrderNo;
 }</pre>
   </div>
 
@@ -613,12 +613,14 @@
     <span class="kw">ORDER BY</span> pm.sort_no
   &lt;/select&gt;
 
-  &lt;select id=<span class="str">"getPaymentResult"</span> resultType=<span class="str">"com.asak.user.dto.response.PaymentResultResponse"</span>&gt;
-    <span class="kw">SELECT</span> payment_id <span class="kw">AS</span> paymentId, order_id <span class="kw">AS</span> orderId, order_no <span class="kw">AS</span> orderNo,
-           payment_status <span class="kw">AS</span> paymentStatus, approved_amount <span class="kw">AS</span> approvedAmount,
-           approved_at <span class="kw">AS</span> approvedAt, waiting_order_count <span class="kw">AS</span> waitingOrderCount
-    <span class="kw">FROM</span> vw_payment_result
-    <span class="kw">WHERE</span> payment_id = #{paymentId}
+  &lt;select id=<span class="str">"getPaymentResult"</span> resultType=<span class="str">"payment"</span>&gt;
+    <span class="kw">SELECT</span> p.id <span class="kw">AS</span> paymentId, p.order_id <span class="kw">AS</span> orderId, o.order_no <span class="kw">AS</span> orderNo,
+           ps.code <span class="kw">AS</span> paymentStatus, p.amount <span class="kw">AS</span> approvedAmount,
+           p.paid_at <span class="kw">AS</span> approvedAt, o.waiting_order_no <span class="kw">AS</span> waitingOrderNo
+    <span class="kw">FROM</span> payment p
+    <span class="kw">JOIN</span> orders o <span class="kw">ON</span> o.id = p.order_id
+    <span class="kw">JOIN</span> common_code ps <span class="kw">ON</span> ps.id = p.status_id
+    <span class="kw">WHERE</span> p.id = #{paymentId}
   &lt;/select&gt;
 
   <span class="cm">&lt;!-- 결제 승인용: 주문 총액 + 기존 결제상태(있으면) 조회 --&gt;</span>
@@ -678,12 +680,13 @@
   </div>
 
   <div class="hint-box">
-    <p class="hint-title">힌트 — UserPayService.approvePayment</p>
+    <p class="hint-title">힌트 — UserPayService.createApprovePayment</p>
     <ul class="hint-list">
       <li>순서 중요: 주문 존재(<span class="mono">ORDER_NOT_FOUND</span>) → 이미 승인됐는지(<span class="mono">PAYMENT_ALREADY_APPROVED</span>) → 금액 일치(<span class="mono">ORDER_AMOUNT_MISMATCH</span>) → 결제수단 활성(<span class="mono">PAYMENT_METHOD_DISABLED</span>), 이 순서로 막아야 함</li>
       <li>금액은 요청값이 아니라 <span class="mono">orders.total_price</span>(주문 생성 시 서버가 계산한 값)와 비교 — 결제 단계에서 또 클라이언트를 믿지 않음</li>
       <li><span class="mono">insertPayment</span>는 <span class="mono">@Param</span> 여러 개 대신 파라미터 객체(<span class="mono">PaymentInsertParams</span>)로 받아야 <span class="mono">useGeneratedKeys</span>가 생성된 id를 돌려받을 수 있음</li>
-      <li>승인 후 <span class="mono">getPaymentResult</span>로 재조회해서 응답 조립 — 계산값을 직접 조립하지 않음 (<span class="mono">waitingOrderCount</span>가 실시간 값이라 뷰를 다시 읽어야 함)</li>
+      <li>승인 후 한국 날짜의 <span class="mono">daily_waiting_sequence</span>를 증가시키고, 발급 번호를 <span class="mono">orders.waiting_order_no</span>에 저장하면서 주문 상태를 <span class="mono">READY → RECEIVED</span>로 변경</li>
+      <li><span class="mono">getPaymentResult</span>는 주문에 확정 저장된 <span class="mono">waitingOrderNo</span>를 조회하므로 멱등성 재요청에서도 번호를 새로 발급하지 않고 같은 번호를 반환</li>
     </ul>
   </div>
 
@@ -696,7 +699,7 @@
   </div>
 
   <footer>
-    ASAK-back · com.asak.user · DB 접속 정보는 포함 안 함 · 2026-07-24 기준 · Admin 쪽은 별도 문서(<span class="mono">asak_admin_backend_reference.html</span>) 참고
+    ASAK-back · com.asak.user · DB 접속 정보는 포함 안 함 · 2026-08-29 API-006 고정 대기번호 반영 · Admin 쪽은 별도 문서(<span class="mono">asak_admin_backend_reference.html</span>) 참고
   </footer>
 
 </div>

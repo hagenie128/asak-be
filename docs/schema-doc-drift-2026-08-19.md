@@ -1,5 +1,7 @@
 # 스키마 문서 vs 실제 asak_db 대조표 (2026-08-19)
 
+> 이 문서는 2026-08-19 당시의 점검 기록이다. 2026-08-29 API-006은 일별 고정 대기번호 `orders.waiting_order_no`를 직접 조회하도록 변경되었다. 테이블 정본은 `docs/아삭_mysql.sql`을 따르며, `docs/view.sql`의 `vw_payment_result`는 운영 DB에 남은 레거시 실시간 `waiting_order_count` 정의와 현재 API 미사용 사실을 함께 기록한다.
+
 대상: `docs/아삭_mysql.sql`(테이블), `docs/view.sql`(뷰)
 방법: 운영 DB 에 읽기 전용 접속해 `SHOW CREATE TABLE` / `SHOW CREATE VIEW` /
 `information_schema` 조회. 스키마 변경은 하지 않았다.

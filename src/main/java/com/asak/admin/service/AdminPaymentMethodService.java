@@ -40,4 +40,13 @@ public class AdminPaymentMethodService {
     params.put("sortNo", request.getSortNo());
     return adminPaymentMethodMapper.updatePaymentMethod(params);
   }
+
+  public AdminPaymentMethodResponse getPaymentMethodByCode(String methodCode) {
+    AdminPaymentMethodResponse paymentMethod =
+        adminPaymentMethodMapper.findPaymentMethodByCode(methodCode);
+    if (paymentMethod.getMethodId() == null) {
+      throw new CustomException(ErrorCode.PAYMENT_METHOD_NOT_FOUND);
+    }
+    return paymentMethod;
+  }
 }

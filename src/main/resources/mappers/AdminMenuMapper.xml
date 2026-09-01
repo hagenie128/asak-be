@@ -24,30 +24,47 @@
 </resultMap>
 
 <select id="getMenuDetail" resultMap="menuDetailMap">
-  SELECT m.id AS menu_id, m.cat_id AS category_id, c.name AS category_name,
-         m.name, m.price, ma.url AS image_url, m.description, m.sold_out
-  FROM menu m
-  JOIN category c ON c.id = m.cat_id
-  LEFT JOIN media_asset ma
-    ON ma.id = m.image_asset_id
-   AND ma.deleted_at IS NULL
-  WHERE m.id = #{menuId}
-    AND m.deleted_at IS NULL
+  SELECT
+      m.id AS menu_id,
+      m.cat_id AS category_id,
+      c.name AS category_name,
+      m.name,
+      m.price,
+      ma.url AS image_url,
+      m.description,
+      m.sold_out
+  FROM
+      menu m
+      JOIN category c ON c.id = m.cat_id
+      LEFT JOIN media_asset ma ON ma.id = m.image_asset_id
+      AND ma.deleted_at IS NULL
+  WHERE
+      m.id = #{menuId}
+      AND m.deleted_at IS NULL
 </select>
 
 <select id="findMenuIngredientSummaries" resultType="com.asak.admin.dto.response.menus.MenuIngredientSummaryResponse">
-  SELECT ingredient_id AS ingredientId, ing_name AS name, ing_sold_out AS isSoldOut,
-         role, quantity, unit,
-         is_default AS isDefault, can_remove AS canRemove
-  FROM vw_menu_ing_json
-  WHERE menu_id = #{menuId}
-  ORDER BY CASE UPPER(role)
-             WHEN 'CORE' THEN 1
-             WHEN 'BASE' THEN 2
-             ELSE 3
-           END,
-           sort_no,
-           ingredient_id
+  SELECT
+      ingredient_id AS ingredientId,
+      ing_name AS name,
+      ing_sold_out AS isSoldOut,
+      role,
+      quantity,
+      unit,
+      is_default AS isDefault,
+      can_remove AS canRemove
+  FROM
+      vw_menu_ing_json
+  WHERE
+      menu_id = #{menuId}
+  ORDER BY
+      CASE UPPER(role)
+          WHEN 'CORE' THEN 1
+          WHEN 'BASE' THEN 2
+          ELSE 3
+      END,
+      sort_no,
+      ingredient_id
 </select>
 
 <select id="findMenuOptionGroupSummaries" resultType="com.asak.admin.dto.response.item.OptionGroupSummaryResponse">
@@ -60,62 +77,85 @@
       policy.max_select AS maxSelect,
       policy.is_required AS isRequired,
       (
-        SELECT recommended_item.item_name
-        FROM JSON_TABLE(
-          policy.items,
-          '$[*]' COLUMNS (
-            item_name VARCHAR(120) PATH '$.name',
-            is_recommended TINYINT PATH '$.isRecommended'
-          )
-        ) AS recommended_item
-        WHERE recommended_item.is_recommended = 1
-        LIMIT 1
+          SELECT
+              recommended_item.item_name
+          FROM
+              JSON_TABLE(
+                  policy.items,
+                  '$[*]' COLUMNS (
+                      item_name VARCHAR(120) PATH '$.name',
+                      is_recommended TINYINT PATH '$.isRecommended'
+                  )
+              ) AS recommended_item
+          WHERE
+              recommended_item.is_recommended = 1
+          LIMIT
+              1
       ) AS recommendedLabel
-  FROM vw_menu_opt_policy_json policy
-  WHERE policy.menu_id = #{menuId}
-  ORDER BY policy.sort_order
+  FROM
+      vw_menu_opt_policy_json policy
+  WHERE
+      policy.menu_id = #{menuId}
+  ORDER BY
+      policy.sort_order
 </select>
 
 <select id="findMenuNutrition" resultType="com.asak.admin.dto.response.menus.MenuNutritionResponse">
-  SELECT serving_g AS servingG,
-         kcal,
-         carb_g AS carbG,
-         sugar_g AS sugarG,
-         protein_g AS proteinG,
-         fat_g AS fatG,
-         saturated_fat_g AS saturatedFatG,
-         sodium_mg AS sodiumMg
-  FROM menu_nutr
-  WHERE menu_id = #{menuId}
+  SELECT
+      serving_g AS servingG,
+      kcal,
+      carb_g AS carbG,
+      sugar_g AS sugarG,
+      protein_g AS proteinG,
+      fat_g AS fatG,
+      saturated_fat_g AS saturatedFatG,
+      sodium_mg AS sodiumMg
+  FROM
+      menu_nutr
+  WHERE
+      menu_id = #{menuId}
 </select>
 
 <select id="findMenuAllergens" resultType="string">
-  SELECT DISTINCT allergen_name
-  FROM (
-    SELECT a.name AS allergen_name
-    FROM menu_ing mi
-    JOIN ing_allergen ia ON ia.ing_id = mi.ing_id
-    JOIN allergen a ON a.id = ia.allergen_id
-    WHERE mi.menu_id = #{menuId}
-    UNION
-    SELECT a.name AS allergen_name
-    FROM menu_opt_policy mop
-    JOIN opt_policy_item opi ON opi.policy_id = mop.policy_id
-    JOIN opt_item oi ON oi.id = opi.opt_item_id
-    JOIN ing_allergen ia ON ia.ing_id = oi.ing_id
-    JOIN allergen a ON a.id = ia.allergen_id
-    WHERE mop.menu_id = #{menuId}
-  ) menu_allergens
-  ORDER BY allergen_name
+  SELECT DISTINCT
+      allergen_name
+  FROM
+      (
+          SELECT
+              a.name AS allergen_name
+          FROM
+              menu_ing mi
+              JOIN ing_allergen ia ON ia.ing_id = mi.ing_id
+              JOIN allergen a ON a.id = ia.allergen_id
+          WHERE
+              mi.menu_id = #{menuId}
+          UNION
+          SELECT
+              a.name AS allergen_name
+          FROM
+              menu_opt_policy mop
+              JOIN opt_policy_item opi ON opi.policy_id = mop.policy_id
+              JOIN opt_item oi ON oi.id = opi.opt_item_id
+              JOIN ing_allergen ia ON ia.ing_id = oi.ing_id
+              JOIN allergen a ON a.id = ia.allergen_id
+          WHERE
+              mop.menu_id = #{menuId}
+      ) menu_allergens
+  ORDER BY
+      allergen_name
 </select>
 
 <select id="findMenuTagNames" resultType="string">
-  SELECT t.name
-  FROM menu_tag mt
-  JOIN tag t ON t.id = mt.tag_id
-  WHERE mt.menu_id = #{menuId}
-    AND t.active = 1
-  ORDER BY t.name
+  SELECT
+      t.name
+  FROM
+      menu_tag mt
+      JOIN tag t ON t.id = mt.tag_id
+  WHERE
+      mt.menu_id = #{menuId}
+      AND t.active = 1
+  ORDER BY
+      t.name
 </select>
 
 <sql id="menuListWhere">
@@ -141,188 +181,308 @@
 </sql>
 
 <select id="getMenus" resultType="com.asak.admin.dto.response.menus.MenuListResponse">
-  SELECT ml.menu_id AS menuId,
-         ml.category_id AS categoryId,
-         ml.name,
-         ml.price,
-         ml.image_url AS imageUrl,
-         ml.is_sold_out AS isSoldOut,
-         ml.has_sold_out_ingredient AS hasSoldOutIngredient,
-         ml.is_orderable AS isOrderable
-  FROM vw_menu_list ml
+  SELECT
+      ml.menu_id AS menuId,
+      ml.category_id AS categoryId,
+      ml.name,
+      ml.price,
+      ml.image_url AS imageUrl,
+      ml.is_sold_out AS isSoldOut,
+      ml.has_sold_out_ingredient AS hasSoldOutIngredient,
+      ml.is_orderable AS isOrderable
+  FROM
+      vw_menu_list ml
   <include refid="menuListWhere"/>
   <choose>
-    <when test="request.sort == 'price,asc'">ORDER BY ml.price ASC</when>
-    <when test="request.sort == 'price,desc'">ORDER BY ml.price DESC</when>
-    <when test="request.sort == 'name,desc'">ORDER BY ml.name DESC</when>
-    <otherwise>ORDER BY ml.name ASC</otherwise>
+      <when test="request.sort == 'price,asc'">
+          ORDER BY
+              ml.price ASC
+      </when>
+      <when test="request.sort == 'price,desc'">
+          ORDER BY
+              ml.price DESC
+      </when>
+      <when test="request.sort == 'name,desc'">
+          ORDER BY
+              ml.name DESC
+      </when>
+      <otherwise>
+          ORDER BY
+              ml.name ASC
+      </otherwise>
   </choose>
-  LIMIT #{request.size} OFFSET #{request.offset}
+  LIMIT
+      #{request.size}
+  OFFSET
+      #{request.offset}
 </select>
 
 <select id="countMenus" resultType="long">
-  SELECT COUNT(*)
-  FROM vw_menu_list ml
+  SELECT
+      COUNT(*)
+  FROM
+      vw_menu_list ml
   <include refid="menuListWhere"/>
 </select>
 
 <select id="getCategories" resultType="com.asak.admin.dto.response.item.AdminCategoryResponse">
-  SELECT id AS categoryId,
-         name AS categoryName,
-         sort_no AS sortOrder,
-         active AS active
-  FROM category
-  WHERE active = 1
-  ORDER BY sort_no ASC
+  SELECT
+      id AS categoryId,
+      name AS categoryName,
+      sort_no AS sortOrder,
+      active AS active
+  FROM
+      category
+  WHERE
+      active = 1
+  ORDER BY
+      sort_no ASC
 </select>
 
 <select id="getCategoryById" resultType="com.asak.admin.dto.response.item.AdminCategoryResponse">
-  SELECT id AS categoryId,
-         name AS categoryName,
-         sort_no AS sortOrder,
-         active AS active
-  FROM category
-  WHERE id = #{categoryId}
-    AND active = 1
-  LIMIT 1
+  SELECT
+      id AS categoryId,
+      name AS categoryName,
+      sort_no AS sortOrder,
+      active AS active
+  FROM
+      category
+  WHERE
+      id = #{categoryId}
+      AND active = 1
+  LIMIT
+      1
 </select>
 
 <select id="getIngredientDetail" resultType="com.asak.admin.dto.response.item.IngredientResponse">
   SELECT
-    i.id AS id,
-    i.name AS name,
-    i.sold_out AS isSoldOut,
-    CASE WHEN i.type_id &lt;= 34 THEN cc.name END AS roleName,
-    CASE WHEN i.type_id &gt; 34 THEN cc.name END AS unitName,
-    n.serving_g AS servingG,
-    n.kcal AS kcal,
-    n.carb_g AS carbG,
-    n.sugar_g AS sugarG,
-    n.protein_g AS proteinG,
-    n.fat_g AS fatG,
-    n.saturated_fat_g AS saturatedFatG,
-    n.sodium_mg AS sodiumMg
-  FROM ing i
-  LEFT JOIN common_code cc ON i.type_id = cc.id
-  LEFT JOIN ing_nutr n ON n.ing_id = i.id
-  WHERE i.id = #{ingredientId}
-  LIMIT 1
+      i.id AS id,
+      i.name AS name,
+      i.sold_out AS isSoldOut,
+      CASE
+          WHEN i.type_id &lt; = 34 THEN cc.name
+      END AS roleName,
+      CASE
+          WHEN i.type_id &gt; 34 THEN cc.name
+      END AS unitName,
+      n.serving_g AS servingG,
+      n.kcal AS kcal,
+      n.carb_g AS carbG,
+      n.sugar_g AS sugarG,
+      n.protein_g AS proteinG,
+      n.fat_g AS fatG,
+      n.saturated_fat_g AS saturatedFatG,
+      n.sodium_mg AS sodiumMg
+  FROM
+      ing i
+      LEFT JOIN common_code cc ON i.type_id = cc.id
+      LEFT JOIN ing_nutr n ON n.ing_id = i.id
+  WHERE
+      i.id = #{ingredientId}
+  LIMIT
+      1
 </select>
 
 <insert id="insertMenu" parameterType="map" useGeneratedKeys="true" keyProperty="menuId" keyColumn="id">
-  INSERT INTO menu (cat_id, name, price, image_asset_id, description)
-  VALUES (#{categoryId}, #{name}, #{price}, #{mediaAssetId}, #{description})
+  INSERT INTO
+      menu (cat_id, name, price, image_asset_id, description)
+  VALUES
+      (
+          #{categoryId},
+          #{name},
+          #{price},
+          #{mediaAssetId},
+          #{description}
+      )
 </insert>
 
 <select id="findCommonCodeId" resultType="java.lang.Long">
-  SELECT cc.id
-  FROM common_code cc
-  JOIN code_group cg ON cg.id = cc.code_grp_id
-  WHERE cg.group_code = #{groupCode}
-    AND cc.active = 1
-    AND (
-      UPPER(cc.code) = UPPER(#{code})
-      OR UPPER(cc.name) = UPPER(#{code})
-    )
-  ORDER BY CASE WHEN UPPER(cc.code) = UPPER(#{code}) THEN 0 ELSE 1 END
-  LIMIT 1
+  SELECT
+      cc.id
+  FROM
+      common_code cc
+      JOIN code_group cg ON cg.id = cc.code_grp_id
+  WHERE
+      cg.group_code = #{groupCode}
+      AND cc.active = 1
+      AND (
+          UPPER(cc.code) = UPPER(#{code})
+          OR UPPER(cc.name) = UPPER(#{code})
+      )
+  ORDER BY
+      CASE
+          WHEN UPPER(cc.code) = UPPER(#{code}) THEN 0
+          ELSE 1
+      END
+  LIMIT
+      1
 </select>
 
 <select id="findTagId" resultType="java.lang.Long">
-  SELECT t.id
-  FROM tag t
-  WHERE t.active = 1
-    AND (
-      (#{code} IS NOT NULL AND #{code} != '' AND UPPER(t.code) = UPPER(#{code}))
-      OR (#{name} IS NOT NULL AND #{name} != '' AND t.name = #{name})
-    )
-  LIMIT 1
+  SELECT
+      t.id
+  FROM
+      tag t
+  WHERE
+      t.active = 1
+      AND (
+          (
+              #{code} IS NOT NULL
+              AND #{code} != ''
+              AND UPPER(t.code) = UPPER(#{code})
+          )
+          OR (
+              #{name} IS NOT NULL
+              AND #{name} != ''
+              AND t.name = #{name}
+          )
+      )
+  LIMIT
+      1
 </select>
 
 <select id="findActiveMediaAssetId" resultType="java.lang.Long">
-  SELECT id
-  FROM media_asset
-  WHERE id = #{mediaAssetId}
-    AND deleted_at IS NULL
+  SELECT
+      id
+  FROM
+      media_asset
+  WHERE
+      id = #{mediaAssetId}
+      AND deleted_at IS NULL
 </select>
 
 <select id="findActiveMediaAssetIdByUrl" resultType="java.lang.Long">
-  SELECT id
-  FROM media_asset
-  WHERE url = #{url}
-    AND deleted_at IS NULL
-  ORDER BY id
-  LIMIT 1
+  SELECT
+      id
+  FROM
+      media_asset
+  WHERE
+      url = #{url}
+      AND deleted_at IS NULL
+  ORDER BY
+      id
+  LIMIT
+      1
 </select>
 
 <select id="getIngredients" resultType="com.asak.admin.dto.response.item.IngredientResponse">
   SELECT
-    i.id AS id,
-    i.name AS name,
-    i.sold_out AS isSoldOut,
-    CASE WHEN i.type_id &lt;= 34 THEN cc.name END AS roleName,
-    CASE WHEN i.type_id &gt; 34 THEN cc.name END AS unitName,
-    n.serving_g AS servingG,
-    n.kcal AS kcal,
-    n.carb_g AS carbG,
-    n.sugar_g AS sugarG,
-    n.protein_g AS proteinG,
-    n.fat_g AS fatG,
-    n.saturated_fat_g AS saturatedFatG,
-    n.sodium_mg AS sodiumMg
-  FROM ing i
-  LEFT JOIN common_code cc ON i.type_id = cc.id
-  LEFT JOIN ing_nutr n ON n.ing_id = i.id
-  ORDER BY i.id
+      i.id AS id,
+      i.name AS name,
+      i.sold_out AS isSoldOut,
+      CASE
+          WHEN i.type_id &lt; = 34 THEN cc.name
+      END AS roleName,
+      CASE
+          WHEN i.type_id &gt; 34 THEN cc.name
+      END AS unitName,
+      n.serving_g AS servingG,
+      n.kcal AS kcal,
+      n.carb_g AS carbG,
+      n.sugar_g AS sugarG,
+      n.protein_g AS proteinG,
+      n.fat_g AS fatG,
+      n.saturated_fat_g AS saturatedFatG,
+      n.sodium_mg AS sodiumMg
+  FROM
+      ing i
+      LEFT JOIN common_code cc ON i.type_id = cc.id
+      LEFT JOIN ing_nutr n ON n.ing_id = i.id
+  ORDER BY
+      i.id
 </select>
 
 
 <insert id="insertMenuIngredient" parameterType="map">
-  INSERT INTO menu_ing (
-    menu_id, ing_id, role_id, quantity, unit_id, is_default, can_remove, sort_no
-  ) VALUES (
-    #{menuId}, #{ingredientId}, #{roleId}, #{quantity}, #{unitId},
-    #{isDefault}, #{canRemove}, #{sortNo}
-  )
+  INSERT INTO
+      menu_ing (
+          menu_id,
+          ing_id,
+          role_id,
+          quantity,
+          unit_id,
+          is_default,
+          can_remove,
+          sort_no
+      )
+  VALUES
+      (
+          #{menuId},
+          #{ingredientId},
+          #{roleId},
+          #{quantity},
+          #{unitId},
+          #{isDefault},
+          #{canRemove},
+          #{sortNo}
+      )
 </insert>
 
 <insert id="insertMenuNutrition" parameterType="map">
-  INSERT INTO menu_nutr (menu_id, kcal, carb_g, protein_g, fat_g, sodium_mg)
-  VALUES (#{menuId}, #{kcal}, #{carbG}, #{proteinG}, #{fatG}, #{sodiumMg})
+  INSERT INTO
+      menu_nutr (
+          menu_id,
+          kcal,
+          carb_g,
+          protein_g,
+          fat_g,
+          sodium_mg
+      )
+  VALUES
+      (
+          #{menuId},
+          #{kcal},
+          #{carbG},
+          #{proteinG},
+          #{fatG},
+          #{sodiumMg}
+      )
 </insert>
 
 <insert id="insertMenuTag" parameterType="map">
-  INSERT INTO menu_tag (menu_id, tag_id)
-  VALUES (#{menuId}, #{tagId})
+  INSERT INTO
+      menu_tag (menu_id, tag_id)
+  VALUES
+      (#{menuId}, #{tagId})
 </insert>
 
 <update id="updateMenu" parameterType="map">
   UPDATE menu
-  SET cat_id = #{request.categoryId, jdbcType=INTEGER},
+  SET
+      cat_id = #{request.categoryId, jdbcType=INTEGER},
       name = #{request.name},
       price = #{request.price, jdbcType=INTEGER},
       image_asset_id = #{mediaAssetId, jdbcType=BIGINT},
       description = #{request.description, jdbcType=VARCHAR}
-  WHERE id = #{menuId}
-    AND deleted_at IS NULL
+  WHERE
+      id = #{menuId}
+      AND deleted_at IS NULL
 </update>
 
 <update id="softDeleteMenu">
   UPDATE menu
-  SET deleted_at = CURRENT_TIMESTAMP,
+  SET
+      deleted_at = CURRENT_TIMESTAMP,
       updated_at = CURRENT_TIMESTAMP
-  WHERE id = #{menuId}
-    AND deleted_at IS NULL
+  WHERE
+      id = #{menuId}
+      AND deleted_at IS NULL
 </update>
 
 <delete id="deleteMenuIngredients" parameterType="long">
-  DELETE FROM menu_ing WHERE menu_id = #{menuId}
+  DELETE FROM menu_ing
+  WHERE
+      menu_id = #{menuId}
 </delete>
 <delete id="deleteMenuNutrition" parameterType="long">
-  DELETE FROM menu_nutr WHERE menu_id = #{menuId}
+  DELETE FROM menu_nutr
+  WHERE
+      menu_id = #{menuId}
 </delete>
 <delete id="deleteMenuTags" parameterType="long">
-  DELETE FROM menu_tag WHERE menu_id = #{menuId}
+  DELETE FROM menu_tag
+  WHERE
+      menu_id = #{menuId}
 </delete>
 
 </mapper>
