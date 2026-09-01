@@ -3,6 +3,7 @@ package com.asak.admin.controller;
 import com.asak.common.exception.ErrorCode;
 import com.asak.common.response.ApiResponse;
 import java.util.Map;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -17,14 +18,20 @@ import org.springframework.web.bind.annotation.RestController;
 public class AdminAuthController {
 
   @PostMapping("/login")
-  public ApiResponse<Map<String, Boolean>> login(@RequestBody Map<String, String> request) {
+  public ResponseEntity<ApiResponse<Map<String, Boolean>>> login(
+      @RequestBody Map<String, String> request) {
     String storeNumber = request.get("storeNumber");
     if (storeNumber == null || storeNumber.isEmpty()) {
-      return ApiResponse.error(ErrorCode.INVALID_STORE_NUMBER);
+      return error(ErrorCode.INVALID_STORE_NUMBER);
     } else if (storeNumber.equals("0001")) {
-      return ApiResponse.success("ADMIN_LOGIN_SUCCESS", "로그인 성공", Map.of("approved", true));
+      return ResponseEntity.ok(
+          ApiResponse.success("ADMIN_LOGIN_SUCCESS", "로그인 성공", Map.of("approved", true)));
     } else {
-      return ApiResponse.error(ErrorCode.NOT_APPROVED_STORE_NUMBER);
+      return error(ErrorCode.NOT_APPROVED_STORE_NUMBER);
     }
+  }
+
+  private static <T> ResponseEntity<ApiResponse<T>> error(ErrorCode errorCode) {
+    return ResponseEntity.status(errorCode.status()).body(ApiResponse.error(errorCode));
   }
 }
