@@ -6,6 +6,7 @@ from __future__ import annotations
 import re
 import sys
 from pathlib import Path
+from xml.sax.saxutils import escape as xml_escape
 
 from lxml import etree
 
@@ -62,11 +63,20 @@ def is_inside_mybatis_expr(text: str, pos: int) -> bool:
     return segment.count("#{") > segment.count("}")
 
 
+def escape_xml_text(text: str) -> str:
+    """Re-escape comparison operators after lxml decodes element text."""
+    return xml_escape(text)
+
+
+def sql_content_line(indent: str, text: str) -> str:
+    return f"{indent}{escape_xml_text(text)}"
+
+
 def local_tag(element: etree._Element) -> str:
     tag = element.tag
     if isinstance(tag, str) and "}" in tag:
-        return tag.rsplit("}", 1)[-1].lower()
-    return str(tag).lower()
+        return tag.rsplit("}", 1)[-1]
+    return str(tag)
 
 
 def collapse_spaces(text: str) -> str:
@@ -138,7 +148,7 @@ def format_case_item(item: str) -> list[str]:
         flags=re.IGNORECASE,
     )
     if not match:
-        return [f"{SQL_INNER}{text}"]
+        return [sql_content_line(SQL_INNER, text)]
 
     when_part = match.group(1).strip()
     else_part = match.group(2).strip()
@@ -146,9 +156,9 @@ def format_case_item(item: str) -> list[str]:
     inner = SQL_INNER + "    "
     return [
         f"{SQL_INNER}CASE",
-        f"{inner}{when_part}",
-        f"{inner}{else_part}",
-        f"{SQL_INNER}{end_part}",
+        sql_content_line(inner, when_part),
+        sql_content_line(inner, else_part),
+        sql_content_line(SQL_INNER, end_part),
     ]
 
 
@@ -169,21 +179,21 @@ def format_clause_body(keyword: str, body: str) -> list[str]:
                 lines.extend(case_lines)
             else:
                 suffix = "," if index < len(items) - 1 else ""
-                lines.append(f"{SQL_INNER}{item}{suffix}")
+                lines.append(sql_content_line(SQL_INNER, f"{item}{suffix}"))
         return lines
 
     if keyword == "FROM":
-        return [f"{SQL_INNER}{line}" for line in split_joins(body)]
+        return [sql_content_line(SQL_INNER, line) for line in split_joins(body)]
 
     if keyword in {"WHERE", "HAVING"}:
-        return [f"{SQL_INNER}{line}" for line in split_where_conditions(body)]
+        return [sql_content_line(SQL_INNER, line) for line in split_where_conditions(body)]
 
     if keyword in {"ORDER BY", "GROUP BY", "LIMIT", "OFFSET"}:
         items = split_commas(body)
         lines = []
         for index, item in enumerate(items):
             suffix = "," if keyword in {"ORDER BY", "GROUP BY"} and index < len(items) - 1 else ""
-            lines.append(f"{SQL_INNER}{item}{suffix}")
+            lines.append(sql_content_line(SQL_INNER, f"{item}{suffix}"))
         return lines
 
     if keyword == "SET":
@@ -191,7 +201,7 @@ def format_clause_body(keyword: str, body: str) -> list[str]:
         lines = []
         for index, item in enumerate(items):
             suffix = "," if index < len(items) - 1 else ""
-            lines.append(f"{SQL_INNER}{item.strip()}{suffix}")
+            lines.append(sql_content_line(SQL_INNER, f"{item.strip()}{suffix}"))
         return lines
 
     if keyword == "VALUES":
@@ -201,33 +211,33 @@ def format_clause_body(keyword: str, body: str) -> list[str]:
             lines = [f"{SQL_INNER}("]
             for index, item in enumerate(items):
                 suffix = "," if index < len(items) - 1 else ""
-                lines.append(f"{SQL_INNER}    {item.strip()}{suffix}")
+                lines.append(sql_content_line(SQL_INNER + "    ", f"{item.strip()}{suffix}"))
             lines.append(f"{SQL_INNER})")
             return lines
         if body.startswith("("):
-            return [f"{SQL_INNER}{body}"]
-        return [f"{SQL_INNER}{item}" for item in split_commas(body)]
+            return [sql_content_line(SQL_INNER, body)]
+        return [sql_content_line(SQL_INNER, item) for item in split_commas(body)]
 
     if keyword in {"INSERT INTO", "UPDATE", "DELETE FROM"}:
         insert_match = re.match(r"(\S+)\s*\((.+)\)$", body, flags=re.DOTALL)
         if keyword == "INSERT INTO" and insert_match:
             table = insert_match.group(1)
-            lines = [f"{SQL_INNER}{table} ("]
+            lines = [sql_content_line(SQL_INNER, f"{table} (")]
             columns = split_commas(insert_match.group(2))
             for index, column in enumerate(columns):
                 suffix = "," if index < len(columns) - 1 else ""
-                lines.append(f"{SQL_INNER}    {column.strip()}{suffix}")
+                lines.append(sql_content_line(SQL_INNER + "    ", f"{column.strip()}{suffix}"))
             lines.append(f"{SQL_INNER})")
             return lines
-        return [f"{SQL_INNER}{body}"]
+        return [sql_content_line(SQL_INNER, body)]
 
     if keyword.endswith("JOIN") or keyword == "JOIN":
-        return [f"{SQL_INNER}{body}"]
+        return [sql_content_line(SQL_INNER, body)]
 
     if keyword == "WITH":
         return format_sql_text(body)
 
-    return [f"{SQL_INNER}{body}"]
+    return [sql_content_line(SQL_INNER, body)]
 
 
 def format_sql_text(text: str) -> list[str]:
@@ -241,7 +251,7 @@ def format_sql_text(text: str) -> list[str]:
         if not is_inside_mybatis_expr(normalized, match.start())
     ]
     if not matches:
-        return [f"{SQL_BASE}{normalized}"]
+        return [sql_content_line(SQL_BASE, normalized)]
 
     lines: list[str] = []
     for index, match in enumerate(matches):
@@ -278,18 +288,18 @@ def format_if_element(element: etree._Element, indent: str) -> list[str]:
     open_tag = f"{indent}<{tag} {attrs}>" if attrs else f"{indent}<{tag}>"
 
     if element.text and element.text.strip() and len(element) == 0:
-        return [f"{open_tag}{element.text.strip()}</{tag}>"]
+        return [f"{open_tag}{escape_xml_text(element.text.strip())}</{tag}>"]
 
     lines = [open_tag]
     inner = indent + "  "
     if element.text and element.text.strip():
         for line in element.text.strip().splitlines():
-            lines.append(f"{inner}{line.strip()}")
+            lines.append(f"{inner}{escape_xml_text(line.strip())}")
     for child in element:
         lines.extend(format_element(child, inner))
         if child.tail and child.tail.strip():
             for line in child.tail.strip().splitlines():
-                lines.append(f"{inner}{line.strip()}")
+                lines.append(f"{inner}{escape_xml_text(line.strip())}")
     lines.append(f"{indent}</{tag}>")
     return lines
 
@@ -299,11 +309,11 @@ def format_dynamic_element(element: etree._Element, indent: str) -> list[str]:
     lines = [f"{indent}<{tag}>"]
     child_indent = indent + "  "
     if element.text and element.text.strip():
-        lines.append(f"{child_indent}{element.text.strip()}")
+        lines.append(f"{child_indent}{escape_xml_text(element.text.strip())}")
     for child in element:
         lines.extend(format_if_element(child, child_indent))
         if child.tail and child.tail.strip():
-            lines.append(f"{child_indent}{child.tail.strip()}")
+            lines.append(f"{child_indent}{escape_xml_text(child.tail.strip())}")
     lines.append(f"{indent}</{tag}>")
     return lines
 
@@ -390,7 +400,7 @@ def format_mapper_tree(root: etree._Element, tree: etree._ElementTree) -> str:
             continue
 
         tag = local_tag(node)
-        if tag == "resultmap":
+        if tag == "resultMap":
             output.extend(format_resultmap(node))
         elif tag in {"select", "insert", "update", "delete"}:
             output.extend(format_sql_container(node))

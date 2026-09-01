@@ -16,12 +16,8 @@ public class PaymentService {
       throw new CustomException(ErrorCode.PAYMENT_METHOD_NOT_SUPPORTED_FOR_REFUND);
     }
 
-    if (target.getProviderPaymentKey() == null || target.getProviderPaymentKey().isBlank()) {
-
-      throw new CustomException(ErrorCode.ORDER_REFUND_FAILED);
-    }
-
-    // 가상 카드 취소 성공
+    // 카드 단말 결제는 현재 가상 취소만 지원한다. 실제 PG 연동 시 providerPaymentKey 검증과
+    // PG 취소 호출을 이 지점에 추가한다.
     return "VIRTUAL-CANCEL-" + UUID.randomUUID();
   }
 

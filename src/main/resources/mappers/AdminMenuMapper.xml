@@ -260,7 +260,7 @@
       i.name AS name,
       i.sold_out AS isSoldOut,
       CASE
-          WHEN i.type_id &lt; = 34 THEN cc.name
+          WHEN i.type_id &lt;= 34 THEN cc.name
       END AS roleName,
       CASE
           WHEN i.type_id &gt; 34 THEN cc.name
@@ -371,7 +371,7 @@
       i.name AS name,
       i.sold_out AS isSoldOut,
       CASE
-          WHEN i.type_id &lt; = 34 THEN cc.name
+          WHEN i.type_id &lt;= 34 THEN cc.name
       END AS roleName,
       CASE
           WHEN i.type_id &gt; 34 THEN cc.name

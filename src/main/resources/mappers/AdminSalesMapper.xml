@@ -291,7 +291,7 @@
                 COUNT(
                     DISTINCT CASE
                         WHEN p.paid_at IS NOT NULL
-                        AND os.code &lt; > 'CANCELED'
+                        AND os.code &lt;&gt; 'CANCELED'
                         AND ps.code NOT IN('CANCELED', 'REFUNDED') THEN o.id
                     END
                 ) AS order_count,
@@ -345,7 +345,7 @@
                         COUNT(
                             DISTINCT CASE
                                 WHEN p.paid_at IS NOT NULL
-                                AND os.code &lt; > 'CANCELED'
+                                AND os.code &lt;&gt; 'CANCELED'
                                 AND ps.code NOT IN('CANCELED', 'REFUNDED') THEN o.id
                             END
                         ),
@@ -586,7 +586,7 @@
                 COUNT(
                     DISTINCT CASE
                         WHEN p.paid_at IS NOT NULL
-                        AND os.code &lt; > 'CANCELED'
+                        AND os.code &lt;&gt; 'CANCELED'
                         AND ps.code NOT IN('CANCELED', 'REFUNDED') THEN o.id
                     END
                 ) AS order_count,

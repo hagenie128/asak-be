@@ -17,7 +17,7 @@
     UPDATE menu SET sold_out = #{isSoldOut} WHERE id = #{targetId} AND deleted_at IS NULL
   </update>
   <update id="updateIngredientSoldOut">
-    UPDATE ingredient SET sold_out = #{isSoldOut} WHERE id = #{targetId}
+    UPDATE ing SET sold_out = #{isSoldOut} WHERE id = #{targetId}
   </update>
   <update id="updateOptionItemSoldOut">
     UPDATE opt_item SET sold_out = #{isSoldOut} WHERE id = #{targetId}

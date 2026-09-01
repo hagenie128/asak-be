@@ -3,6 +3,7 @@ package com.asak.admin.mapper;
 import com.asak.admin.dto.request.orders.OrderListFilter;
 import com.asak.admin.dto.response.orders.LiveOrderResponse;
 import com.asak.admin.dto.response.orders.OrderDetailResponse;
+import com.asak.admin.dto.response.orders.OrderItemResponse;
 import com.asak.admin.dto.response.orders.OrderListResponse;
 import java.util.List;
 import java.util.Map;
@@ -20,6 +21,8 @@ public interface AdminOrderMapper {
   long countOrderList(@Param("filter") OrderListFilter filter);
 
   Long findOrderStatusId(@Param("code") String code);
+
+  List<OrderItemResponse> findOrderItems(Long orderId);
 
   int changeOrderStatus(Map<String, Object> map);
 
