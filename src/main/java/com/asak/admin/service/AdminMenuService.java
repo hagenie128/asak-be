@@ -45,6 +45,7 @@ public class AdminMenuService {
   public PageResult<MenuListResponse> getMenus(MenuListRequest request) {
     List<MenuListResponse> content = adminMenuMapper.getMenus(request);
     long totalElements = adminMenuMapper.countMenus(request);
+
     return new PageResult<>(content, request.getPage(), request.getSize(), totalElements);
   }
 
