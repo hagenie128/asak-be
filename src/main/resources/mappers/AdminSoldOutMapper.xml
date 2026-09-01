@@ -2,7 +2,7 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.asak.admin.mapper.AdminSoldOutMapper">
   <select id="getSoldOutCatalog" resultType="com.asak.admin.dto.response.item.SoldOutCatalogItemResponse">
-    <!-- vw_soldout_catalog가 카탈로그 공통 필드와 image_url을 모두 제공한다. -->
+    <!-- vw_soldout_catalog: 운영 범위(menu_ing/opt_policy 연결)와 image fallback을 뷰에서 처리 -->
     SELECT v.target_type AS targetType,
            v.target_id AS targetId,
            v.name,
@@ -10,7 +10,7 @@
            v.is_sold_out AS isSoldOut,
            v.image_url AS imageUrl
     FROM vw_soldout_catalog v
-    ORDER BY v.target_type, v.category, v.name
+    ORDER BY v.name
   </select>
 
   <update id="updateMenuSoldOut">
