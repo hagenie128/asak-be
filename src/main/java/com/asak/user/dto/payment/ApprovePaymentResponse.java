@@ -25,7 +25,7 @@ import org.apache.ibatis.type.Alias;
         "orderStatus": "RECEIVED",
         "approvedAmount": 8900,
         "approvedAt": "2026-08-21T12:00:00",
-        "waitingOrderNo": 0
+        "waitingOrderCount": 0
     }
     }
 */
@@ -44,5 +44,5 @@ public class ApprovePaymentResponse {
   private OrderStatus orderStatus;
   private int approvedAmount;
   private LocalDateTime approvedAt;
-  private int waitingOrderNo; // 고정 대기 번호
+  private int waitingOrderCount;
 }

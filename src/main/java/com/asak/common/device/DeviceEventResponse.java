@@ -3,14 +3,6 @@ package com.asak.common.device;
 import java.time.Instant;
 
 /** React와 RTOS가 공통으로 보는 장치 명령 상태 응답/ 임시 코드 */
-
-/*
-  payload --> RTOS가 실제 출력할 영수증 내용
-
-
-
-*/
-
 public record DeviceEventResponse(
     long eventId,
     long orderId,
