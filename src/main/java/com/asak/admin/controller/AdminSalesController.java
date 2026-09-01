@@ -12,6 +12,7 @@ import java.time.DateTimeException;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.List;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -50,13 +51,13 @@ public class AdminSalesController {
    * 이번 달 1일~오늘을 사용한다(Service 기본값).
    */
   @GetMapping("/sales/summary")
-  public ApiResponse<SalesSummaryResponse> getSalesSummary(
+  public ResponseEntity<ApiResponse<SalesSummaryResponse>> getSalesSummary(
       @RequestParam(required = false) String period,
       @RequestParam(required = false) String startDate,
       @RequestParam(required = false) String endDate) {
 
     if (period != null && !AdminSalesService.isSupportedPeriod(period)) {
-      return ApiResponse.error(ErrorCode.SALES_PERIOD_INVALID);
+      return error(ErrorCode.SALES_PERIOD_INVALID);
     }
 
     LocalDate parsedStartDate = null;
@@ -67,21 +68,22 @@ public class AdminSalesController {
         parsedEndDate =
             (endDate == null || endDate.isBlank()) ? parsedStartDate : LocalDate.parse(endDate);
       } catch (DateTimeException exception) {
-        return ApiResponse.error(ErrorCode.SALES_DATE_INVALID);
+        return error(ErrorCode.SALES_DATE_INVALID);
       }
 
       LocalDate today = LocalDate.now(KOREA_ZONE_ID);
       if (parsedStartDate.isAfter(today)
           || parsedEndDate.isAfter(today)
           || parsedEndDate.isBefore(parsedStartDate)) {
-        return ApiResponse.error(ErrorCode.DATE_RANGE_INVALID);
+        return error(ErrorCode.DATE_RANGE_INVALID);
       }
     }
 
-    return ApiResponse.success(
-        "ADMIN_SALES_SUMMARY_SUCCESS",
-        "매출 요약",
-        adminSalesService.getSalesSummary(period, parsedStartDate, parsedEndDate));
+    return ResponseEntity.ok(
+        ApiResponse.success(
+            "ADMIN_SALES_SUMMARY_SUCCESS",
+            "매출 요약",
+            adminSalesService.getSalesSummary(period, parsedStartDate, parsedEndDate)));
   }
 
   /**
@@ -89,22 +91,23 @@ public class AdminSalesController {
    * 하나만 쓰므로 12개월치를 미리 조회하지 않는다.)
    */
   @GetMapping("/sales/monthly")
-  public ApiResponse<MonthlySalesResponse> getMonthlySales(
+  public ResponseEntity<ApiResponse<MonthlySalesResponse>> getMonthlySales(
       @RequestParam int year, @RequestParam(required = false) Integer month) {
     int currentYear = LocalDate.now(KOREA_ZONE_ID).getYear();
     if (year < adminSalesService.getMinYear() || year > currentYear) {
-      return ApiResponse.error(ErrorCode.SALES_YEAR_INVALID);
+      return error(ErrorCode.SALES_YEAR_INVALID);
     }
     if (month != null && (month < 1 || month > 12)) {
-      return ApiResponse.error(ErrorCode.SALES_MONTH_INVALID);
+      return error(ErrorCode.SALES_MONTH_INVALID);
     }
-    return ApiResponse.success(
-        "ADMIN_SALES_MONTHLY_SUCCESS", "월별 매출", adminSalesService.getMonthlySales(year, month));
+    return ResponseEntity.ok(
+        ApiResponse.success(
+            "ADMIN_SALES_MONTHLY_SUCCESS", "월별 매출", adminSalesService.getMonthlySales(year, month)));
   }
 
   /** Daily: from~to 일자 행, 선택 종료일의 분해·랭킹 데이터를 반환한다. */
   @GetMapping("/sales/daily")
-  public ApiResponse<DailySalesResponse> getDailySales(
+  public ResponseEntity<ApiResponse<DailySalesResponse>> getDailySales(
       @RequestParam(required = false) String from, @RequestParam(required = false) String to) {
 
     LocalDate today = LocalDate.now(KOREA_ZONE_ID);
@@ -122,38 +125,44 @@ public class AdminSalesController {
         endDate = (to == null || to.isBlank()) ? startDate : LocalDate.parse(to);
       }
     } catch (DateTimeException exception) {
-      return ApiResponse.error(ErrorCode.SALES_DATE_INVALID);
+      return error(ErrorCode.SALES_DATE_INVALID);
     }
 
     if (startDate.isAfter(today) || endDate.isAfter(today) || endDate.isBefore(startDate)) {
-      return ApiResponse.error(ErrorCode.DATE_RANGE_INVALID);
+      return error(ErrorCode.DATE_RANGE_INVALID);
     }
 
-    return ApiResponse.success(
-        "ADMIN_SALES_DAILY_SUCCESS", "일별 매출", adminSalesService.getDailySales(startDate, endDate));
+    return ResponseEntity.ok(
+        ApiResponse.success(
+            "ADMIN_SALES_DAILY_SUCCESS", "일별 매출", adminSalesService.getDailySales(startDate, endDate)));
   }
 
   /** Daily Time Slots: 30분 또는 60분 버킷은 영업시간(10:00~22:00) 안에서만 반환한다. */
   @GetMapping("/sales/daily/time-slots")
-  public ApiResponse<List<DailySalesTimeSlotResponse>> getDailyTimeSlots(
+  public ResponseEntity<ApiResponse<List<DailySalesTimeSlotResponse>>> getDailyTimeSlots(
       @RequestParam String date, @RequestParam(defaultValue = "60") int intervalMinutes) {
     if (intervalMinutes != 30 && intervalMinutes != 60) {
-      return ApiResponse.error(ErrorCode.SALES_INTERVAL_INVALID);
+      return error(ErrorCode.SALES_INTERVAL_INVALID);
     }
 
     LocalDate salesDate;
     try {
       salesDate = LocalDate.parse(date);
     } catch (DateTimeException exception) {
-      return ApiResponse.error(ErrorCode.SALES_DATE_INVALID);
+      return error(ErrorCode.SALES_DATE_INVALID);
     }
     if (salesDate.isAfter(LocalDate.now(KOREA_ZONE_ID))) {
-      return ApiResponse.error(ErrorCode.DATE_RANGE_INVALID);
+      return error(ErrorCode.DATE_RANGE_INVALID);
     }
 
-    return ApiResponse.success(
-        "ADMIN_SALES_TIME_SLOTS_SUCCESS",
-        "시간대별 매출",
-        adminSalesService.getDailySalesTimeSlots(salesDate, intervalMinutes));
+    return ResponseEntity.ok(
+        ApiResponse.success(
+            "ADMIN_SALES_TIME_SLOTS_SUCCESS",
+            "시간대별 매출",
+            adminSalesService.getDailySalesTimeSlots(salesDate, intervalMinutes)));
+  }
+
+  private static <T> ResponseEntity<ApiResponse<T>> error(ErrorCode errorCode) {
+    return ResponseEntity.status(errorCode.status()).body(ApiResponse.error(errorCode));
   }
 }
