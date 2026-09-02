@@ -16,6 +16,19 @@
 
 ---
 
+> **Team Project Original** — 팀 프로젝트 종료 시점 스냅샷
+> Team Development: 2026.07 ~ 2026.09
+> Freeze tag: `team-original-2026-09-02`
+> 이 저장소에는 팀 종료 이후 개인 확장 작업을 추가하지 않습니다.
+
+| 버전 | 배포 |
+| --- | --- |
+| Team Original (이 repo) | https://asak.stackroom.cloud |
+| 하진 Personal Extension | https://hajin-asak.stackroom.cloud |
+| 나연 Personal Extension | https://nayeon-asak.stackroom.cloud |
+
+---
+
 ## 0. 프로젝트 한눈에 보기
 
 본 프로젝트는 고객용 키오스크(User)와 관리자용 태블릿(Admin)을 **하나의 백엔드 서버**에서 처리하며, 모듈성과 유지보수성을 위해 도메인·역할별로 패키지를 분리해 관리합니다.
