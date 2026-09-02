@@ -163,13 +163,17 @@ public class AdminOrderService {
       if (response == null) {
         throw new CustomException(ErrorCode.ORDER_NOT_FOUND);
       }
-      // 1) 미승인 주문은 cancel, APPROVED 결제는 TODO-038 refund로 분리한다. 승인 결제는 이 메서드에서 변경하지
-      // 않는다.
-      if (response.getPaymentStatus().equals(PaymentStatus.APPROVED.name())) {
+      // 취소 불가: READY(키오스크 결제 대기), APPROVED 결제, COMPLETED, CANCELED
+      if (OrderStatus.READY.name().equals(response.getOrderStatus())) {
+        throw new CustomException(ErrorCode.ORDER_CANCEL_NOT_ALLOWED);
+      }
+      if (PaymentStatus.APPROVED.name().equals(response.getPaymentStatus())) {
         throw new CustomException(ErrorCode.ORDER_PAYMENT_APPROVED_CANCEL_NOT_ALLOWED);
-      } else if (response.getOrderStatus().equals(OrderStatus.COMPLETED.name())) {
+      }
+      if (OrderStatus.COMPLETED.name().equals(response.getOrderStatus())) {
         throw new CustomException(ErrorCode.ORDER_COMPLETED_CANCEL_NOT_ALLOWED);
-      } else if (response.getOrderStatus().equals(OrderStatus.CANCELED.name())) {
+      }
+      if (OrderStatus.CANCELED.name().equals(response.getOrderStatus())) {
         throw new CustomException(ErrorCode.ORDER_ALREADY_CANCELED);
       }
       Map<String, Object> map = new HashMap<>();

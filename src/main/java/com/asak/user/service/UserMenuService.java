@@ -3,9 +3,13 @@ package com.asak.user.service;
 import com.asak.user.dto.menu.CategoryResponse;
 import com.asak.user.dto.menu.MenuDetailResponse;
 import com.asak.user.dto.menu.MenuListItemResponse;
+import com.asak.user.dto.menu.MenuTagRow;
 import com.asak.user.dto.menu.OptionGroupResponse;
 import com.asak.user.mapper.UserMenuMapper;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -20,7 +24,23 @@ public class UserMenuService {
   }
 
   public List<MenuListItemResponse> selectMenuList() {
-    return menuMapper.selectMenuList();
+    List<MenuListItemResponse> menus = menuMapper.selectMenuList();
+    if (menus.isEmpty()) {
+      return menus;
+    }
+
+    Map<Long, List<String>> tagsByMenuId = new HashMap<>();
+    for (MenuTagRow row : menuMapper.selectAllMenuTags()) {
+      tagsByMenuId
+          .computeIfAbsent(row.getMenuId(), ignored -> new ArrayList<>())
+          .add(row.getTagName());
+    }
+
+    for (MenuListItemResponse menu : menus) {
+      menu.setTags(tagsByMenuId.getOrDefault(menu.getMenuId(), List.of()));
+    }
+
+    return menus;
   }
 
   // 메뉴디테일

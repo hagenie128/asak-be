@@ -6,6 +6,8 @@ import com.asak.admin.dto.response.orders.OrderDetailResponse;
 import com.asak.admin.dto.response.orders.OrderListResponse;
 import com.asak.admin.service.AdminOrderService;
 import com.asak.admin.service.AdminRefundReasonService;
+import com.asak.common.enums.OrderStatus;
+import com.asak.common.enums.PaymentStatus;
 import com.asak.common.exception.CustomException;
 import com.asak.common.exception.ErrorCode;
 import com.asak.common.response.ApiResponse;
@@ -102,11 +104,15 @@ public class AdminOrderController {
     OrderDetailResponse response = adminOrderService.getOrderDetail(orderId);
     if (response == null) {
       return ApiResponse.error(ErrorCode.ORDER_NOT_FOUND);
-    } else if (response.getPaymentStatus().equals("APPROVED")) {
-      return ApiResponse.error(ErrorCode.ORDER_PAYMENT_APPROVED_CANCEL_NOT_ALLOWED);
-    } else if (response.getOrderStatus().equals("COMPLETED")
-        || response.getOrderStatus().equals("CANCELED")) {
+    }
+    // READY(결제 대기)·COMPLETED·CANCELED는 취소 불가. paymentStatus null은 NPE 방지용 equals 패턴.
+    if (OrderStatus.READY.name().equals(response.getOrderStatus())
+        || OrderStatus.COMPLETED.name().equals(response.getOrderStatus())
+        || OrderStatus.CANCELED.name().equals(response.getOrderStatus())) {
       return ApiResponse.error(ErrorCode.ORDER_CANCEL_NOT_ALLOWED);
+    }
+    if (PaymentStatus.APPROVED.name().equals(response.getPaymentStatus())) {
+      return ApiResponse.error(ErrorCode.ORDER_PAYMENT_APPROVED_CANCEL_NOT_ALLOWED);
     }
     try {
       adminOrderService.cancelOrder(orderId);

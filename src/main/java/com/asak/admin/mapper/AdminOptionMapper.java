@@ -16,7 +16,8 @@ public interface AdminOptionMapper {
 
   List<Long> findOptItemIdsByPolicyId(@Param("policyId") Long policyId);
 
-  List<OptionItemSummaryResponse> findOptionItemsByGroupId(@Param("optionGroupId") Long optionGroupId);
+  List<OptionItemSummaryResponse> findOptionItemsByGroupId(
+      @Param("optionGroupId") Long optionGroupId);
 
   List<OptionItemSummaryResponse> findMenuOptionItems(
       @Param("menuId") Long menuId, @Param("optionGroupId") Long optionGroupId);

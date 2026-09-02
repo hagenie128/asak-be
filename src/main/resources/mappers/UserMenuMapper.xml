@@ -63,6 +63,21 @@
             AND m.deleted_at IS NULL
     </select>
 
+    <!-- 메뉴 목록용 태그 일괄 조회 -->
+    <select id="selectAllMenuTags" resultType="menuTag">
+        SELECT
+            mt.menu_id AS menuId,
+            t.name AS tagName
+        FROM
+            menu_tag mt
+        JOIN tag t ON
+            t.id = mt.tag_id
+        WHERE
+            t.active = true
+        ORDER BY
+            mt.menu_id ASC, t.id ASC
+    </select>
+
     <!-- 메뉴 상세 태그 조회 -->
     <select id="selectTages" resultType="string">
         SELECT
