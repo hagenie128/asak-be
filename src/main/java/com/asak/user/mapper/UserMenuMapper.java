@@ -4,6 +4,7 @@ import com.asak.user.dto.menu.CategoryResponse;
 import com.asak.user.dto.menu.IngredientResponse;
 import com.asak.user.dto.menu.MenuDetailResponse;
 import com.asak.user.dto.menu.MenuListItemResponse;
+import com.asak.user.dto.menu.MenuTagRow;
 import com.asak.user.dto.menu.OptionGroupResponse;
 import com.asak.user.dto.menu.OptionItemResponse;
 import java.util.List;
@@ -28,4 +29,6 @@ public interface UserMenuMapper {
       @Param("menuId") Long menuId, @Param("policyId") Long policyId);
 
   List<String> selectTages(@Param("menuId") Long menuId);
+
+  List<MenuTagRow> selectAllMenuTags();
 }

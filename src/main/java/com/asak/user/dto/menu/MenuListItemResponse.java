@@ -1,5 +1,7 @@
 package com.asak.user.dto.menu;
 
+import java.util.ArrayList;
+import java.util.List;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -34,4 +36,5 @@ public class MenuListItemResponse {
   private Double kcal;
   private Boolean isSoldOut;
   private Boolean isOrderable;
+  private List<String> tags = new ArrayList<>();
 }
