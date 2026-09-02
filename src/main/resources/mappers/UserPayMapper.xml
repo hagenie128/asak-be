@@ -25,6 +25,7 @@
         on method_config.image_asset_id = media_asset.id
 
         where method_group.group_code = 'PAYMENT_METHOD'
+            and method_config.active = 1
         order by method_config.sort_no asc
     
     </select>
