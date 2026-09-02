@@ -16,6 +16,38 @@
 
 ---
 
+> **Personal Extension (Hajin)** — 팀 프로젝트 종료 이후 개인 포트폴리오 확장 저장소
+> Team Development: 2026.07 ~ 2026.09 · Freeze tag: `team-original-2026-09-02`
+> upstream: [nayeon0828/ASAK-backend](https://github.com/nayeon0828/ASAK-backend) (팀 원본, push 금지)
+
+| 버전 | 배포 |
+| --- | --- |
+| Team Original | https://api.asak.stackroom.cloud |
+| Personal Extension (이 repo) | https://api.hajin-asak.stackroom.cloud |
+
+## Project Origin
+
+**Original ASAK Team Project**
+
+| 영역 | 담당 |
+| --- | --- |
+| 백엔드 | admin 도메인 — AdminOrderMapper, 품절·매출 API |
+| 공통 | CORS, 스키마, 운영 설정 |
+
+## Personal Extension
+
+팀 종료(`team-original-2026-09-02`) 이후 개인적으로 추가·개선한 기능을 여기에 기록한다.
+
+## Original Repository
+
+- https://github.com/nayeon0828/ASAK-backend
+
+## Contribution
+
+- https://github.com/nayeon0828/ASAK-backend/commits?author=hagenie128
+
+---
+
 ## 0. 프로젝트 한눈에 보기
 
 본 프로젝트는 고객용 키오스크(User)와 관리자용 태블릿(Admin)을 **하나의 백엔드 서버**에서 처리하며, 모듈성과 유지보수성을 위해 도메인·역할별로 패키지를 분리해 관리합니다.
