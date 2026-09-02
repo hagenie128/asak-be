@@ -259,12 +259,8 @@
       i.id AS id,
       i.name AS name,
       i.sold_out AS isSoldOut,
-      CASE
-          WHEN i.type_id &lt;= 34 THEN cc.name
-      END AS roleName,
-      CASE
-          WHEN i.type_id &gt; 34 THEN cc.name
-      END AS unitName,
+      cc.name AS roleName,
+      NULL AS unitName,
       n.serving_g AS servingG,
       n.kcal AS kcal,
       n.carb_g AS carbG,
@@ -371,12 +367,8 @@
       i.id AS id,
       i.name AS name,
       i.sold_out AS isSoldOut,
-      CASE
-          WHEN i.type_id &lt;= 34 THEN cc.name
-      END AS roleName,
-      CASE
-          WHEN i.type_id &gt; 34 THEN cc.name
-      END AS unitName,
+      cc.name AS roleName,
+      NULL AS unitName,
       n.serving_g AS servingG,
       n.kcal AS kcal,
       n.carb_g AS carbG,

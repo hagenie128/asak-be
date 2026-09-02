@@ -12,10 +12,20 @@
            CASE v.target_type
                WHEN 'MENU' THEN 1
                WHEN 'INGREDIENT' THEN (
-                   SELECT COUNT(DISTINCT mi.menu_id)
-                   FROM menu_ing mi
-                   JOIN menu m ON m.id = mi.menu_id AND m.deleted_at IS NULL
-                   WHERE mi.ing_id = v.target_id
+                   SELECT COUNT(DISTINCT affected.menu_id)
+                   FROM (
+                       SELECT mi.menu_id
+                       FROM menu_ing mi
+                       JOIN menu m ON m.id = mi.menu_id AND m.deleted_at IS NULL
+                       WHERE mi.ing_id = v.target_id
+                       UNION
+                       SELECT mop.menu_id
+                       FROM opt_item oi
+                       JOIN opt_policy_item opi ON opi.opt_item_id = oi.id
+                       JOIN menu_opt_policy mop ON mop.policy_id = opi.policy_id
+                       JOIN menu m ON m.id = mop.menu_id AND m.deleted_at IS NULL
+                       WHERE oi.ing_id = v.target_id
+                   ) affected
                )
                WHEN 'OPTION_ITEM' THEN (
                    SELECT COUNT(DISTINCT mop.menu_id)
