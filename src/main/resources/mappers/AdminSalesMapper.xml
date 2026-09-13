@@ -166,7 +166,8 @@
                     FROM
                         vw_order_summary
                     WHERE
-                        DATE(paid_at) BETWEEN #{startDate} AND #{endDate}
+                        paid_at &gt;= #{startDate}
+                        AND paid_at &lt; DATE_ADD(#{endDate}, INTERVAL 1 DAY)
                         AND payment_status_code NOT IN('CANCELED', 'REFUNDED')
                 ),
                 0
@@ -176,7 +177,8 @@
     FROM
         vw_order_summary
     WHERE
-        DATE(paid_at) BETWEEN #{startDate} AND #{endDate}
+        paid_at &gt;= #{startDate}
+        AND paid_at &lt; DATE_ADD(#{endDate}, INTERVAL 1 DAY)
         AND payment_status_code NOT IN('CANCELED', 'REFUNDED')
     GROUP BY
         payment_method_name
