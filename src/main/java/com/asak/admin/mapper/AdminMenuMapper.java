@@ -29,6 +29,12 @@ public interface AdminMenuMapper {
 
   Long findActiveMediaAssetIdByUrl(@Param("url") String url);
 
+  Long findMediaProviderId();
+
+  Long findAnyMediaProviderId();
+
+  int insertMediaAsset(Map<String, Object> map);
+
   int insertMenuIngredient(Map<String, Object> map);
 
   int insertMenuNutrition(Map<String, Object> map);

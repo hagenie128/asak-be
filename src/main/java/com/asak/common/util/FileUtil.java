@@ -29,6 +29,10 @@ public final class FileUtil {
 
   private FileUtil() {}
 
+  public static void validateMenuImage(MultipartFile file) {
+    validateImage(file);
+  }
+
   public static String saveMenuImage(MultipartFile file, Path menuUploadDirectory)
       throws IOException {
     validateImage(file);

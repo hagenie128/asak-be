@@ -222,8 +222,9 @@
     ~1.2~1.4초). 그래서 이 두 날짜만 필요한 경우엔 뷰를 거치지 않고 orders.created_at으로
     먼저 좁혀서(±1일 여유를 둬 자정 넘어 결제되는 경우까지 커버) 베이스 테이블에서 직접 집계한다.
     (2026-08-20 검증: 결과값 뷰 기준과 완전 일치, ~1.2~1.4초 -> ~80ms.)
-    activeOrderCount도 vw_order_live(주방보드용 JSON 상세 뷰) COUNT는 상세 JSON까지 다 계산돼
-    ~400ms가 들어서, 단순 상태 카운트로 대체했다(결과 동일, ~400ms -> ~6ms).
+    진행 중 주문(activeOrderCount)은 오늘 생성분 중 RECEIVED·PREPARING만 센다.
+    READY(결제 대기)는 주방 진행 중이 아니고, 날짜를 빼면 오래된 미완료 주문이 오늘 KPI에 섞인다.
+    상태 요약·오늘 매출과 같은 날짜 기준을 맞춘다.
   -->
   <select id="getDashboardKpi" resultType="map">
     SELECT
@@ -282,7 +283,8 @@
                 orders o2
                 JOIN common_code st2 ON st2.id = o2.status_id
             WHERE
-                st2.code IN ('RECEIVED', 'PREPARING', 'READY')
+                st2.code IN ('RECEIVED', 'PREPARING')
+                AND DATE(o2.created_at) = #{today}
         ) AS activeOrderCount
     FROM
         (
@@ -435,6 +437,8 @@
         orders o
         JOIN common_code ot ON ot.id = o.order_type_id
         JOIN common_code st ON st.id = o.status_id
+    WHERE
+        DATE(o.created_at) = #{today}
     ORDER BY
         o.created_at DESC
     LIMIT

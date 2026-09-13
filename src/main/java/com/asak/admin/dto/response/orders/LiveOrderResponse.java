@@ -19,6 +19,7 @@ public class LiveOrderResponse {
   private String orderStatus;
   private int totalAmount;
   private LocalDateTime createdAt;
+  private LocalDateTime paidAt;
   private Long elapsedSec;
 
   @JsonRawValue private String menus;
