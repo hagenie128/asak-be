@@ -129,29 +129,37 @@
 </select>
 
   <select id="getMenuRankingByRange"
-          resultType="com.asak.admin.dto.response.sales.MenuSalesRankingResponse">
-    SELECT
+          resultType="com.asak.admin.dto.response.sales.MenuSalesRankingResponse">SELECT
         ROW_NUMBER() OVER (
             ORDER BY
-                SUM(sales_amount) DESC,
-                menu_id
+                SUM(oi.price * oi.quantity) DESC,
+                m.id
         ) AS `rank`,
-        menu_id AS menuId,
-        menu_name AS menuName,
-        SUM(order_count) AS orderCount,
-        SUM(sales_amount) AS salesAmount
+        m.id AS menuId,
+        m.name AS menuName,
+        COUNT(DISTINCT o.id) AS orderCount,
+        SUM(oi.price * oi.quantity) AS salesAmount
     FROM
-        vw_top_menu_daily
+        orders o
+        JOIN order_item oi ON oi.order_id = o.id
+        JOIN menu m ON m.id = oi.menu_id
+        JOIN payment p ON p.order_id = o.id
+        JOIN common_code ps ON ps.id = p.status_id
+        JOIN common_code os ON os.id = o.status_id
     WHERE
-        sales_date BETWEEN #{startDate} AND #{endDate}
+        p.paid_at &gt;= #{startDate}
+        AND p.paid_at &lt; DATE_ADD(#{endDate}, INTERVAL 1 DAY)
+        AND os.code &lt;&gt; 'CANCELED'
+        AND ps.code NOT IN ('CANCELED', 'REFUNDED')
     GROUP BY
-        menu_id,
-        menu_name
+        m.id,
+        m.name
     ORDER BY
         salesAmount DESC,
         menuId
     LIMIT
         4
+    
   </select>
 
   <select id="getPaymentShare"
@@ -188,34 +196,39 @@
   </select>
 
   <select id="getOrderShare"
-          resultType="com.asak.admin.dto.response.sales.SalesShareResponse">
-    SELECT
-        order_type_name AS label,
+          resultType="com.asak.admin.dto.response.sales.SalesShareResponse">SELECT
+        ot.name AS label,
         ROUND(
-            SUM(order_count) / NULLIF(
+            COUNT(*) / NULLIF(
                 (
                     SELECT
-                        SUM(order_count)
+                        COUNT(*)
                     FROM
-                        vw_order_status_summary
+                        orders o2
+                        JOIN common_code st2 ON st2.id = o2.status_id
                     WHERE
-                        order_date BETWEEN #{startDate} AND #{endDate}
-                        AND status_code != 'CANCELED'
+                        o2.created_at &gt;= #{startDate}
+                        AND o2.created_at &lt; DATE_ADD(#{endDate}, INTERVAL 1 DAY)
+                        AND st2.code != 'CANCELED'
                 ),
                 0
             ) * 100,
             2
         ) AS percent
     FROM
-        vw_order_status_summary
+        orders o
+        JOIN common_code ot ON ot.id = o.order_type_id
+        JOIN common_code st ON st.id = o.status_id
     WHERE
-        order_date BETWEEN #{startDate} AND #{endDate}
-        AND status_code != 'CANCELED'
+        o.created_at &gt;= #{startDate}
+        AND o.created_at &lt; DATE_ADD(#{endDate}, INTERVAL 1 DAY)
+        AND st.code != 'CANCELED'
     GROUP BY
-        order_type_name
+        ot.name
     ORDER BY
         percent DESC,
         label
+    
   </select>
 
   <!--
