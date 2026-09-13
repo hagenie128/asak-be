@@ -33,12 +33,7 @@ public class GlobalExceptionHandler {
       MissingServletRequestParameterException exception) {
     log.warn("필수 요청 파라미터 누락: {}", exception.getParameterName());
 
-    return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-        .body(
-            ApiResponse.failure(
-                HttpStatus.BAD_REQUEST.value(),
-                ErrorCode.INVALID_REQUEST.code(),
-                "필수 파라미터가 없습니다: " + exception.getParameterName()));
+    return badRequest(ErrorCode.MISSING_PARAMETER, exception.getParameterName());
   }
 
   /** 요청 파라미터 타입 불일치. 예: year=2026 이어야 하는 자리에 year=abc 가 온 경우. 날짜·기간 필터에서 형식이 어긋날 때 이 경로로 들어온다. */
@@ -47,12 +42,18 @@ public class GlobalExceptionHandler {
       MethodArgumentTypeMismatchException exception) {
     log.warn("요청 파라미터 형식 오류: {}={}", exception.getName(), exception.getValue());
 
-    return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+    return badRequest(ErrorCode.INVALID_PARAMETER_TYPE, exception.getName());
+  }
+
+  /** 코드·상태·기본 메시지는 ErrorCode 한 곳에서 가져오고, 어떤 파라미터인지만 덧붙인다. */
+  private ResponseEntity<ApiResponse<Object>> badRequest(
+      ErrorCode errorCode, String parameterName) {
+    return ResponseEntity.status(errorCode.status())
         .body(
             ApiResponse.failure(
-                HttpStatus.BAD_REQUEST.value(),
-                ErrorCode.INVALID_REQUEST.code(),
-                "파라미터 형식이 올바르지 않습니다: " + exception.getName()));
+                errorCode.status().value(),
+                errorCode.code(),
+                errorCode.message() + " (" + parameterName + ")"));
   }
 
   @ExceptionHandler(Exception.class)

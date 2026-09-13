@@ -40,7 +40,7 @@ class GlobalExceptionHandlerTest {
         .andExpect(status().isBadRequest())
         .andExpect(jsonPath("$.status").value(400))
         .andExpect(jsonPath("$.success").value(false))
-        .andExpect(jsonPath("$.code").value("INVALID_REQUEST"))
+        .andExpect(jsonPath("$.code").value("MISSING_PARAMETER"))
         .andExpect(jsonPath("$.message").value(containsString("year")));
   }
 
@@ -50,7 +50,7 @@ class GlobalExceptionHandlerTest {
     mvc.perform(get("/probe/monthly").param("year", "abc"))
         .andExpect(status().isBadRequest())
         .andExpect(jsonPath("$.status").value(400))
-        .andExpect(jsonPath("$.code").value("INVALID_REQUEST"))
+        .andExpect(jsonPath("$.code").value("INVALID_PARAMETER_TYPE"))
         .andExpect(jsonPath("$.message").value(containsString("year")));
   }
 

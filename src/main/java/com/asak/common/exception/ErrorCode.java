@@ -9,6 +9,8 @@ import org.springframework.http.HttpStatus;
  */
 public enum ErrorCode {
   INVALID_REQUEST("INVALID_REQUEST", HttpStatus.BAD_REQUEST, "잘못된 요청입니다."),
+  MISSING_PARAMETER("MISSING_PARAMETER", HttpStatus.BAD_REQUEST, "필수 파라미터가 없습니다."),
+  INVALID_PARAMETER_TYPE("INVALID_PARAMETER_TYPE", HttpStatus.BAD_REQUEST, "파라미터 형식이 올바르지 않습니다."),
   INVALID_STORE_NUMBER("INVALID_STORE_NUMBER", HttpStatus.BAD_REQUEST, "잘못된 매장 번호입니다."),
   NOT_APPROVED_STORE_NUMBER("NOT_APPROVED_STORE_NUMBER", HttpStatus.BAD_REQUEST, "승인되지 않은 매장입니다."),
 
