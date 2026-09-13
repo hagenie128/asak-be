@@ -12,6 +12,7 @@ import com.asak.common.exception.CustomException;
 import com.asak.common.exception.ErrorCode;
 import com.asak.common.response.ApiResponse;
 import com.asak.common.response.PageResult;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import java.time.LocalDate;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -60,6 +61,16 @@ public class AdminOrderController {
     return ApiResponse.success("ADMIN_ORDER_LIST_SUCCESS", "관리자 주문 목록 조회 성공", result);
   }
 
+  @GetMapping("/live")
+  public ApiResponse<LiveOrderListResponse> getLiveOrders(HttpServletResponse response) {
+    // /{orderId}보다 위에 둔다. live가 숫자로 파싱되면 상세 조회로 잘못 탄다.
+    // Empty(0건)는 오류가 아님 — 200 + 빈 content. NOT_FOUND는 특정 orderId 조회 실패에만 사용.
+    response.setHeader("Cache-Control", "no-store, no-cache, must-revalidate");
+    response.setHeader("Pragma", "no-cache");
+    LiveOrderListResponse result = adminOrderService.getLiveOrders();
+    return ApiResponse.success("ADMIN_LIVE_ORDERS_SUCCESS", "관리자 Live 주문 조회 성공", result);
+  }
+
   @GetMapping("/{orderId}")
   public ApiResponse<OrderDetailResponse> getOrderDetail(
       @PathVariable(name = "orderId") Long orderId) {
@@ -68,13 +79,6 @@ public class AdminOrderController {
       return ApiResponse.error(ErrorCode.ORDER_NOT_FOUND);
     }
     return ApiResponse.success("ADMIN_ORDER_DETAIL_SUCCESS", "관리자 주문 상세 조회 성공", result);
-  }
-
-  @GetMapping("/live")
-  public ApiResponse<LiveOrderListResponse> getLiveOrders() {
-    // Empty(0건)는 오류가 아님 — 200 + 빈 content. NOT_FOUND는 특정 orderId 조회 실패에만 사용.
-    LiveOrderListResponse result = adminOrderService.getLiveOrders();
-    return ApiResponse.success("ADMIN_LIVE_ORDERS_SUCCESS", "관리자 Live 주문 조회 성공", result);
   }
 
   // | API-008 | `PATCH /api/admin/orders/{orderId}/status` | 허용 상태 전이와 동시 변경 충돌

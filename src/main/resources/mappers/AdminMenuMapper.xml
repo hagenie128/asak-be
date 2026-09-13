@@ -362,6 +362,62 @@
       1
 </select>
 
+<select id="findMediaProviderId" resultType="java.lang.Long">
+  SELECT
+      cc.id
+  FROM
+      common_code cc
+      JOIN code_group cg ON cg.id = cc.code_grp_id
+  WHERE
+      cc.code IN ('CLOUDINARY', 'LOCAL', 'UPLOAD')
+  ORDER BY
+      CASE cc.code
+          WHEN 'CLOUDINARY' THEN 0
+          WHEN 'LOCAL' THEN 1
+          ELSE 2
+      END
+  LIMIT
+      1
+</select>
+
+<select id="findAnyMediaProviderId" resultType="java.lang.Long">
+  SELECT
+      provider_id
+  FROM
+      media_asset
+  ORDER BY
+      id
+  LIMIT
+      1
+</select>
+
+<insert id="insertMediaAsset" parameterType="map" useGeneratedKeys="true" keyProperty="id" keyColumn="id">
+  INSERT INTO
+      media_asset (
+          provider_id,
+          public_id,
+          asset_folder,
+          url,
+          format,
+          width,
+          height,
+          bytes,
+          uploaded_at
+      )
+  VALUES
+      (
+          #{providerId},
+          #{publicId},
+          #{assetFolder},
+          #{url},
+          #{format},
+          #{width},
+          #{height},
+          #{bytes},
+          NOW()
+      )
+</insert>
+
 <select id="getIngredients" resultType="com.asak.admin.dto.response.item.IngredientResponse">
   SELECT
       i.id AS id,

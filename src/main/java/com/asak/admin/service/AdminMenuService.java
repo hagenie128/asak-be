@@ -8,11 +8,13 @@ import com.asak.admin.dto.request.menus.MenuListRequest;
 import com.asak.admin.dto.response.item.AdminCategoryResponse;
 import com.asak.admin.dto.response.item.IngredientResponse;
 import com.asak.admin.dto.response.menus.MenuDetailResponse;
+import com.asak.admin.dto.response.menus.MenuImageUploadResponse;
 import com.asak.admin.dto.response.menus.MenuListResponse;
 import com.asak.admin.mapper.AdminMenuMapper;
 import com.asak.common.exception.CustomException;
 import com.asak.common.exception.ErrorCode;
 import com.asak.common.response.PageResult;
+import com.asak.common.util.CloudinaryMenuImageUploader;
 import com.asak.common.util.FileUtil;
 import java.io.IOException;
 import java.nio.file.Paths;
@@ -33,10 +35,15 @@ public class AdminMenuService {
 
   private final AdminMenuMapper adminMenuMapper;
   private final AdminOptionService adminOptionService;
+  private final CloudinaryMenuImageUploader cloudinaryMenuImageUploader;
 
-  public AdminMenuService(AdminMenuMapper adminMenuMapper, AdminOptionService adminOptionService) {
+  public AdminMenuService(
+      AdminMenuMapper adminMenuMapper,
+      AdminOptionService adminOptionService,
+      CloudinaryMenuImageUploader cloudinaryMenuImageUploader) {
     this.adminMenuMapper = adminMenuMapper;
     this.adminOptionService = adminOptionService;
+    this.cloudinaryMenuImageUploader = cloudinaryMenuImageUploader;
   }
 
   @Value("${app.file.menu-upload-dir}")
@@ -69,6 +76,74 @@ public class AdminMenuService {
 
   public String saveMenuImage(MultipartFile imageFile) throws IOException {
     return FileUtil.saveMenuImage(imageFile, Paths.get(menuUploadDir));
+  }
+
+  @Transactional
+  public MenuImageUploadResponse uploadMenuImage(MultipartFile imageFile) {
+    try {
+      FileUtil.validateMenuImage(imageFile);
+
+      Long providerId = adminMenuMapper.findMediaProviderId();
+      if (providerId == null) {
+        providerId = adminMenuMapper.findAnyMediaProviderId();
+      }
+      if (providerId == null) {
+        throw new CustomException(ErrorCode.MENU_IMAGE_SAVE_FAILED);
+      }
+
+      String publicId;
+      String url;
+      String format;
+      Integer width = null;
+      Integer height = null;
+      Integer bytes = Math.toIntExact(imageFile.getSize());
+      String folder = "asak/menu";
+
+      if (cloudinaryMenuImageUploader.isConfigured()) {
+        CloudinaryMenuImageUploader.UploadedImage uploaded =
+            cloudinaryMenuImageUploader.upload(imageFile);
+        publicId = uploaded.publicId();
+        url = uploaded.url();
+        format = uploaded.format();
+        width = uploaded.width();
+        height = uploaded.height();
+        bytes = uploaded.bytes();
+        folder = uploaded.folder();
+      } else {
+        url = FileUtil.saveMenuImage(imageFile, Paths.get(menuUploadDir));
+        String fileName = url.substring(url.lastIndexOf('/') + 1);
+        int dot = fileName.lastIndexOf('.');
+        publicId = dot > 0 ? fileName.substring(0, dot) : fileName;
+        format = dot > 0 ? fileName.substring(dot + 1) : null;
+      }
+
+      Map<String, Object> row = new HashMap<>();
+      row.put("providerId", providerId);
+      row.put("publicId", publicId);
+      row.put("assetFolder", folder);
+      row.put("url", url);
+      row.put("format", format);
+      row.put("width", width);
+      row.put("height", height);
+      row.put("bytes", bytes);
+
+      int inserted = adminMenuMapper.insertMediaAsset(row);
+      Object generatedId = row.get("id");
+      if (inserted <= 0 || generatedId == null) {
+        throw new CustomException(ErrorCode.MENU_IMAGE_SAVE_FAILED);
+      }
+
+      return MenuImageUploadResponse.builder()
+          .mediaAssetId(((Number) generatedId).longValue())
+          .imageUrl(url)
+          .build();
+    } catch (CustomException e) {
+      throw e;
+    } catch (IllegalArgumentException e) {
+      throw new CustomException(ErrorCode.MENU_CREATE_INVALID);
+    } catch (Exception e) {
+      throw new CustomException(ErrorCode.MENU_IMAGE_SAVE_FAILED);
+    }
   }
 
   @Transactional

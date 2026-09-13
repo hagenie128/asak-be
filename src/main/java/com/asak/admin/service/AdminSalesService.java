@@ -65,7 +65,7 @@ public class AdminSalesService {
     Map<String, Object> kpi = adminSalesMapper.getDashboardKpi(today, yesterday);
     Map<String, Object> orderType = adminSalesMapper.getDashboardOrderTypeSummary(today);
     Map<String, Object> inventory = adminSalesMapper.getDashboardInventorySummary();
-    var recentOrders = adminSalesMapper.getDashboardRecentOrders();
+    var recentOrders = adminSalesMapper.getDashboardRecentOrders(today);
     var statusSummary = adminSalesMapper.getDashboardStatusSummary(today);
     var weeklySales =
         adminSalesMapper.getDashboardWeeklySales(dateRange(today.minusDays(6), today));
@@ -93,13 +93,7 @@ public class AdminSalesService {
                     longValue(kpi, "averageOrderAmount"),
                     longValue(kpi, "prevAverageOrderAmount"),
                     "today"),
-                // 진행 중 주문은 순간값이라 "전일" 개념이 없다. 기존 로직이 label의 "주문" 일치로
-                // 전일 주문 수(prevOrderCount)를 델타 기준으로 재사용하던 동작을 그대로 유지한다.
-                buildKpiResponse(
-                    "진행 중 주문",
-                    longValue(kpi, "activeOrderCount"),
-                    longValue(kpi, "prevOrderCount"),
-                    "today")))
+                buildCountKpi("진행 중 주문", longValue(kpi, "activeOrderCount"))))
         .recentOrders(recentOrders)
         .statusSummary(statusSummary)
         .orderTypeSummary(
@@ -373,6 +367,17 @@ public class AdminSalesService {
         // ↑ 1.1% 전일 대비
         .delta(delta)
         .deltaLabel(deltaLabel)
+        .build();
+  }
+
+  /** 진행 중 주문처럼 전일 대비가 없는 건수 KPI. */
+  private SalesKpiResponse buildCountKpi(String label, long value) {
+    return SalesKpiResponse.builder()
+        .label(label)
+        .value(value)
+        .display(String.format(Locale.KOREA, "%,d건", value))
+        .delta(null)
+        .deltaLabel(null)
         .build();
   }
 

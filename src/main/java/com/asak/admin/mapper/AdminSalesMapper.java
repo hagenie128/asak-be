@@ -36,7 +36,7 @@ public interface AdminSalesMapper {
   Map<String, Object> getDashboardKpi(
       @Param("today") LocalDate today, @Param("yesterday") LocalDate yesterday);
 
-  List<DashboardRecentOrderResponse> getDashboardRecentOrders();
+  List<DashboardRecentOrderResponse> getDashboardRecentOrders(@Param("today") LocalDate today);
 
   List<DashboardOrderStatusResponse> getDashboardStatusSummary(LocalDate date);
 

@@ -117,16 +117,28 @@
 </select>
 
 <select id="getLiveOrders" resultType="com.asak.admin.dto.response.orders.LiveOrderResponse">
-  SELECT order_id AS orderId,
-         order_no AS orderNo,
-         order_type_label AS orderTypeLabel,
-         status_code AS orderStatus,
-         total_price AS totalAmount,
-         created_at AS createdAt,
-         elapsed_sec AS elapsedSec,
-         menus
-  FROM vw_order_live
-  ORDER BY created_at ASC
+  SELECT v.order_id AS orderId,
+         v.order_no AS orderNo,
+         v.order_type_label AS orderTypeLabel,
+         v.status_code AS orderStatus,
+         v.total_price AS totalAmount,
+         v.created_at AS createdAt,
+         p.paid_at AS paidAt,
+         CASE
+           WHEN p.paid_at IS NULL THEN NULL
+           ELSE TIMESTAMPDIFF(SECOND, p.paid_at, NOW())
+         END AS elapsedSec,
+         v.menus
+  FROM vw_order_live v
+  LEFT JOIN (
+    SELECT order_id, MAX(paid_at) AS paid_at
+    FROM payment
+    WHERE paid_at IS NOT NULL
+    GROUP BY order_id
+  ) p ON p.order_id = v.order_id
+  WHERE v.created_at &gt;= CURDATE()
+    AND v.created_at &lt; DATE_ADD(CURDATE(), INTERVAL 1 DAY)
+  ORDER BY v.created_at ASC
 </select>
 
 <!-- 기대 status_id일 때만 갱신. 0건이면 다른 요청이 먼저 바꾼 것(동시성 충돌) -->

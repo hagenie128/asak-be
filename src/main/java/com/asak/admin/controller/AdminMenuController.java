@@ -5,6 +5,7 @@ import com.asak.admin.dto.request.menus.MenuListRequest;
 import com.asak.admin.dto.response.item.AdminCategoryResponse;
 import com.asak.admin.dto.response.item.IngredientResponse;
 import com.asak.admin.dto.response.menus.MenuDetailResponse;
+import com.asak.admin.dto.response.menus.MenuImageUploadResponse;
 import com.asak.admin.dto.response.menus.MenuListResponse;
 import com.asak.admin.service.AdminMenuService;
 import com.asak.admin.service.AdminOptionService;
@@ -13,6 +14,7 @@ import com.asak.common.exception.ErrorCode;
 import com.asak.common.response.ApiResponse;
 import com.asak.common.response.PageResult;
 import jakarta.validation.Valid;
+import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
@@ -21,7 +23,9 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 @RestController
 @RequestMapping("/api/admin/menus")
@@ -61,6 +65,18 @@ public class AdminMenuController {
     return ApiResponse.success("ADMIN_MENU_INGREDIENTS_SUCCESS", "관리자 재료 목록 조회 성공", ingredients);
   }
 
+  @PostMapping(path = "/images", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+  public ApiResponse<MenuImageUploadResponse> uploadMenuImage(
+      @RequestParam("file") MultipartFile file) {
+    try {
+      MenuImageUploadResponse uploaded = adminMenuService.uploadMenuImage(file);
+      return ApiResponse.success(
+          "ADMIN_MENU_IMAGE_UPLOAD_SUCCESS", "관리자 메뉴 이미지 업로드 성공", uploaded);
+    } catch (CustomException e) {
+      return ApiResponse.error(e.getErrorCode());
+    }
+  }
+
   @GetMapping("/{menuId:\\d+}")
   public ApiResponse<MenuDetailResponse> getMenuDetail(@PathVariable Long menuId) {
     MenuDetailResponse menuDetail = adminMenuService.getMenuDetail(menuId);
@@ -70,8 +86,8 @@ public class AdminMenuController {
     return ApiResponse.success("ADMIN_MENU_DETAIL_SUCCESS", "관리자 메뉴 상세 조회 성공", menuDetail);
   }
 
-  // TODO-003: POST /api/admin/menus — JSON body(CreateMenuRequest)만 처리한다. 이미지 파일
-  // 업로드는 후순위다.
+  // TODO-003: POST /api/admin/menus — JSON body(CreateMenuRequest)를 처리한다.
+  // 이미지 파일은 POST /api/admin/menus/images 로 먼저 올려 mediaAssetId를 받는다.
   // 저장 전 categoryId·optionGroupIds·ingredientIds의 실제 존재/활성 여부를 Service에서 검증하고,
   // 생성 성공 뒤 GET 상세와 목록에 같은 menuId가 보이는지 API·DB 기준으로 확인한다.
   @PostMapping
